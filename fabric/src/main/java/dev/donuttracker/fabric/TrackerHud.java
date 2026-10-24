@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.PlayerFaceRenderer;
 /** Calm, translucent cards with a clear information hierarchy. */
 final class TrackerHud {
     private TrackerHud() {}
-    static int height(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 38 : h.layout == Settings.Layout.STACKED ? 112 : 88; }
+    static int height(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 42 : h.layout == Settings.Layout.STACKED ? 128 : 104; }
     static int width() { return 200; }
     static int x(Settings.Hud h, int screenWidth) { return Math.max(0, Math.min(h.x, screenWidth - (int)(width() * h.scale))); }
     static int y(Settings.Hud h, int screenHeight) { return Math.max(0, Math.min(h.y, screenHeight - (int)(height(h) * h.scale))); }
@@ -25,6 +25,7 @@ final class TrackerHud {
         rounded(g, 1, 3, w+1, ht+3, ((int)(45*h.opacity)<<24));
         rounded(g, 0, 0, w, ht, ((int)(255 * h.opacity) << 24) | h.background);
         border(g, 0, 0, w, ht, h.theme == Settings.Theme.NEON ? accent : ((int)(170*h.opacity)<<24) | (blend(h.text,h.background,.18f)&0xFFFFFF));
+        CoastalStyle.wave(g,12,h.layout==Settings.Layout.MINIMAL?21:24,w-24,1,0x60000000|h.accent,0);
         if (h.showIcon) { if (payment) people(g, 11, 11, accent); else donut(g, 11, 10, accent); }
         scaled(g, payment ? "Payments" : "Net profit", h.showIcon ? 28 : 12, 11, .8f, ink);
         if (payment) {
@@ -36,6 +37,7 @@ final class TrackerHud {
             rounded(g, w - 39, 11, w - 35, 15, mod.tracker.running() ? opaque(h.positive) : muted);
             scaled(g, mod.tracker.running() ? "LIVE" : "IDLE", w - 30, 11, .7f, muted);
         }
+        CoastalStyle.wave(g,12,ht-4,w-24,1,0x65000000|h.accent,1.4);
         if (payment) payment(g, mod, h, ink, muted, accent);
         else profit(g, mod, h, ink, muted);
         g.pose().popMatrix();
@@ -52,15 +54,21 @@ final class TrackerHud {
             float scale=Math.min(2.15f,176f/Math.max(1,Minecraft.getInstance().font.width(amount)));
             scaled(g,amount,12,31,scale,value);
         }
-        divider(g,59,h);
-        if(h.showTimer){scaled(g,"DURATION",12,65,.55f,muted);scaled(g,mod.tracker.duration(),12,75,.8f,ink);}
+        divider(g,60,h);
+        int cell=((int)(255*h.opacity)<<24)|(blend(h.text,h.background,.045f)&0xFFFFFF);
+        if(h.showTimer){
+            rounded(g,10,66,96,95,cell);scaled(g,"ELAPSED",17,72,.55f,muted);
+            scaled(g,mod.tracker.duration(),17,83,.85f,ink);
+        }
         if(h.showRate){
-            right(g,"PER HOUR",width()-12,65,.55f,muted);
-            right(g,Money.signed(mod.tracker.perHour()),width()-12,75,.8f,mod.tracker.perHour().signum()<0?opaque(h.negative):ink);
+            rounded(g,104,66,190,95,cell);scaled(g,"PER HOUR",111,72,.55f,muted);
+            String rate=Money.signed(mod.tracker.perHour());
+            float fit=Math.min(.85f,72f/Math.max(1,Minecraft.getInstance().font.width(rate)));
+            scaled(g,rate,111,83,fit,mod.tracker.perHour().signum()<0?opaque(h.negative):ink);
         }
         if(h.layout==Settings.Layout.STACKED){
-            divider(g,94,h);scaled(g,"Balance",12,102,.65f,muted);
-            right(g,mod.tracker.hasBalance()?Money.format(mod.tracker.balance()):"Not read",width()-12,102,.65f,ink);
+            divider(g,104,h);scaled(g,"Balance",12,114,.65f,muted);
+            right(g,mod.tracker.hasBalance()?Money.format(mod.tracker.balance()):"Not read",width()-12,114,.65f,ink);
         }
     }
     private static void payment(GuiGraphics g, DonutTrackerClient mod, Settings.Hud h, int ink, int muted, int accent){
@@ -81,17 +89,17 @@ final class TrackerHud {
             scaled(g,active.player(),49,32,.85f,ink);
             scaled(g,"+"+Money.format(active.amount()),49,46,1.1f,value);
         }
-        divider(g,66,h);
+        divider(g,68,h);
         var waiting=mod.queue.all().stream().skip(1).toList();
-        if(waiting.isEmpty())scaled(g,mod.settings.advanceOnLever?"Lever: next player":"Nobody waiting",12,76,.65f,muted);
+        if(waiting.isEmpty()){scaled(g,"QUEUE IS CLEAR",12,76,.55f,muted);scaled(g,mod.settings.advanceOnLever?"Lever advances the queue":"No players waiting",12,87,.65f,ink);}
         else {
-            String next="Next  "+waiting.getFirst().player();
-            scaled(g,Minecraft.getInstance().font.plainSubstrByWidth(next,165),12,76,.7f,muted);
-            right(g,Money.format(waiting.getFirst().amount()),width()-12,76,.7f,ink);
+            scaled(g,"UP NEXT",12,76,.55f,muted);
+            scaled(g,waiting.getFirst().player(),12,87,.75f,ink);
+            right(g,Money.format(waiting.getFirst().amount()),width()-12,87,.75f,ink);
         }
         if(h.layout==Settings.Layout.STACKED)for(int i=1;i<Math.min(3,waiting.size());i++){
-            var p=waiting.get(i);scaled(g,p.player(),12,90+(i-1)*12,.7f,muted);
-            right(g,Money.format(p.amount()),width()-12,90+(i-1)*12,.7f,ink);
+            var p=waiting.get(i);scaled(g,p.player(),12,104+(i-1)*12,.7f,muted);
+            right(g,Money.format(p.amount()),width()-12,104+(i-1)*12,.7f,ink);
         }
     }
     private static void divider(GuiGraphics g, int y, Settings.Hud h) { g.fill(11, y, width() - 11, y + 1, blend(h.text, h.background, .15f)); }

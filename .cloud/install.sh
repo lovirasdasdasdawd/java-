@@ -42,5 +42,5 @@ PY
 java -version
 javac -version
 ./gradlew -PwithFabric build :fabric:build
-java -jar fabric/build/libs/donut-tracker-fabric-1.21.11-1.6.0.jar
-java -jar build/libs/donut-tracker-1.6.0.jar --render /workspace/setup/donut-ui.png
+java -jar fabric/build/libs/donut-tracker-fabric-1.21.11-1.7.0.jar
+java -jar build/libs/donut-tracker-1.7.0.jar --render /workspace/setup/donut-ui.png

@@ -1,0 +1,5 @@
+{
+  "ocean.shoreline": {"sounds": [{"name": "donuttracker:ocean/shoreline", "stream": true}]},
+  "ocean.open_sea": {"sounds": [{"name": "donuttracker:ocean/open_sea", "stream": true}]},
+  "ocean.rainy_coast": {"sounds": [{"name": "donuttracker:ocean/rainy_coast", "stream": true}]}
+}

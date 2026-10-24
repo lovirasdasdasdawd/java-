@@ -33,8 +33,8 @@ final class HudEditorScreen extends Screen {
             }
         }
         String hint=dragging!=null?"Release to place":selected==null?"Drag a HUD to place it":"Arrow keys to nudge  /  Drag to move";
-        int tw=font.width(hint);TrackerHud.rounded(g,width/2-tw/2-10,height-52,width/2+tw/2+10,height-33,0xF0181D24);
-        g.drawCenteredString(font,hint,width/2,height-46,0xFFDCE3E0);
+        int tw=font.width(hint);TrackerHud.rounded(g,width/2-tw/2-10,height-52,width/2+tw/2+10,height-33,CoastalStyle.panel());
+        g.drawCenteredString(font,hint,width/2,height-46,CoastalStyle.ink());
         super.render(g,mx,my,delta);
     }
     @Override public boolean mouseClicked(MouseButtonEvent e,boolean twice){

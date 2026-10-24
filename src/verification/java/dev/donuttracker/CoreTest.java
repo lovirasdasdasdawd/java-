@@ -186,6 +186,25 @@ public final class CoreTest {
         Settings leverSettings=new Settings();leverSettings.advanceOnLever=false;
         var leverFile=dir.resolve("lever-settings.properties");leverSettings.save(leverFile);
         check(!Settings.load(leverFile).advanceOnLever,"lever preference survives restart");
+        Settings oceanSettings=new Settings();
+        check(oceanSettings.oceanShouldPlay(true,false),"ocean defaults to menu playback");
+        check(!oceanSettings.oceanShouldPlay(false,true),"ocean does not play in game by default");
+        oceanSettings.oceanInGame=true;check(oceanSettings.oceanShouldPlay(false,true),"in-game ambience opt-in");
+        check(!oceanSettings.oceanShouldPlay(false,false),"no ocean outside menus or game");
+        oceanSettings.oceanEnabled=false;check(!oceanSettings.oceanShouldPlay(true,true),"off always silences ocean");
+        oceanSettings.oceanEnabled=true;oceanSettings.oceanVolume=0;check(!oceanSettings.oceanShouldPlay(true,true),"zero volume does not start streams");
+        oceanSettings.oceanVolume=.37;oceanSettings.oceanTrack=Settings.OceanTrack.RAINY_COAST;oceanSettings.menuPalette=Settings.MenuPalette.PAPER;oceanSettings.menuMotion=false;
+        oceanSettings.profit.accent=0x123456;oceanSettings.profit.x=91;oceanSettings.profit.scale=.85;
+        var oceanFile=dir.resolve("ocean-settings.properties");oceanSettings.save(oceanFile);var oceanLoaded=Settings.load(oceanFile);
+        check(oceanLoaded.oceanEnabled&&oceanLoaded.oceanInGame&&oceanLoaded.oceanVolume==.37,"ocean volume and playback scope persist");
+        check(oceanLoaded.oceanTrack==Settings.OceanTrack.RAINY_COAST&&oceanLoaded.menuPalette==Settings.MenuPalette.PAPER&&!oceanLoaded.menuMotion,"track, palette and reduced motion persist");
+        check(oceanLoaded.profit.accent==0x123456&&oceanLoaded.profit.x==91&&oceanLoaded.profit.scale==.85,"theme/audio settings preserve custom HUD design");
+        Files.writeString(oceanFile,"ocean.volume=4\n");check(Settings.load(oceanFile).oceanVolume==1,"ocean volume upper bound");
+        Files.writeString(oceanFile,"ocean.volume=-1\n");check(Settings.load(oceanFile).oceanVolume==0,"ocean volume lower bound");
+        Files.writeString(oceanFile,"ocean.volume=NaN\n");
+        try{Settings.load(oceanFile);throw new AssertionError("invalid volume should be rejected");}catch(java.io.IOException expected){check(true,"nonfinite ocean volume rejected");}
+        Files.writeString(oceanFile,"profit.accent=654321\n");var oceanLegacy=Settings.load(oceanFile);
+        check(oceanLegacy.profit.accent==0x654321&&oceanLegacy.oceanTrack==Settings.OceanTrack.SHORELINE,"old configs migrate without replacing custom colours");
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");
         PaymentQueue migratedQueue = new PaymentQueue();StateStore.load(legacyQueue,new Tracker(),migratedQueue);
         check(!migratedQueue.active().returnRequested(),"old queue file remains readable");

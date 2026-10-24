@@ -6,10 +6,22 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.6.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.7.0.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
+
+## New in 1.7.0: Tideline coastal HUD and ocean ambience
+
+Actual Minecraft previews: [Overview](releases/tideline-overview-1.7.png) · [Ocean controls](releases/tideline-ocean-1.7.png) · [Dusk](releases/tideline-dusk-1.7.png) · [Warm paper](releases/tideline-paper-1.7.png) · [HUD](releases/tideline-hud-1.7.png).
+
+Right Shift opens a coastal pixel interface with a sea-glass palette, warm cream text, subtle wave contours and a redesigned HUD stat row. Ocean & style offers Sea glass, Dusk and Warm paper menu palettes. Menu motion can be disabled. Changing a menu palette preserves custom HUD colours; Match HUD colours explicitly applies that palette to both modules without changing position, scale, opacity or Clean/Neon selection.
+
+Ocean ambience has three bundled 24-second looping choices: Shoreline, Open sea and Rainy coast. They are original procedurally synthesized surf textures (authored with deterministic DSP), not field recordings. They play through Minecraft's Ambient/Environment channel, with a separate 0–100% ocean volume. Default: enabled at 18%, in mod menus only. In-game audio is an opt-in toggle. Playback fades in/out, crossfades track changes, stops on disconnect/shutdown, and the page reports Playing/Off/Minecraft-muted state. No downloads or network calls are required for audio. Minecraft Master and Ambient volume still apply.
+
+The bundled files and generation script are included; normal Gradle builds do not need audio-generation dependencies. The optional authoring script is `scripts/make_ocean_audio.py` (numpy, scipy, ffmpeg). Audio attribution is bundled as OCEAN-SOUNDS.md.
+
+Existing /start, /stop, income/loss arithmetic, chat 2×/3× controls, lever queue advance, positions, scale, custom colours and session history remain. No automatic /bal or branded success chat is introduced.
 
 ## New in 1.6.0: lever queue advance and consistent controls
 
@@ -108,8 +120,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.6.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.6.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.7.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.7.0.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -122,10 +134,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.6.0.jar
+java -jar build/libs/donut-tracker-1.7.0.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.6.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.7.0.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

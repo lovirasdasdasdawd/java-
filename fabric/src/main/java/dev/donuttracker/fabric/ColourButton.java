@@ -15,11 +15,11 @@ final class ColourButton extends Button.Plain {
         TrackerHud.rounded(g, x, y, x + getWidth(), y + getHeight(), 0xFF000000 | colour);
         TrackerHud.border(g, x, y, x + getWidth(), y + getHeight(), isHoveredOrFocused() ? 0xFFFFFFFF : 0xFF85899F);
         if (!getMessage().getString().isEmpty()) {
-            TrackerHud.rounded(g,x,y,x+getWidth(),y+getHeight(),0xFF1C222A);
-            TrackerHud.border(g,x,y,x+getWidth(),y+getHeight(),isHoveredOrFocused()?0xFFB8A5F4:0xFF343D47);
+            TrackerHud.rounded(g,x,y,x+getWidth(),y+getHeight(),CoastalStyle.surface());
+            TrackerHud.border(g,x,y,x+getWidth(),y+getHeight(),isHoveredOrFocused()?CoastalStyle.accent():CoastalStyle.line());
             TrackerHud.rounded(g,x+5,y+4,x+17,y+getHeight()-4,0xFF000000|colour);
             String label=String.format("#%06X",colour);
-            g.drawString(Minecraft.getInstance().font,label,x+24,y+(getHeight()-8)/2,0xFFDCE2ED,false);
+            g.drawString(Minecraft.getInstance().font,label,x+24,y+(getHeight()-8)/2,CoastalStyle.ink(),false);
             return;
         }
         int light = ((colour >> 16 & 255) * 299 + (colour >> 8 & 255) * 587 + (colour & 255) * 114) / 1000;

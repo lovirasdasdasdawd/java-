@@ -48,6 +48,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
     private BlockPos leverPos;
     private ClientLevel leverLevel;
     private boolean leverUseHeld;
+    private final OceanAmbience ocean = new OceanAmbience();
     private long lastRequest;
     private boolean pendingStart, pendingStop;
     private long pendingAt;
@@ -57,9 +58,11 @@ public final class DonutTrackerClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         try { settings = Settings.load(config); } catch (IOException ex) { settings = new Settings(); settingsWritable = false; LOG.error("Settings could not be read; original file preserved", ex); status = "Invalid settings file: " + config; }
         try { StateStore.load(state, tracker, queue); } catch (IOException ex) { stateWritable = false; LOG.error("History could not be read; original file preserved", ex); status = "Invalid history file: " + state; }
+        CoastalStyle.configure(settings);
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (menu.consumeClick()) if (client.player != null) client.setScreen(new TrackerScreen(this, client.screen));
+            CoastalStyle.configure(settings);ocean.tick(client,settings);
             if(!client.options.keyUse.isDown())leverUseHeld=false;
             observeLever(client);
             long now = System.currentTimeMillis();
@@ -99,12 +102,13 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if (client.player != null && !client.options.hideGui) TrackerHud.render(g, this, false);
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ocean.stop(client);
             if (tracker.running()) { tracker.stop(); status = "Disconnected: session ended at last observed balance."; }
             save(); var history = tracker.history(); tracker = new Tracker(); tracker.restoreHistory(history);
             pendingStart = pendingStop = false;
             chatReceipts.clear();leverAdvance.cancel();leverLevel=null;leverPos=null;leverUseHeld=false;
         });
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> save());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {ocean.stop(client);save();});
         LOG.info("Donut Tracker initialized; press Right Shift for settings.");
     }
     private void observeLever(Minecraft client){
@@ -171,6 +175,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
             return 0;
         }
     }
+    String oceanStatus(){return ocean.status(Minecraft.getInstance(),settings);}
     void requestBalance() {
         var connection = Minecraft.getInstance().getConnection();
         if (connection == null) throw new IllegalStateException("Join a server first.");

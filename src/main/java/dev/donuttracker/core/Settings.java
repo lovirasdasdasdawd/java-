@@ -11,17 +11,24 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 public final class Settings {
+    public enum MenuPalette { SEA_GLASS, DUSK, PAPER }
+    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST }
     public enum Theme { CLEAN, NEON }
     public enum Layout { COMPACT, STACKED, MINIMAL }
     public static final class Hud {
         public boolean enabled = true, showProfit = true, showTimer = true, showRate = true, showIcon = true;
         public Theme theme = Theme.CLEAN;
         public Layout layout = Layout.COMPACT;
-        public int accent = 0xCB8CF6, text = 0xE9EAF2, positive = 0x39DA94, negative = 0xFF657A, background = 0x10131F;
+        public int accent = 0x90D7C2, text = 0xF3E8CB, positive = 0xA5E3B7, negative = 0xF4A296, background = 0x0D2733;
         public double scale = 1.0, opacity = .90;
         public int x = 16, y = 16;
     }
     public final Hud profit = new Hud(), queue = new Hud();
+    public MenuPalette menuPalette = MenuPalette.SEA_GLASS;
+    public OceanTrack oceanTrack = OceanTrack.SHORELINE;
+    public boolean oceanEnabled = true, oceanInGame = false, menuMotion = true;
+    public double oceanVolume = .18;
+    public boolean oceanShouldPlay(boolean moduleMenu,boolean inGame){return oceanEnabled&&oceanVolume>0&&(moduleMenu||oceanInGame&&inGame);}
     public boolean advanceOnLever = true;
     public BigDecimal minimumPayment = new BigDecimal("100000");
     // Anchored patterns: capture only confirmed balance/payment lines, never arbitrary chat amounts.
@@ -31,7 +38,7 @@ public final class Settings {
     public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
     // One amount capture shared by outgoing confirmations and explicit monetary loss lines.
     public String expensePattern = "(?i)^you\\s+(?:(?:have\\s+)?(?:successfully\\s+)?(?:paid|sent)\\s+(?:[A-Za-z0-9_]{1,16}\\s+|(?=\\$|[0-9]))|lost\\s+)\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?(?:\\s+to\\s+[A-Za-z0-9_]{1,16})?\\s*[!.]?$";
-    public Settings() { queue.x = 280; queue.y = 16; queue.accent = 0x70CFEA; }
+    public Settings() { queue.x = 280; queue.y = 16; queue.accent = 0xB6C6E9; }
     public static int color(String hex) {
         String s = hex.strip().replaceFirst("^#", "");
         if (!s.matches("[0-9a-fA-F]{6}")) throw new IllegalArgumentException("Use a six-digit HEX colour, e.g. #CB8CF6.");
@@ -48,6 +55,12 @@ public final class Settings {
         Properties p = new Properties();
         try (Reader r = Files.newBufferedReader(file)) { p.load(r); }
         try {
+            s.menuPalette=MenuPalette.valueOf(p.getProperty("menu.palette",s.menuPalette.name()));
+            s.oceanTrack=OceanTrack.valueOf(p.getProperty("ocean.track",s.oceanTrack.name()));
+            s.oceanEnabled=Boolean.parseBoolean(p.getProperty("ocean.enabled","true"));
+            s.oceanInGame=Boolean.parseBoolean(p.getProperty("ocean.inGame","false"));
+            s.menuMotion=Boolean.parseBoolean(p.getProperty("menu.motion","true"));
+            s.oceanVolume=bounded(p.getProperty("ocean.volume","0.18"),0,1);
             read(p, "profit.", s.profit); read(p, "queue.", s.queue);
             s.advanceOnLever = Boolean.parseBoolean(p.getProperty("queue.leverAdvance", "true"));
             s.minimumPayment = Money.parse(p.getProperty("queue.minimum", "100K"));
@@ -65,8 +78,8 @@ public final class Settings {
         h.theme = Theme.valueOf(p.getProperty(k + "theme", "CLEAN"));
         h.layout = Layout.valueOf(p.getProperty(k + "layout", "COMPACT"));
         h.accent = color(p.getProperty(k + "accent", String.format("%06X", h.accent)));
-        h.text = color(p.getProperty(k + "text", "E9EAF2")); h.positive = color(p.getProperty(k + "positive", "39DA94"));
-        h.negative = color(p.getProperty(k + "negative", "FF657A")); h.background = color(p.getProperty(k + "background", "10131F"));
+        h.text = color(p.getProperty(k + "text", String.format("%06X", h.text))); h.positive = color(p.getProperty(k + "positive", String.format("%06X", h.positive)));
+        h.negative = color(p.getProperty(k + "negative", String.format("%06X", h.negative))); h.background = color(p.getProperty(k + "background", String.format("%06X", h.background)));
         h.scale = bounded(p.getProperty(k + "scale", "1"), .5, 2);
         h.opacity = bounded(p.getProperty(k + "opacity", ".9"), 0, 1);
         h.x = Math.max(0, Integer.parseInt(p.getProperty(k + "x", "" + h.x)));
@@ -84,6 +97,9 @@ public final class Settings {
     public void save(Path file) throws IOException {
         validatePatterns();
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
+        p.setProperty("menu.palette",menuPalette.name());p.setProperty("menu.motion",Boolean.toString(menuMotion));
+        p.setProperty("ocean.enabled",Boolean.toString(oceanEnabled));p.setProperty("ocean.inGame",Boolean.toString(oceanInGame));
+        p.setProperty("ocean.track",oceanTrack.name());p.setProperty("ocean.volume",Double.toString(Math.clamp(oceanVolume,0,1)));
         p.setProperty("queue.minimum", minimumPayment.toPlainString());
         p.setProperty("queue.leverAdvance",Boolean.toString(advanceOnLever));
         p.setProperty("balance.pattern", balancePattern); p.setProperty("payment.pattern", paymentPattern); p.setProperty("expense.pattern", expensePattern);
