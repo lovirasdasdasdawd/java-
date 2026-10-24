@@ -213,9 +213,11 @@ public final class CoreTest {
         check(auroraLoaded.auroraGlow==.42&&!auroraLoaded.menuMotion&&auroraLoaded.profit.accent==0x123456&&auroraLoaded.profit.x==73,"aurora controls preserve HUD preferences");
         Files.writeString(auroraFile,"menu.palette=DUSK\nocean.track=RAINY_COAST\nprofit.accent=654321\n");var previousScene=Settings.load(auroraFile);
         check(previousScene.backgroundScene==Settings.BackgroundScene.OCEAN&&previousScene.menuPalette==Settings.MenuPalette.DUSK&&previousScene.oceanTrack==Settings.OceanTrack.RAINY_COAST&&previousScene.profit.accent==0x654321,"old profiles keep their ocean scene, palette, sound and HUD colour");
+        check(Settings.BackgroundScene.values().length==10,"ten distinct background scenes available");
+        check(Settings.OceanTrack.values().length==12,"twelve selectable ambience loops available");
         for(var scene:Settings.BackgroundScene.values()){
             var design=aurora.sceneDesigns.get(scene);design.intensity=.31;design.speed=.72;design.density=.93;design.tint=0xAABB33;
-            aurora.backgroundScene=scene;aurora.oceanTrack=switch(scene){case SPACE->Settings.OceanTrack.DEEP_SPACE;case CITY->Settings.OceanTrack.CITY_RAIN;case FOREST->Settings.OceanTrack.FOREST_BREEZE;default->Settings.OceanTrack.AURORA_DRIFT;};
+            aurora.backgroundScene=scene;aurora.oceanTrack=switch(scene){case SPACE->Settings.OceanTrack.DEEP_SPACE;case CITY->Settings.OceanTrack.CITY_RAIN;case FOREST->Settings.OceanTrack.FOREST_BREEZE;case DESERT->Settings.OceanTrack.DESERT_WIND;case SNOW->Settings.OceanTrack.SNOW_HUSH;case ABYSS->Settings.OceanTrack.ABYSSAL_DRIFT;case SAKURA->Settings.OceanTrack.GARDEN_CHIMES;case STORM->Settings.OceanTrack.DISTANT_STORM;default->Settings.OceanTrack.AURORA_DRIFT;};
             aurora.save(auroraFile);var roundtrip=Settings.load(auroraFile);
             check(roundtrip.backgroundScene==scene&&roundtrip.oceanTrack==aurora.oceanTrack,"scene and soundtrack survive reload: "+scene);
             var restoredDesign=roundtrip.sceneDesign();check(restoredDesign.intensity==.31&&restoredDesign.speed==.72&&restoredDesign.density==.93&&restoredDesign.tint==0xAABB33,"independent scene details survive reload: "+scene);

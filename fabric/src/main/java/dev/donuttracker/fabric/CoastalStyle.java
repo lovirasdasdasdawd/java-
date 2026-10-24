@@ -24,7 +24,7 @@ final class CoastalStyle {
     static int mix(int a,int b,float amount){int r=Math.round((a>>16&255)*(1-amount)+(b>>16&255)*amount),g=Math.round((a>>8&255)*(1-amount)+(b>>8&255)*amount),v=Math.round((a&255)*(1-amount)+(b&255)*amount);return 0xFF000000|r<<16|g<<8|v;}
     static String sceneName(){return scene.name();}
     static void background(GuiGraphics g,int width,int height){
-        if(scene==Settings.BackgroundScene.SPACE||scene==Settings.BackgroundScene.CITY||scene==Settings.BackgroundScene.FOREST){WorldBackdrop.draw(g,0,0,width,height,scene,motion,settings.sceneDesign());return;}
+        if(scene!=Settings.BackgroundScene.AURORA&&scene!=Settings.BackgroundScene.OCEAN){WorldBackdrop.draw(g,0,0,width,height,scene,motion,settings.sceneDesign());return;}
         if(scene==Settings.BackgroundScene.AURORA){AuroraBackdrop.draw(g,0,0,width,height,motion,glow,settings.sceneDesign());return;}
         int top=palette==Settings.MenuPalette.PAPER?0xEA344F54:palette==Settings.MenuPalette.DUSK?0xEF171E36:0xEF071E2D;
         int bottom=palette==Settings.MenuPalette.PAPER?0xE9A8BDAB:palette==Settings.MenuPalette.DUSK?0xEE63516A:0xEF23545B;

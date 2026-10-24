@@ -54,5 +54,45 @@
         "stream": true
       }
     ]
+  },
+  "ocean.desert_wind": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/desert_wind",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.snow_hush": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/snow_hush",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.abyssal_drift": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/abyssal_drift",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.garden_chimes": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/garden_chimes",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.distant_storm": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/distant_storm",
+        "stream": true
+      }
+    ]
   }
 }

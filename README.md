@@ -1,3 +1,14 @@
+## Seasons — 1.11.0
+
+Actual Minecraft previews: [New scenes](releases/seasons-catalog-1.11.png) · [Sidebar divider](releases/seasons-divider-1.11.png) · [New sounds](releases/seasons-sound-1.11.png)
+Five new atmospheres and matching original 32-second sound loops: **Desert Dusk / Desert wind**, **Snowfall / Snow hush**, **Deep Ocean / Abyssal drift**, **Sakura Garden / Garden chimes**, **Storm Coast / Distant storm**. Ten scenes and twelve sounds total.
+
+Right Shift → Atmosphere → Scenes → Next opens the five new scenes. Scenes and Sound use paged browsers; all existing choices remain available. Each scene supports custom tint, intensity, particle density, speed and animation controls. Sound retains mute, volume and optional in-game playback. Storm Coast uses no flashing lightning.
+
+The sidebar now has an inset divider with an accent diamond between the two modules and the layout/atmosphere controls, matching the requested position.
+
+Install `donut-tracker-fabric-1.21.11-1.11.0.jar` in mods, replacing the previous version. Minecraft 1.21.11, Java 21, Fabric and Fabric API required.
+
 ## Pixel ledger — 1.10.0
 
 Actual Minecraft previews: [GUI](releases/pixel-overview-1.10.png) · [HUDs](releases/pixel-hud-1.10.png) · [Negative profit](releases/pixel-loss-1.10.png) · [Placement](releases/pixel-placement-1.10.png)

@@ -28,6 +28,7 @@ final class TrackerScreen extends Screen {
         g.fill(x+1,y+1,x+rail,y+h-1,CoastalStyle.surface());g.fill(x+rail,y+1,x+rail+1,y+h-1,CoastalStyle.line());
         TrackerHud.text(g,"DONUT",x+12,y+15,CoastalStyle.ink());TrackerHud.text(g,"TRACKER",x+12,y+27,CoastalStyle.accent());
         TrackerHud.scaled(g,"MODULES",x+12,y+52,.7f,CoastalStyle.muted());
+        sidebarDivider(g);
         TrackerHud.text(g,"Session",cx,y+15,CoastalStyle.ink());
         String state=mod.tracker.running()?"RECORDING":"STANDBY";right(g,state,cx+cw,y+16,.7f,mod.tracker.running()?CoastalStyle.accent():CoastalStyle.muted());
         line(g,y+33);
@@ -46,6 +47,12 @@ final class TrackerScreen extends Screen {
         else {TrackerHud.text(g,a.player(),cx,y+168,CoastalStyle.ink());right(g,"+"+Money.format(a.amount()),cx+cw,y+168,1f,CoastalStyle.value(false,mod.settings.queue.positive));String next=mod.queue.waiting()>0?"Next: "+mod.queue.all().get(1).player():"No players waiting";TrackerHud.scaled(g,next,cx,y+185,.75f,CoastalStyle.muted());}
         if(h>225){line(g,y+h-22);TrackerHud.scaled(g,CoastalStyle.sceneName()+" / Right Shift",cx,y+h-14,.65f,CoastalStyle.muted());}
         super.render(g,mx,my,delta);
+    }
+    private void sidebarDivider(GuiGraphics g){
+        int yy=y+121,mid=x+rail/2;
+        g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+rail-9,yy+1,CoastalStyle.line());
+        g.fill(x+10,yy,x+19,yy+1,CoastalStyle.accent());
+        g.fill(mid-3,yy-2,mid+4,yy+3,CoastalStyle.line());g.fill(mid-1,yy-1,mid+2,yy+2,CoastalStyle.accent());
     }
     private void stat(GuiGraphics g,String name,String value,int xx,int yy,int width){TrackerHud.scaled(g,name,xx,yy,.75f,CoastalStyle.muted());TrackerHud.scaled(g,value,xx,yy+14,Math.min(.9f,(width-8f)/Math.max(1,font.width(value))),CoastalStyle.ink());}
     private void line(GuiGraphics g,int yy){g.fill(cx,yy,cx+cw,yy+1,CoastalStyle.line());}

@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 public final class Settings {
     public enum MenuPalette { SEA_GLASS, DUSK, PAPER, AURORA }
-    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST, AURORA_DRIFT, DEEP_SPACE, CITY_RAIN, FOREST_BREEZE }
-    public enum BackgroundScene { OCEAN, AURORA, SPACE, CITY, FOREST }
+    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST, AURORA_DRIFT, DEEP_SPACE, CITY_RAIN, FOREST_BREEZE, DESERT_WIND, SNOW_HUSH, ABYSSAL_DRIFT, GARDEN_CHIMES, DISTANT_STORM }
+    public enum BackgroundScene { OCEAN, AURORA, SPACE, CITY, FOREST, DESERT, SNOW, ABYSS, SAKURA, STORM }
     public static final class SceneDesign {
         public double intensity=.75, density=.6, speed=.4;
         public int tint=0xA9B8FA;
@@ -47,7 +47,7 @@ public final class Settings {
     public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
     // One amount capture shared by outgoing confirmations and explicit monetary loss lines.
     public String expensePattern = "(?i)^you\\s+(?:(?:have\\s+)?(?:successfully\\s+)?(?:paid|sent)\\s+(?:[A-Za-z0-9_]{1,16}\\s+|(?=\\$|[0-9]))|lost\\s+)\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?(?:\\s+to\\s+[A-Za-z0-9_]{1,16})?\\s*[!.]?$";
-    public Settings() { for(var scene:BackgroundScene.values()){var d=new SceneDesign();if(scene==BackgroundScene.AURORA)d.intensity=.85;d.tint=switch(scene){case AURORA->0x68EFBE;case OCEAN->0x83C7BB;case SPACE->0xA9B8FA;case CITY->0xF2AE91;case FOREST->0xE7AD68;};sceneDesigns.put(scene,d);} queue.x = 280; queue.y = 16; queue.accent = 0xB6C6E9; }
+    public Settings() { for(var scene:BackgroundScene.values()){var d=new SceneDesign();if(scene==BackgroundScene.AURORA)d.intensity=.85;d.tint=switch(scene){case AURORA->0x68EFBE;case OCEAN->0x83C7BB;case SPACE->0xA9B8FA;case CITY->0xF2AE91;case FOREST->0xE7AD68;case DESERT->0xEBA56C;case SNOW->0xC6DBF1;case ABYSS->0x50CFC8;case SAKURA->0xE9A5BB;case STORM->0x93ACC6;};sceneDesigns.put(scene,d);} queue.x = 280; queue.y = 16; queue.accent = 0xB6C6E9; }
     public static int color(String hex) {
         String s = hex.strip().replaceFirst("^#", "");
         if (!s.matches("[0-9a-fA-F]{6}")) throw new IllegalArgumentException("Use a six-digit HEX colour, e.g. #CB8CF6.");
