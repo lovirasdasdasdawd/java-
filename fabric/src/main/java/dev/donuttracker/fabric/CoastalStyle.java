@@ -34,7 +34,7 @@ final class CoastalStyle {
     }
     static void panel(GuiGraphics g,int x,int y,int w,int h){
         TrackerHud.rounded(g,x-1,y+4,x+w+1,y+h+5,0x50000000);
-        TrackerHud.rounded(g,x,y,x+w,y+h,(scene==Settings.BackgroundScene.AURORA&&palette!=Settings.MenuPalette.PAPER?0xE9000000:0xFF000000)|(panel()&0xFFFFFF));
+        TrackerHud.rounded(g,x,y,x+w,y+h,0xFF000000|(panel()&0xFFFFFF));
         TrackerHud.border(g,x,y,x+w,y+h,line());
         g.fill(x+10,y+1,x+w-10,y+2,mix(panel(),ink(),.16f));
     }
@@ -51,7 +51,7 @@ final class CoastalStyle {
             g.fill(x+dx,yy,x+Math.min(width,dx+step),yy+1,colour);
         }
     }
-    static void headerWave(GuiGraphics g,int x,int y,int width){wave(g,x,y,width,2,0x80000000|(accent()&0xFFFFFF),motion?System.nanoTime()/1_000_000_000d*.18:0);}
+    static void headerWave(GuiGraphics g,int x,int y,int width){g.fill(x,y,x+width,y+1,line());}
     static void matchHud(Settings settings){
         for(var h:new Settings.Hud[]{settings.profit,settings.queue}){
             h.accent=accent()&0xFFFFFF;h.text=ink()&0xFFFFFF;h.background=panel()&0xFFFFFF;

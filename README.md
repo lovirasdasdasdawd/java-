@@ -1,3 +1,10 @@
+## Pixel ledger — 1.10.0
+
+Actual Minecraft previews: [GUI](releases/pixel-overview-1.10.png) · [HUDs](releases/pixel-hud-1.10.png) · [Negative profit](releases/pixel-loss-1.10.png) · [Placement](releases/pixel-placement-1.10.png)
+A new compact session ledger and left module rail replace the floating dashboard. Both in-game HUDs use smaller 180-pixel frames, one-pixel corners, an accent edge, aligned values and plain dividers. Compact, Stacked and Minimal remain available, as do per-HUD colours, opacity, scale, visibility and drag positioning. All five scenes and seven soundtracks remain available under Atmosphere.
+
+Install `donut-tracker-fabric-1.21.11-1.10.0.jar` in mods, replacing the previous version. Requires Minecraft 1.21.11, Java 21, Fabric and Fabric API.
+
 ## Worlds — 1.9.0
 
 In-game previews: [Space](releases/space-1.9.png) · [Rainy City](releases/city-1.9.png) · [Autumn Forest](releases/forest-1.9.png) · [Details](releases/details-1.9.png)

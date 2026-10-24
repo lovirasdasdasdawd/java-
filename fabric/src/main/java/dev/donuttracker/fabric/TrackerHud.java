@@ -5,111 +5,59 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 
-/** Calm, translucent cards with a clear information hierarchy. */
+/** Compact pixel instruments. Geometry is shared with placement and hit testing. */
 final class TrackerHud {
-    private TrackerHud() {}
-    static int height(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 42 : h.layout == Settings.Layout.STACKED ? 128 : 104; }
-    static int width() { return 200; }
-    static int x(Settings.Hud h, int screenWidth) { return Math.max(0, Math.min(h.x, screenWidth - (int)(width() * h.scale))); }
-    static int y(Settings.Hud h, int screenHeight) { return Math.max(0, Math.min(h.y, screenHeight - (int)(height(h) * h.scale))); }
-    static void render(GuiGraphics g, DonutTrackerClient mod, boolean editing) {
-        draw(g, mod, mod.settings.profit, false, editing); draw(g, mod, mod.settings.queue, true, editing);
-    }
-    static void draw(GuiGraphics g, DonutTrackerClient mod, Settings.Hud h, boolean payment, boolean editing) {
-        if (!h.enabled && !editing) return;
-        g.pose().pushMatrix();
-        g.pose().translate((float)x(h, g.guiWidth()), (float)y(h, g.guiHeight()));
-        g.pose().scale((float)h.scale, (float)h.scale);
-        int w = width(), ht = height(h), accent = opaque(h.accent), ink = opaque(h.text), muted = blend(h.text, h.background, .45f);
-        if (h.theme == Settings.Theme.NEON) for (int spread = 5; spread > 0; spread--) border(g, -spread, -spread, w + spread, ht + spread, 0x11000000 | h.accent);
-        rounded(g, 1, 3, w+1, ht+3, ((int)(45*h.opacity)<<24));
-        rounded(g, 0, 0, w, ht, ((int)(255 * h.opacity) << 24) | h.background);
-        border(g, 0, 0, w, ht, h.theme == Settings.Theme.NEON ? accent : ((int)(170*h.opacity)<<24) | (blend(h.text,h.background,.18f)&0xFFFFFF));
-        CoastalStyle.wave(g,12,h.layout==Settings.Layout.MINIMAL?21:24,w-24,1,0x60000000|h.accent,0);
-        if (h.showIcon) { if (payment) people(g, 11, 11, accent); else donut(g, 11, 10, accent); }
-        scaled(g, payment ? "Payments" : "Net profit", h.showIcon ? 28 : 12, 11, .8f, ink);
-        if (payment) {
-            String waiting = "" + mod.queue.waiting() + " queued";
-            int pillW = Math.max(38, Math.round(Minecraft.getInstance().font.width(waiting) * .65f) + 12);
-            rounded(g, w - pillW - 10, 8, w - 10, 22, blend(h.text, h.background, .07f));
-            scaled(g, waiting, w - pillW - 4, 12, .65f, muted);
-        } else {
-            rounded(g, w - 39, 11, w - 35, 15, mod.tracker.running() ? opaque(h.positive) : muted);
-            scaled(g, mod.tracker.running() ? "LIVE" : "IDLE", w - 30, 11, .7f, muted);
+    private TrackerHud(){}
+    static int height(Settings.Hud h){return h.layout==Settings.Layout.MINIMAL?29:h.layout==Settings.Layout.STACKED?94:68;}
+    static int width(){return 180;}
+    static int x(Settings.Hud h,int sw){return Math.max(0,Math.min(h.x,sw-(int)(width()*h.scale)));}
+    static int y(Settings.Hud h,int sh){return Math.max(0,Math.min(h.y,sh-(int)(height(h)*h.scale)));}
+    static void render(GuiGraphics g,DonutTrackerClient mod,boolean editing){draw(g,mod,mod.settings.profit,false,editing);draw(g,mod,mod.settings.queue,true,editing);}
+    static void draw(GuiGraphics g,DonutTrackerClient mod,Settings.Hud h,boolean payment,boolean editing){
+        if(!h.enabled&&!editing)return;
+        g.pose().pushMatrix();g.pose().translate((float)x(h,g.guiWidth()),(float)y(h,g.guiHeight()));g.pose().scale((float)h.scale,(float)h.scale);
+        int w=width(),ht=height(h),ink=opaque(h.text),muted=blend(h.text,h.background,.56f),accent=opaque(h.accent);
+        if(h.theme==Settings.Theme.NEON)for(int n=3;n>0;n--)border(g,-n,-n,w+n,ht+n,0x14000000|h.accent);
+        g.fill(2,ht,w+2,ht+2,((int)(65*h.opacity)<<24));
+        g.fill(0,0,w,ht,((int)(255*h.opacity)<<24)|h.background);
+        border(g,0,0,w,ht,((int)(160*h.opacity)<<24)|(blend(h.text,h.background,.22f)&0xFFFFFF));
+        g.fill(0,0,2,ht,accent);g.fill(2,0,w,1,((int)(100*h.opacity)<<24)|h.accent);
+        if(h.layout==Settings.Layout.MINIMAL){
+            if(h.showIcon){if(payment)people(g,8,8,accent);else donut(g,8,8,accent);}
+            int start=h.showIcon?26:9;
+            if(payment){var a=mod.queue.active();fit(g,a==null?"Queue empty":a.player(),start,10,.85f,70,ink);if(a!=null)right(g,"+"+Money.format(a.amount()),w-8,10,Math.min(.9f,65f/Math.max(1,Minecraft.getInstance().font.width("+"+Money.format(a.amount())))),opaque(h.positive));}
+            else {if(h.showProfit)fit(g,Money.signed(mod.tracker.profit()),start,9,1.2f,90,opaque(mod.tracker.profit().signum()<0?h.negative:h.positive));if(h.showTimer)right(g,mod.tracker.duration(),w-8,11,.75f,muted);}
+            g.pose().popMatrix();return;
         }
-        CoastalStyle.wave(g,12,ht-4,w-24,1,0x65000000|h.accent,1.4);
-        if (payment) payment(g, mod, h, ink, muted, accent);
-        else profit(g, mod, h, ink, muted);
+        if(h.showIcon){if(payment)people(g,8,7,accent);else donut(g,8,6,accent);}
+        scaled(g,payment?"PAYMENTS":"SESSION",h.showIcon?26:9,8,.75f,muted);
+        right(g,payment?mod.queue.waiting()+" waiting":mod.tracker.running()?"REC":"IDLE",w-9,8,.75f,payment?muted:mod.tracker.running()?accent:muted);
+        if(payment)payment(g,mod,h,ink,muted,accent);else profit(g,mod,h,ink,muted);
         g.pose().popMatrix();
     }
-    private static void profit(GuiGraphics g, DonutTrackerClient mod, Settings.Hud h, int ink, int muted) {
-        int value=opaque(mod.tracker.profit().signum()<0?h.negative:h.positive);
-        if(h.layout==Settings.Layout.MINIMAL){
-            if(h.showProfit)scaled(g,Money.signed(mod.tracker.profit()),12,25,1f,value);
-            if(h.showTimer)right(g,mod.tracker.duration(),width()-12,26,.7f,muted);
-            return;
-        }
-        if(h.showProfit){
-            String amount=Money.signed(mod.tracker.profit());
-            float scale=Math.min(2.15f,176f/Math.max(1,Minecraft.getInstance().font.width(amount)));
-            scaled(g,amount,12,31,scale,value);
-        }
-        divider(g,60,h);
-        int cell=((int)(255*h.opacity)<<24)|(blend(h.text,h.background,.045f)&0xFFFFFF);
-        if(h.showTimer){
-            rounded(g,10,66,96,95,cell);scaled(g,"ELAPSED",17,72,.55f,muted);
-            scaled(g,mod.tracker.duration(),17,83,.85f,ink);
-        }
-        if(h.showRate){
-            rounded(g,104,66,190,95,cell);scaled(g,"PER HOUR",111,72,.55f,muted);
-            String rate=Money.signed(mod.tracker.perHour());
-            float fit=Math.min(.85f,72f/Math.max(1,Minecraft.getInstance().font.width(rate)));
-            scaled(g,rate,111,83,fit,mod.tracker.perHour().signum()<0?opaque(h.negative):ink);
-        }
-        if(h.layout==Settings.Layout.STACKED){
-            divider(g,104,h);scaled(g,"Balance",12,114,.65f,muted);
-            right(g,mod.tracker.hasBalance()?Money.format(mod.tracker.balance()):"Not read",width()-12,114,.65f,ink);
-        }
+    private static void profit(GuiGraphics g,DonutTrackerClient mod,Settings.Hud h,int ink,int muted){
+        int colour=opaque(mod.tracker.profit().signum()<0?h.negative:h.positive);
+        if(h.showProfit)fit(g,Money.signed(mod.tracker.profit()),9,25,1.8f,162,colour);
+        g.fill(9,48,171,49,blend(h.text,h.background,.18f));
+        if(h.showTimer)scaled(g,mod.tracker.duration(),9,55,.8f,ink);
+        if(h.showRate)right(g,Money.signed(mod.tracker.perHour())+"/h",171,55,.8f,mod.tracker.perHour().signum()<0?opaque(h.negative):muted);
+        if(h.layout==Settings.Layout.STACKED){scaled(g,"Balance",9,78,.8f,muted);right(g,mod.tracker.hasBalance()?Money.format(mod.tracker.balance()):"Not read",171,78,.8f,ink);}
     }
-    private static void payment(GuiGraphics g, DonutTrackerClient mod, Settings.Hud h, int ink, int muted, int accent){
-        var active=mod.queue.active();int value=opaque(h.positive);
-        if(h.layout==Settings.Layout.MINIMAL){
-            scaled(g,active==null?"No payments":active.player(),12,26,.8f,ink);
-            if(active!=null)right(g,"+"+Money.format(active.amount()),width()-12,26,.85f,value);
-            return;
-        }
-        if(active==null){
-            scaled(g,"No payments yet",12,35,1f,ink);
-            scaled(g,"Waiting for your next payment",12,50,.65f,muted);
-        } else {
-            rounded(g,12,30,40,58,blend(h.text,h.background,.08f));
-            var connection=Minecraft.getInstance().getConnection();var info=connection==null?null:connection.getPlayerInfo(active.player());
-            if(info!=null)PlayerFaceRenderer.draw(g,info.getSkin(),14,32,24);
-            else centered(g,active.player().substring(0,1),26,37,1.4f,accent);
-            scaled(g,active.player(),49,32,.85f,ink);
-            scaled(g,"+"+Money.format(active.amount()),49,46,1.1f,value);
-        }
-        divider(g,68,h);
-        var waiting=mod.queue.all().stream().skip(1).toList();
-        if(waiting.isEmpty()){scaled(g,"QUEUE IS CLEAR",12,76,.55f,muted);scaled(g,mod.settings.advanceOnLever?"Lever advances the queue":"No players waiting",12,87,.65f,ink);}
+    private static void payment(GuiGraphics g,DonutTrackerClient mod,Settings.Hud h,int ink,int muted,int accent){
+        var a=mod.queue.active();
+        if(a==null){scaled(g,"Queue empty",9,27,1f,ink);scaled(g,"Ready for the next player",9,55,.7f,muted);}
         else {
-            scaled(g,"UP NEXT",12,76,.55f,muted);
-            scaled(g,waiting.getFirst().player(),12,87,.75f,ink);
-            right(g,Money.format(waiting.getFirst().amount()),width()-12,87,.75f,ink);
-        }
-        if(h.layout==Settings.Layout.STACKED)for(int i=1;i<Math.min(3,waiting.size());i++){
-            var p=waiting.get(i);scaled(g,p.player(),12,104+(i-1)*12,.7f,muted);
-            right(g,Money.format(p.amount()),width()-12,104+(i-1)*12,.7f,ink);
+            int start=9;
+            if(h.showIcon){var cn=Minecraft.getInstance().getConnection();var info=cn==null?null:cn.getPlayerInfo(a.player());g.fill(9,23,33,47,blend(h.text,h.background,.12f));if(info!=null)PlayerFaceRenderer.draw(g,info.getSkin(),10,24,22);else centered(g,a.player().substring(0,1),21,30,1f,accent);start=40;}
+            fit(g,a.player(),start,25,.9f,130,ink);fit(g,"+"+Money.format(a.amount()),start,37,1f,130,opaque(h.positive));
+            var list=mod.queue.all();g.fill(9,49,171,50,blend(h.text,h.background,.18f));
+            if(list.size()>1){fit(g,"Next: "+list.get(1).player(),9,55,.75f,105,muted);right(g,Money.format(list.get(1).amount()),171,55,.75f,ink);}else scaled(g,"No players waiting",9,55,.75f,muted);
+            if(h.layout==Settings.Layout.STACKED)for(int i=2;i<Math.min(4,list.size());i++){var next=list.get(i);scaled(g,next.player(),9,72+(i-2)*11,.75f,muted);right(g,Money.format(next.amount()),171,72+(i-2)*11,.75f,ink);}
         }
     }
-    private static void divider(GuiGraphics g, int y, Settings.Hud h) { g.fill(11, y, width() - 11, y + 1, blend(h.text, h.background, .15f)); }
-    private static int opaque(int c) { return 0xFF000000 | c; }
-    private static int blend(int foreground, int background, float amount) {
-        int r = Math.round((foreground >> 16 & 255) * amount + (background >> 16 & 255) * (1-amount));
-        int green = Math.round((foreground >> 8 & 255) * amount + (background >> 8 & 255) * (1-amount));
-        int b = Math.round((foreground & 255) * amount + (background & 255) * (1-amount));
-        return 0xFF000000 | r << 16 | green << 8 | b;
-    }
+    private static void fit(GuiGraphics g,String s,int x,int y,float max,int width,int c){scaled(g,s,x,y,Math.min(max,width/(float)Math.max(1,Minecraft.getInstance().font.width(s))),c);}
+    private static int opaque(int c){return 0xFF000000|c;}
+    private static int blend(int a,int b,float n){return CoastalStyle.mix(0xFF000000|b,0xFF000000|a,n);}
     static void text(GuiGraphics g, String s, int x, int y, int color) { g.drawString(Minecraft.getInstance().font, s, x, y, color, false); }
     static void scaled(GuiGraphics g, String s, int x, int y, float scale, int color) {
         g.pose().pushMatrix(); g.pose().translate((float)x, (float)y); g.pose().scale(scale, scale);
@@ -122,11 +70,11 @@ final class TrackerHud {
         return distance == 0 ? 0 : Math.max(0, (int)Math.ceil(radius - Math.sqrt(radius * radius - distance * distance)));
     }
     static void rounded(GuiGraphics g, int x1, int y1, int x2, int y2, int color) {
-        int ht = y2 - y1, radius = Math.max(0, Math.min(7, Math.min((x2-x1)/2, ht/2)));
+        int ht = y2 - y1, radius = Math.max(0, Math.min(1, Math.min((x2-x1)/2, ht/2)));
         for (int y = 0; y < ht; y++) { int dx = inset(y, ht, radius); g.fill(x1 + dx, y1+y, x2-dx, y1+y+1, color); }
     }
     static void border(GuiGraphics g, int x1, int y1, int x2, int y2, int color) {
-        int ht = y2-y1, radius = Math.max(0, Math.min(7, Math.min((x2-x1)/2, ht/2)));
+        int ht = y2-y1, radius = Math.max(0, Math.min(1, Math.min((x2-x1)/2, ht/2)));
         for (int y = 0; y < ht; y++) {
             int dx = inset(y, ht, radius);
             if (y == 0 || y == ht-1) g.fill(x1+dx,y1+y,x2-dx,y1+y+1,color);
