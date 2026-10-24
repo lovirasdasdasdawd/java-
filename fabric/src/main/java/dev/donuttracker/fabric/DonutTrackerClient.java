@@ -60,7 +60,9 @@ public final class DonutTrackerClient implements ClientModInitializer {
                 .executes(context -> returnFromChat(StringArgumentType.getString(context,"receipt"), IntegerArgumentType.getInteger(context,"multiplier")));
             var receipt = ClientCommandManager.argument("receipt", StringArgumentType.word()).then(multiplier);
             dispatcher.register(ClientCommandManager.literal("donuttracker_return").then(receipt));
+            dispatcher.register(ClientCommandManager.literal("start").executes(context -> sessionCommand(true)));
             dispatcher.register(ClientCommandManager.literal("sstart").executes(context -> sessionCommand(true)));
+            dispatcher.register(ClientCommandManager.literal("stop").executes(context -> sessionCommand(false)));
             dispatcher.register(ClientCommandManager.literal("sstop").executes(context -> sessionCommand(false)));
         });
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::receiveServerMessage);
@@ -118,7 +120,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
     }
     private int sessionCommand(boolean start) {
         try {
-            if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking received payments live. Use /sstop to finish."; }
+            if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking received payments live. Use /stop to finish."; }
             else { tracker.stop(); cancelPending(); status = "Session ended: " + Money.signed(tracker.profit()); }
             save(); return 1;
         } catch (RuntimeException ex) {
