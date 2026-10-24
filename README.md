@@ -6,10 +6,20 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.3.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.5.0.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
+
+## New in 1.5.0: compact HUDs and module navigation
+
+Actual Minecraft screenshots: [Overview](releases/overview-1.5.png) · [Settings](releases/settings-1.5.png) · [Placement editor](releases/placement-1.5.png). Values shown come from synthetic payment messages in an offline test world.
+
+Right Shift opens two separate module cards showing your real session total, duration and queue. Start/End session is available directly on this overview and uses the same local net tracking as `/start` and `/stop`, without requesting `/bal`. Each module has its own fixed navigation rail: Appearance, Colours, Visibility and the module's session/queue pages. Colours still open the visual picker; existing saved colours and positions are preserved.
+
+The gameplay HUDs use quieter surfaces, smaller headers and left-aligned values. Compact shows net profit, duration and hourly rate; Stacked additionally shows the balance. Payment Queue puts the player's name and amount together, with the next player below. The former decorative next arrow is removed. Clean and Neon remain selectable.
+
+Arrange HUDs has a selected outline, live coordinates, centre guides, gentle snapping to margins/centre, one-pixel arrow-key nudges, and a Done button. Dragging and keyboard nudges only move the selected HUD; scale is changed separately in Appearance. All changes are saved locally.
 
 ## New in 1.4.3: live net profit
 
@@ -23,7 +33,7 @@ Only matching server confirmations change the total: submitting `/pay` or clicki
 
 The settings menu replaces stone-texture buttons with distinct controls: a visibility switch, separate Clean/Neon style choices, illustrated Compact/Stacked/Minimal cards, and labelled size/opacity sliders with percentage readouts. Navigation uses highlighted text tabs; action buttons have secondary and primary styles. Colours uses compact swatches with HEX labels, and the module chooser and colour picker share the same dark controls.
 
-On wide scaled GUI layouts, Design also shows a live preview of the selected HUD. Narrow layouts keep all controls usable without a preview. Sliders apply their final value on mouse release, including fast drags. Changes save automatically; Back to modules returns to the module chooser and Done closes settings. Use Design → Move HUD... to reposition a box. Payment/chat behaviour is unchanged: inline 2×/3× controls, no automatic /bal, and no branded success confirmation.
+On wide scaled GUI layouts, Appearance also shows a live preview of the selected HUD. Narrow layouts keep all controls usable without a preview. Sliders apply their final value on mouse release, including fast drags. Changes save automatically; Modules returns to the module chooser and Done closes settings. Use Appearance → Move HUD... to reposition a box. Payment/chat behaviour is unchanged: inline 2×/3× controls, no automatic /bal, and no branded success confirmation.
 
 ## Return controls inside chat
 
@@ -35,7 +45,7 @@ One return is permitted per queue entry: its request marker is persisted before 
 
 ## Clean HUD design
 
-The gameplay HUDs now use the clean design preview: rounded translucent charcoal cards, subtle borders, large centered session profit, a timer/rate row and balance footer. Payment Queue includes the active player head, name, amount, waiting-count pill and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Design → Clean preset for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. The arrow in the queue footer is decorative; Next Player is available in the module menu.
+The gameplay HUDs use translucent charcoal cards, subtle borders, left-aligned session profit and a timer/rate row. Stacked layout also shows the balance. Payment Queue includes the active player head, name, amount, waiting count and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Appearance → Clean preset for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. Next Player is available in the module menu.
 
 ## Payment refresh fix
 
@@ -47,7 +57,7 @@ Right Shift now opens two module cards: **Tracker** and **Payment Queue**. Open 
 
 **Colours** displays actual coloured swatches. Click one for a saturation/brightness square, a rainbow hue strip, preset colour tiles, a live swatch and optional HEX input. Changes apply immediately and save.
 
-Use **Move this HUD** in either module, or **Move HUD boxes** on the module chooser. Click and drag the box itself; Escape saves its new position. Design → Move HUD... also provides numeric X/Y coordinates and reset controls. Dragging now sets the screen drag state correctly.
+Use **Move this HUD** in either module, or **Move HUD boxes** on the module chooser. Click and drag the box itself; Escape saves its new position. Appearance → Move HUD... also provides numeric X/Y coordinates and reset controls. Dragging now sets the screen drag state correctly.
 
 ## Features and controls
 
@@ -88,8 +98,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.3.jar` — installable mod.
-- `build/libs/donut-tracker-1.4.3.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.5.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.5.0.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -102,10 +112,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.4.3.jar
+java -jar build/libs/donut-tracker-1.5.0.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.4.3.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.5.0.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

@@ -37,7 +37,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
     Settings settings;
     Tracker tracker = new Tracker();
     final PaymentQueue queue = new PaymentQueue();
-    String status = "Run /bal to read your balance before starting.";
+    String status = "Ready. Use /start or Start session.";
     private long lastRequest;
     private boolean pendingStart, pendingStop;
     private long pendingAt;
@@ -120,7 +120,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
             return 0;
         }
     }
-    private int sessionCommand(boolean start) {
+    int sessionCommand(boolean start) {
         try {
             if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking income and confirmed expenses live. Use /stop to finish."; }
             else { tracker.stop(); cancelPending(); status = "Session ended: " + Money.signed(tracker.profit()); }

@@ -15,8 +15,8 @@ final class ColourButton extends Button.Plain {
         TrackerHud.rounded(g, x, y, x + getWidth(), y + getHeight(), 0xFF000000 | colour);
         TrackerHud.border(g, x, y, x + getWidth(), y + getHeight(), isHoveredOrFocused() ? 0xFFFFFFFF : 0xFF85899F);
         if (!getMessage().getString().isEmpty()) {
-            TrackerHud.rounded(g,x,y,x+getWidth(),y+getHeight(),0xFF171C29);
-            TrackerHud.border(g,x,y,x+getWidth(),y+getHeight(),isHoveredOrFocused()?0xFFB8A5F4:0xFF2A3244);
+            TrackerHud.rounded(g,x,y,x+getWidth(),y+getHeight(),0xFF1C222A);
+            TrackerHud.border(g,x,y,x+getWidth(),y+getHeight(),isHoveredOrFocused()?0xFFB8A5F4:0xFF343D47);
             TrackerHud.rounded(g,x+5,y+4,x+17,y+getHeight()-4,0xFF000000|colour);
             String label=String.format("#%06X",colour);
             g.drawString(Minecraft.getInstance().font,label,x+24,y+(getHeight()-8)/2,0xFFDCE2ED,false);
