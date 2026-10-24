@@ -78,11 +78,11 @@ final class ModuleSettingsScreen extends Screen {
                 switch (index) { case 0 -> h.accent = c; case 1 -> h.text = c; case 2 -> h.positive = c; case 3 -> h.negative = c; case 4 -> h.background = c; }
             })))); y += 23;
         }
-        caption("Select a swatch to pick a colour.", x, y + 4, 0xFF89929F);
+        caption("Select a swatch to pick a colour.", x, y + 4, 0xFF89959F);
     }
     private void position(int y) {
         int x = contentLeft, w = contentWidth; Settings.Hud h = hud();
-        caption("Drag to place this HUD.", x, y + 4, 0xFF89929F); y += 20;
+        caption("Drag to place this HUD.", x, y + 4, 0xFF89959F); y += 20;
         button("Drag this HUD", x, y, w - 3, () -> minecraft.setScreen(new HudEditorScreen(mod, this, h))); y += 25;
         caption("X / Y position", x, y + 5, 0xFFD8DDE4);
         EditBox px = input("" + h.x, x + w / 3, y, w / 4, 6), py = input("" + h.y, x + w * 2 / 3, y, w / 4, 6); y += 25;
@@ -91,7 +91,7 @@ final class ModuleSettingsScreen extends Screen {
     }
     private void session(int y) {
         int x=contentLeft,w=contentWidth;
-        caption("Live income minus confirmed payments.",x,y+3,0xFF89929F);y+=19;
+        caption("Live income minus confirmed payments.",x,y+3,0xFF89959F);y+=19;
         addRenderableWidget(new MenuWidgets.Action(x,y,w,24,mod.tracker.running()?"End session":"Start session",()->hud().accent,MenuWidgets.Kind.PRIMARY,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();}));y+=32;
         caption("Balance reconciliation",x,y,0xFFDCE2ED);y+=15;
         EditBox balance=input(mod.tracker.hasBalance()?mod.tracker.balance().toPlainString():"",x,y,w-61,30);
@@ -100,23 +100,20 @@ final class ModuleSettingsScreen extends Screen {
         button("Reset session",x+w/2+3,y,w/2-3,()->mod.act(()->{mod.cancelPending();mod.tracker.reset();mod.status="Session reset. History retained.";rebuildWidgets();}));
     }
     private void queue(int y) {
-        int x = contentLeft, w = contentWidth;
-        caption("Minimum payment", x, y + 6, 0xFFD8DDE4);
-        EditBox minimum = input(mod.settings.minimumPayment.toPlainString(), x + w / 2, y, w / 2 - 58, 30);
-        button("Set", x + w - 53, y, 50, () -> mod.act(() -> {
-            var amount = Money.parse(minimum.getValue()); if (amount.signum() < 0) throw new IllegalArgumentException("Minimum cannot be negative."); mod.settings.minimumPayment = amount; mod.status = "Payment minimum saved.";
-        })); y += 23;
-        button("Next player →", x, y, w / 2 - 3, () -> mod.act(() -> { mod.queue.next(); mod.status = mod.queue.waiting() + " players waiting."; }));
-        button("Clear queue", x + w / 2, y, w / 2 - 3, () -> mod.act(mod.queue::clear)); y += 25;
-        caption("Manual entry: IGN / amount", x, y + 2, 0xFF89929F); y += 14;
-        EditBox name = input("", x, y, w / 2 - 3, 16), amount = input("100K", x + w / 2, y, w / 2 - 3, 30); y += 23;
-        button("Add payment", x, y, w - 3, () -> mod.act(() -> {
-            mod.status = mod.queue.add(name.getValue().strip(), Money.parse(amount.getValue()), mod.settings.minimumPayment) ? "Payment added." : "Below minimum payment.";
-        }));
+        int x=contentLeft,w=contentWidth;
+        addRenderableWidget(new MenuWidgets.Toggle(x,y,w,24,"Lever advances queue",()->mod.settings.advanceOnLever,()->hud().accent,()->change(()->mod.settings.advanceOnLever=!mod.settings.advanceOnLever)));y+=30;
+        caption("Minimum payment",x,y+6,0xFFD8DDE4);
+        EditBox minimum=input(mod.settings.minimumPayment.toPlainString(),x+w/2,y,w/2-58,30);
+        button("Set",x+w-53,y,50,()->mod.act(()->{var amount=Money.parse(minimum.getValue());if(amount.signum()<0)throw new IllegalArgumentException("Minimum cannot be negative.");mod.settings.minimumPayment=amount;mod.status="Minimum payment saved.";}));y+=24;
+        button("Next player",x,y,w/2-3,()->mod.act(()->{mod.queue.next();mod.status=mod.queue.waiting()+" players waiting.";}));
+        button("Clear queue",x+w/2+3,y,w/2-3,()->mod.act(mod.queue::clear));y+=25;
+        caption("Add a payment · IGN / amount",x,y+2,0xFF89959F);y+=14;
+        EditBox name=input("",x,y,w/2-3,16),amount=input("100K",x+w/2+3,y,w/2-3,30);y+=24;
+        button("Add payment",x,y,w,()->mod.act(()->{mod.status=mod.queue.add(name.getValue().strip(),Money.parse(amount.getValue()),mod.settings.minimumPayment)?"Payment added.":"Below minimum payment.";}));
     }
     private void detection(int y) {
         int x = contentLeft, w = contentWidth;
-        caption(tab == 0 ? "Balance message · amount capture" : "Payment message · IGN + amount", x, y, 0xFF89929F); y += 15;
+        caption(tab == 0 ? "Balance message · amount capture" : "Payment message · IGN + amount", x, y, 0xFF89959F); y += 15;
         EditBox pattern = input(tab == 0 ? mod.settings.balancePattern : mod.settings.paymentPattern, x, y, w - 3, 1024); y += 25;
         button("Save pattern", x, y, w - 3, () -> mod.act(() -> {
             String oldB = mod.settings.balancePattern, oldP = mod.settings.paymentPattern;
@@ -125,7 +122,7 @@ final class ModuleSettingsScreen extends Screen {
             mod.status = "Detection pattern saved.";
         })); y += 25;
         if (tab == 0) {
-            caption("Expense message · amount capture",x,y,0xFF89929F); y+=15;
+            caption("Expense message · amount capture",x,y,0xFF89959F); y+=15;
             EditBox expense = input(mod.settings.expensePattern,x,y,w-3,1024); y+=25;
             button("Save expenses",x,y,w/2-3,()->mod.act(()->{
                 String old=mod.settings.expensePattern;mod.settings.expensePattern=expense.getValue();
@@ -138,12 +135,14 @@ final class ModuleSettingsScreen extends Screen {
     private void history(int y) {
         int x = contentLeft, count = mod.tracker.history().size(), pageSize = Math.max(1, (panelHeight - 120) / 24);
         historyPage = Math.min(historyPage, Math.max(0, (count - 1) / pageSize));
-        if (count == 0) caption("No completed sessions yet.", x, y + 8, 0xFF89929F);
+        if (count == 0) caption("No completed sessions yet.", x, y + 8, 0xFF89959F);
         for (int i = 0; i < pageSize; i++) {
             int index = historyPage * pageSize + i; if (index >= count) break;
             var session = mod.tracker.history().get(index);
-            String date = java.time.Instant.ofEpochMilli(session.endedAt()).toString().substring(0, 16);
-            caption(date + "  " + Money.signed(session.profit()) + "  " + (session.endedAt() - session.startedAt()) / 1000 + "s", x, y + i * 24 + 4, 0xFFD8DDE4);
+            String date=java.time.format.DateTimeFormatter.ofPattern("dd MMM  HH:mm").withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.ofEpochMilli(session.endedAt()));
+            caption(date,x,y+i*24+4,0xFF89959F);
+            String result=Money.signed(session.profit());
+            caption(result,x+contentWidth-font.width(result)-3,y+i*24+4,0xFF000000|(session.profit().signum()<0?hud().negative:hud().positive));
         }
         button("Previous", x, top + panelHeight - 51, 90, () -> { historyPage = Math.max(0, historyPage - 1); rebuildWidgets(); });
         button("Next", x + 94, top + panelHeight - 51, 90, () -> { if ((historyPage + 1) * pageSize < count) historyPage++; rebuildWidgets(); });
@@ -159,28 +158,30 @@ final class ModuleSettingsScreen extends Screen {
     }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
         g.fill(0, 0, width, height, 0xD0090C10);
-        TrackerHud.rounded(g, left, top, left + panelWidth, top + panelHeight, 0xFC171C23);
-        TrackerHud.border(g, left, top, left + panelWidth, top + panelHeight, 0xFF353D47);
-        g.drawString(font,"DONUT",left+14,top+15,0xFFABB5C0,false);
+        TrackerHud.rounded(g, left, top, left + panelWidth, top + panelHeight, 0xFC11171D);
+        TrackerHud.border(g, left, top, left + panelWidth, top + panelHeight, 0xFF343E46);
+        TrackerHud.rounded(g,left+12,top+12,left+34,top+34,0xFF242A34);
+        TrackerHud.scaled(g,"DT",left+17,top+19,.8f,0xFF000000|hud().accent);
+        TrackerHud.scaled(g,"MODULE",left+12,top+40,.55f,0xFF89959F);
         g.drawString(font,tab==0?"Tracker":"Payments",contentLeft,top+13,0xFFF1F3F5,false);
-        g.fill(left+102,top+8,left+103,top+panelHeight-8,0xFF303740);
-        String saved="Saved locally";g.drawString(font,saved,left+panelWidth-font.width(saved)-14,top+11,0xFF89929F,false);
-        g.fill(contentLeft,top+36,left+panelWidth-14,top+37,0xFF303740);
+        g.fill(left+102,top+8,left+103,top+panelHeight-8,0xFF2D363E);
+        String saved="Auto-save";g.drawString(font,saved,left+panelWidth-font.width(saved)-14,top+11,0xFF89959F,false);
+        g.fill(contentLeft,top+36,left+panelWidth-14,top+37,0xFF2D363E);
         if(previewWidth>0) {
             int ph=Math.min(151,top+panelHeight-34-previewY);
             TrackerHud.rounded(g,previewX,previewY,previewX+previewWidth,previewY+ph,0xFF12171D);
-            TrackerHud.border(g,previewX,previewY,previewX+previewWidth,previewY+ph,0xFF303740);
-            g.drawString(font,"ON YOUR SCREEN",previewX+12,previewY+11,0xFF89929F,false);
+            TrackerHud.border(g,previewX,previewY,previewX+previewWidth,previewY+ph,0xFF2D363E);
+            g.drawString(font,"HUD PREVIEW",previewX+12,previewY+11,0xFF89959F,false);
             float scale=Math.min(.88f,Math.min((previewWidth-20f)/TrackerHud.width(),(ph-58f)/TrackerHud.height(hud())));
             float factor=scale/(float)hud().scale;
             g.pose().pushMatrix();g.pose().translate(previewX+(previewWidth-TrackerHud.width()*scale)/2-TrackerHud.x(hud(),width)*factor,previewY+32-TrackerHud.y(hud(),height)*factor);g.pose().scale(factor,factor);
             TrackerHud.draw(g,mod,hud(),tab==1,true);g.pose().popMatrix();
-            g.drawString(font,hud().enabled?"Visible in game":"Hidden in game",previewX+12,previewY+ph-15,0xFF89929F,false);
+            g.drawString(font,hud().enabled?"Visible in game":"Hidden in game",previewX+12,previewY+ph-15,0xFF89959F,false);
         }
         for (var c : captions) g.drawString(font, c.text(), c.x(), c.y(), c.color(), false);
         int available=Math.max(40,contentWidth-82);
         String status=font.width(mod.status)>available?font.plainSubstrByWidth(mod.status,available-font.width("..."))+"...":mod.status;
-        g.drawString(font, status, contentLeft, top + panelHeight - 21, 0xFF89929F, false);
+        g.drawString(font, status, contentLeft, top + panelHeight - 21, 0xFF89959F, false);
         super.render(g, mx, my, delta);
     }
     @Override public boolean keyPressed(KeyEvent event) {

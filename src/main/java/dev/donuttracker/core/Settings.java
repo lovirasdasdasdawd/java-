@@ -22,6 +22,7 @@ public final class Settings {
         public int x = 16, y = 16;
     }
     public final Hud profit = new Hud(), queue = new Hud();
+    public boolean advanceOnLever = true;
     public BigDecimal minimumPayment = new BigDecimal("100000");
     // Anchored patterns: capture only confirmed balance/payment lines, never arbitrary chat amounts.
     public String balancePattern = "(?i)^(?:you have|(?:your )?balance\\s*[:»])\\s*\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*$";
@@ -48,6 +49,7 @@ public final class Settings {
         try (Reader r = Files.newBufferedReader(file)) { p.load(r); }
         try {
             read(p, "profit.", s.profit); read(p, "queue.", s.queue);
+            s.advanceOnLever = Boolean.parseBoolean(p.getProperty("queue.leverAdvance", "true"));
             s.minimumPayment = Money.parse(p.getProperty("queue.minimum", "100K"));
             if (s.minimumPayment.signum() < 0) throw new IllegalArgumentException("Minimum payment must be nonnegative.");
             s.balancePattern = p.getProperty("balance.pattern", s.balancePattern);
@@ -83,6 +85,7 @@ public final class Settings {
         validatePatterns();
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
         p.setProperty("queue.minimum", minimumPayment.toPlainString());
+        p.setProperty("queue.leverAdvance",Boolean.toString(advanceOnLever));
         p.setProperty("balance.pattern", balancePattern); p.setProperty("payment.pattern", paymentPattern); p.setProperty("expense.pattern", expensePattern);
         atomicSave(file, p, "Donut Tracker — per-HUD design and server detection patterns");
     }

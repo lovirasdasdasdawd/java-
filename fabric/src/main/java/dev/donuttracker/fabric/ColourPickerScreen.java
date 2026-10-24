@@ -14,25 +14,26 @@ final class ColourPickerScreen extends Screen {
     private final DonutTrackerClient mod;
     private final Screen parent;
     private final String label;
+    private final int originalColour;
     private final IntConsumer setter;
     private float hue, saturation, brightness;
     private int left, top, size, dragging;
     private EditBox hex;
     ColourPickerScreen(DonutTrackerClient mod, Screen parent, String label, int colour, IntConsumer setter) {
-        super(Component.literal("Choose " + label + " colour")); this.mod = mod; this.parent = parent; this.label = label; this.setter = setter;
+        super(Component.literal("Choose " + label + " colour")); this.mod = mod; this.parent = parent; this.label = label; this.originalColour=colour; this.setter = setter;
         float[] hsv = Color.RGBtoHSB(colour >> 16 & 255, colour >> 8 & 255, colour & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2];
     }
     private int colour() { return Color.HSBtoRGB(hue, saturation, brightness) & 0xFFFFFF; }
     @Override public boolean isPauseScreen() { return false; }
     @Override protected void init() {
         size = Math.min(150, Math.min(height - 115, width - 160)); size = Math.max(60, size);
-        left = (width - size - 124) / 2; top = Math.max(30, (height - size - 75) / 2);
+        left = (width - size - 124) / 2; top = Math.max(36, (height - size - 75) / 2);
         hex = new EditBox(font, left + size + 28, top + 53, 90, 20, Component.literal("HEX colour")); hex.setMaxLength(7); hex.setValue(String.format("#%06X", colour())); addRenderableWidget(hex);
         addRenderableWidget(new MenuWidgets.Action(left + size + 28, top + 78, 90, 20, "Use HEX", () -> 0xB8A5F4, MenuWidgets.Kind.SECONDARY, () -> mod.act(() -> { int c = Settings.color(hex.getValue()); float[] hsv = Color.RGBtoHSB(c >> 16 & 255, c >> 8 & 255, c & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]; apply(); })));
         int[] colours = {0xCB8CF6,0xF277D7,0x70CFEA,0x39DA94,0xFF657A,0xFFCC74,0xFFFFFF,0x10131F};
         int cell = (size + 120) / colours.length;
         for (int i = 0; i < colours.length; i++) { int c = colours[i]; addRenderableWidget(new ColourButton(left + i * cell, top + size + 9, cell - 3, 18, c, "", () -> { float[] hsv = Color.RGBtoHSB(c >> 16 & 255, c >> 8 & 255, c & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]; apply(); })); }
-        addRenderableWidget(new MenuWidgets.Action(left,top+size+34,size+120,20,"Done - save colour",()->0xB8A5F4,MenuWidgets.Kind.PRIMARY,this::onClose));
+        addRenderableWidget(new MenuWidgets.Action(left,top+size+34,size+120,20,"Done",()->0xB8A5F4,MenuWidgets.Kind.PRIMARY,this::onClose));
     }
     private void apply() { setter.accept(colour()); hex.setValue(String.format("#%06X", colour())); mod.save(); }
     private void pick(double x, double y) {
@@ -51,15 +52,22 @@ final class ColourPickerScreen extends Screen {
     @Override public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
         if (dragging != 0) { pick(e.x(), e.y()); return true; } return super.mouseDragged(e, dx, dy);
     }
-    @Override public boolean mouseReleased(MouseButtonEvent e) { dragging = 0; setDragging(false); return super.mouseReleased(e); }
+    @Override public boolean mouseReleased(MouseButtonEvent e) { if(dragging!=0)pick(e.x(),e.y()); dragging = 0; setDragging(false); return super.mouseReleased(e); }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
-        g.fill(0,0,width,height,0xEF0B0E19); g.drawString(font, label + " - click or drag to choose a colour", left, top - 19, 0xFFFFFFFF, false);
-        for (int x = 0; x < size; x += 3) for (int y = 0; y < size; y += 3) g.fill(left+x,top+y,left+Math.min(size,x+3),top+Math.min(size,y+3),Color.HSBtoRGB(hue,(float)x/size,1-(float)y/size));
+        g.fill(0,0,width,height,0xC0080B0F);
+        TrackerHud.rounded(g,left-14,top-32,left+size+134,top+size+65,0xFC11171D);
+        TrackerHud.border(g,left-14,top-32,left+size+134,top+size+65,0xFF343E46);
+        g.drawString(font,label+" colour",left,top-20,0xFFEAF0F1,false);
+        for(int x=0;x<size;x++)g.fillGradient(left+x,top,left+x+1,top+size,0xFF000000|(Color.HSBtoRGB(hue,(float)x/size,1)&0xFFFFFF),0xFF000000);
         for (int y = 0; y < size; y++) g.fill(left+size+7,top+y,left+size+20,top+y+1,Color.HSBtoRGB((float)y/size,1,1));
         int sx = left + Math.round(saturation * size), sy = top + Math.round((1-brightness)*size);
+        TrackerHud.border(g,sx-4,sy-4,sx+5,sy+5,0xFF11171D);
         TrackerHud.border(g,sx-3,sy-3,sx+4,sy+4,0xFFFFFFFF);
         g.fill(left+size+5,top+Math.round(hue*size)-1,left+size+22,top+Math.round(hue*size)+1,0xFFFFFFFF);
-        g.fill(left+size+28,top,left+size+118,top+43,0xFF000000|colour());
+        g.fill(left+size+28,top,left+size+73,top+35,0xFF000000|originalColour);
+        g.fill(left+size+73,top,left+size+118,top+35,0xFF000000|colour());
+        TrackerHud.scaled(g,"Before",left+size+28,top+40,.65f,0xFF89959F);
+        TrackerHud.scaled(g,"After",left+size+81,top+40,.65f,0xFF89959F);
         super.render(g,mx,my,delta);
     }
     @Override public void onClose() { apply(); minecraft.setScreen(parent); }

@@ -3,6 +3,12 @@ package dev.donuttracker.fabric;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.donuttracker.core.*;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.core.BlockPos;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.LeverBlock;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -38,6 +44,10 @@ public final class DonutTrackerClient implements ClientModInitializer {
     Tracker tracker = new Tracker();
     final PaymentQueue queue = new PaymentQueue();
     String status = "Ready. Use /start or Start session.";
+    private final LeverQueueAdvance leverAdvance = new LeverQueueAdvance();
+    private BlockPos leverPos;
+    private ClientLevel leverLevel;
+    private boolean leverUseHeld;
     private long lastRequest;
     private boolean pendingStart, pendingStop;
     private long pendingAt;
@@ -50,6 +60,8 @@ public final class DonutTrackerClient implements ClientModInitializer {
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (menu.consumeClick()) if (client.player != null) client.setScreen(new TrackerScreen(this, client.screen));
+            if(!client.options.keyUse.isDown())leverUseHeld=false;
+            observeLever(client);
             long now = System.currentTimeMillis();
             if ((pendingStart || pendingStop) && now - pendingAt > 10_000) {
                 pendingStart = pendingStop = false; status = "No matching /bal response. Check Detection or enter a manual balance.";
@@ -65,6 +77,22 @@ public final class DonutTrackerClient implements ClientModInitializer {
             dispatcher.register(ClientCommandManager.literal("stop").executes(context -> sessionCommand(false)));
             dispatcher.register(ClientCommandManager.literal("sstop").executes(context -> sessionCommand(false)));
         });
+        UseBlockCallback.EVENT.register((player,level,hand,hit)->{
+            var client=Minecraft.getInstance();
+            if(level.isClientSide()&&player==client.player&&hand==InteractionHand.MAIN_HAND&&!player.isSpectator()
+                &&settings.advanceOnLever&&stateWritable&&!leverUseHeld
+                &&!(player.isShiftKeyDown()&&(!player.getMainHandItem().isEmpty()||!player.getOffhandItem().isEmpty()))){
+                var block=level.getBlockState(hit.getBlockPos());
+                if(block.getBlock() instanceof LeverBlock){
+                    leverUseHeld=true;
+                    if(!leverAdvance.pending()&&queue.active()!=null){
+                        leverPos=hit.getBlockPos().immutable();leverLevel=client.level;
+                        leverAdvance.arm(queue.active(),block.getValue(LeverBlock.POWERED),System.currentTimeMillis());
+                    }
+                }
+            }
+            return InteractionResult.PASS;
+        });
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::receiveServerMessage);
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("donuttracker", "hud"), (g, delta) -> {
             Minecraft client = Minecraft.getInstance();
@@ -74,10 +102,22 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if (tracker.running()) { tracker.stop(); status = "Disconnected: session ended at last observed balance."; }
             save(); var history = tracker.history(); tracker = new Tracker(); tracker.restoreHistory(history);
             pendingStart = pendingStop = false;
-            chatReceipts.clear();
+            chatReceipts.clear();leverAdvance.cancel();leverLevel=null;leverPos=null;leverUseHeld=false;
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> save());
         LOG.info("Donut Tracker initialized; press Right Shift for settings.");
+    }
+    private void observeLever(Minecraft client){
+        if(!leverAdvance.pending())return;
+        if(!settings.advanceOnLever||client.level==null||client.level!=leverLevel||client.player==null){leverAdvance.cancel();leverLevel=null;leverPos=null;return;}
+        var block=client.level.getBlockState(leverPos);boolean lever=block.getBlock() instanceof LeverBlock;
+        try{
+            if(leverAdvance.observe(lever,lever&&block.getValue(LeverBlock.POWERED),System.currentTimeMillis(),queue,()->StateStore.save(state,tracker,queue))){
+                status=queue.active()==null?"Lever switched. Queue is clear.":"Next player: "+queue.active().player();
+                chatReceipts.entrySet().removeIf(entry->queue.all().stream().noneMatch(payment->payment==entry.getValue()));
+            }
+        }catch(IOException|RuntimeException ex){status="Queue was not advanced: "+ex.getMessage();LOG.warn(status,ex);}
+        if(!leverAdvance.pending()){leverLevel=null;leverPos=null;}
     }
     private Component receiveServerMessage(Component message, boolean overlay) {
         if (overlay) return message;

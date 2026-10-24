@@ -6,10 +6,20 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.5.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.6.0.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
+
+## New in 1.6.0: lever queue advance and consistent controls
+
+Actual Minecraft screenshots: [Queue controls](releases/queue-1.6.png) · [Colour picker](releases/colours-1.6.png) · [Settings](releases/settings-1.6.png).
+
+Right-click a lever to complete the active payment and show the next player in Payment Queue. Both on → off and off → on count. One mouse press completes at most one receipt; holding Use cannot skip multiple players. An empty queue is a no-op. Enable/disable this in Payment Queue → Queue → Lever advances queue (enabled by default). This applies to any lever you use; other blocks and other players' lever changes without your own pending interaction do not advance the queue.
+
+The client waits for the lever's visible powered state to change, for up to three seconds. Unchanged/rejected attempts do not advance. Changing the active receipt manually, disconnecting, changing worlds or disabling the feature cancels a pending attempt. A save failure restores the removed receipt. Lever use never sends a payment or balance command and does not alter session profit.
+
+Settings, shared controls, HUD typography and history now share the quieter overview style. History uses aligned dates and colour-coded results. The colour picker shows Before/After swatches and uses smooth GPU gradients with fewer draw calls than the previous tiled square. Existing saved custom colours, positions and scale are preserved.
 
 ## New in 1.5.0: compact HUDs and module navigation
 
@@ -98,8 +108,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.5.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.5.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.6.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.6.0.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -112,10 +122,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.5.0.jar
+java -jar build/libs/donut-tracker-1.6.0.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.5.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.6.0.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

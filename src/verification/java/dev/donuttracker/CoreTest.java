@@ -78,6 +78,28 @@ public final class CoreTest {
         check(Money.signed(reconciled.profit()).equals("-3M"),"manual balance catches other unreported losses");
         now.addAndGet(3_600_000);
         check(Money.signed(reconciled.perHour()).equals("-3M"),"negative hourly rate");
+        PaymentQueue leverQueue=new PaymentQueue();
+        leverQueue.add("First",Money.parse("1M"),BigDecimal.ZERO);leverQueue.add("Second",Money.parse("2M"),BigDecimal.ZERO);
+        LeverQueueAdvance lever=new LeverQueueAdvance();var receipt=leverQueue.active();
+        lever.arm(receipt,false,1000);
+        check(!lever.observe(true,false,1100,leverQueue,()->{}),"click without a state transition does not advance");
+        check(lever.observe(true,true,1200,leverQueue,()->{}),"lever turning on advances once");
+        check(leverQueue.active().player().equals("Second"),"next player becomes active");
+        check(!lever.observe(true,true,1300,leverQueue,()->{}),"same transition cannot remove two players");
+        lever.arm(leverQueue.active(),true,2000);
+        check(lever.observe(true,false,2100,leverQueue,()->{})&&leverQueue.active()==null,"turning off also advances and empty queue stays safe");
+        lever.arm(null,false,2200);check(!lever.pending(),"empty queue click does not capture future arrival");
+        leverQueue.add("Original",Money.parse("1M"),BigDecimal.ZERO);leverQueue.add("Next",Money.parse("1M"),BigDecimal.ZERO);
+        lever.arm(leverQueue.active(),false,3000);leverQueue.next();
+        check(!lever.observe(true,true,3100,leverQueue,()->{})&&leverQueue.active().player().equals("Next"),"manual Next while waiting never removes a different player");
+        lever.arm(leverQueue.active(),false,4000);
+        check(!lever.observe(true,true,7101,leverQueue,()->{})&&leverQueue.active()!=null,"timed out interaction does not advance");
+        lever.arm(leverQueue.active(),false,8000);
+        check(!lever.observe(false,true,8100,leverQueue,()->{}),"removed lever cancels");
+        receipt=leverQueue.active();lever.arm(receipt,false,9000);
+        try{lever.observe(true,true,9100,leverQueue,()->{throw new java.io.IOException("disk full");});throw new AssertionError("save should fail");}
+        catch(java.io.IOException expected){check(leverQueue.active()==receipt&&!lever.pending(),"failed save restores exact receipt and cancels pending click");}
+        lever.arm(receipt,false,10000);lever.cancel();check(!lever.observe(true,true,10100,leverQueue,()->{}),"disconnect or disabled setting cancels interaction");
         Settings s = new Settings(); PaymentQueue q = new PaymentQueue(); ChatParser parser = new ChatParser(s);
         check(parser.accept("You Have $ §a2,311,178,968", t, q) == ChatParser.Result.BALANCE, "user balance format");
         check(t.balance().equals(Money.parse("2311178968")), "parsed exact balance");
@@ -161,6 +183,9 @@ public final class CoreTest {
         var negativeFile=dir.resolve("negative-history.properties");StateStore.save(negativeFile,net,netQueue);
         Tracker negativeRestored=new Tracker();StateStore.load(negativeFile,negativeRestored,new PaymentQueue());
         check(Money.signed(negativeRestored.history().getFirst().profit()).equals("-3M"),"negative net history survives reload");
+        Settings leverSettings=new Settings();leverSettings.advanceOnLever=false;
+        var leverFile=dir.resolve("lever-settings.properties");leverSettings.save(leverFile);
+        check(!Settings.load(leverFile).advanceOnLever,"lever preference survives restart");
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");
         PaymentQueue migratedQueue = new PaymentQueue();StateStore.load(legacyQueue,new Tracker(),migratedQueue);
         check(!migratedQueue.active().returnRequested(),"old queue file remains readable");
