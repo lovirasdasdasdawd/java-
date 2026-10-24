@@ -30,5 +30,29 @@
         "stream": true
       }
     ]
+  },
+  "ocean.deep_space": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/deep_space",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.city_rain": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/city_rain",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.forest_breeze": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/forest_breeze",
+        "stream": true
+      }
+    ]
   }
 }

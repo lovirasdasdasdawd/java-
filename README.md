@@ -1,3 +1,14 @@
+## Worlds — 1.9.0
+
+In-game previews: [Space](releases/space-1.9.png) · [Rainy City](releases/city-1.9.png) · [Autumn Forest](releases/forest-1.9.png) · [Details](releases/details-1.9.png)
+Three new selectable menu scenes: **Space** (ringed planet and drifting stars), **Rainy City** (warm windows, rain and wet pavement), and **Autumn Forest** (layered trees, falling leaves and low mist). Aurora and Ocean remain available.
+
+**Right Shift → Atmosphere → Scenes** selects a scene and matching soundtrack. **Details** provides per-scene intensity, density, motion speed, six visible tint swatches, a full HSV/HEX custom tint picker, and four interface palettes. Animation can be turned off. **Sound** offers seven independently selectable tracks, volume, mute and optional in-game playback. Existing settings are retained; choosing a preset does not overwrite your HUD colours or positions. Use Match HUD colours explicitly if desired.
+
+New soundscapes: Deep space, City rain, Forest breeze. Original 32-second seamless DSP loops. Minecraft Master and Ambient volume also apply.
+
+Install `donut-tracker-fabric-1.21.11-1.9.0.jar` in `mods`, replacing the previous version. Requires Fabric, Fabric API, Minecraft 1.21.11 and Java 21.
+
 # Donut Tracker
 
 Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and an executable desktop settings companion.

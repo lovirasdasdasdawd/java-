@@ -2,14 +2,14 @@ Use the existing isolated checkout /workspace/java-. Do not create a worktree un
 
 Initialize each shell with `source .cloud/env.sh`. Build and verify with `./gradlew -PwithFabric build :fabric:build`. Refresh prerequisites with `bash .cloud/install.sh`.
 
-Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.8.0.jar.
-Desktop companion: build/libs/donut-tracker-1.8.0.jar.
+Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.9.0.jar.
+Desktop companion: build/libs/donut-tracker-1.9.0.jar.
 
 For a graphical development client, use `./gradlew -PwithFabric :fabric:runClient`. In this snapshot the framebuffer is available at /workspace/toolchains/xvfb/usr/bin/Xvfb. Start it on an unused display with `Xvfb :99 -screen 0 1280x720x24 -nolisten tcp`, export DISPLAY=:99 and start the client. Restart required processes after snapshot restoration, and stop only processes you started. Confirm rendering and the Donut Tracker initialized log, not just a PID.
 
 Right Shift opens independent Tracker and Payment Queue modules. Check their settings separately. Colours opens visible swatches and an HSV picker. Design → Move HUD... lets you drag the selected box; verify saved X/Y changes without changing scale. Escape saves.
 
-Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.8.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
+Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.9.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
 
 The prior environment draft is stale after publication. These updated setup instructions are preserved here and in install.sh for transfer/reconciliation in a new setup chat if the environment configuration needs refreshing.
 
@@ -27,4 +27,4 @@ Version 1.6.0: Use an offline creative world with three synthetic payment messag
 
 Version 1.7.0 (Tideline) bundles three original DSP-authored Vorbis ocean loops. Normal builds require no Python audio tools. For headless audio-engine tests use ALSOFT_DRIVERS=null only on the local runClient command; do not persist this as a user runtime requirement. Validate the Ocean & style playback indicator for all three tracks, volume/mute, menu-only/in-game scope, motion toggle and all three palettes. Changing the menu palette must preserve custom HUD colours until Match HUD colours is explicitly clicked. Check a restart retains the chosen track, volume and palette. ffprobe/ffmpeg can independently decode and verify the 24-second mono OGG files. Financial/lever core calculations should remain unchanged.
 
-Version 1.8.0: Check the floating Aurora dashboard in narrow/wide GUI scales. Atmosphere has Backdrop/Sound tabs. Verify Aurora/Ocean presets pair menu palette and sound, glow and motion persist, and old configurations retain Ocean by default. Aurora drift is a bundled 32-second mono Vorbis loop; it is themed synthesis, not a recording. Use ALSOFT_DRIVERS=null only for headless test playback. GUI glow slider is disabled on Ocean; other sound/volume choices remain available. Match HUD colours must not move or resize either HUD.
+Version 1.9.0: Check all five scene presets and the Scenes/Details/Sound pages at narrow and wide GUI scales. Space, Rainy City and Autumn Forest pair their menu palette and matching sound. Details saves each scene's tint, intensity, density and speed independently; use custom HSV/HEX picker and motion toggle. Sound offers seven original streaming loops with mute, volume and in-game opt-in. Use ALSOFT_DRIVERS=null only for headless playback tests; do not claim physical speakers were auditioned. Match HUD colours must preserve position and scale. Existing configurations retain their scene and HUD preferences. Run all core assertions and build the remapped Fabric JAR. Never rebuild class outputs while a dev client is running.

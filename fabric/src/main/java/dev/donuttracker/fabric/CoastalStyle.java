@@ -9,7 +9,8 @@ final class CoastalStyle {
     private static Settings.BackgroundScene scene=Settings.BackgroundScene.AURORA;
     private static boolean motion=true;
     private static float glow=.85f;
-    static void configure(Settings settings){palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.auroraGlow;}
+    private static Settings settings;
+    static void configure(Settings settings){CoastalStyle.settings=settings;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
     static int panel(){return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;};}
     static int surface(){return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;};}
     static int line(){return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;};}
@@ -21,14 +22,15 @@ final class CoastalStyle {
     static int primaryInk(){return palette==Settings.MenuPalette.PAPER?0xFFFFF4D8:0xFF183A3E;}
     static int hover(){return mix(surface(),accent(),.12f);}
     static int mix(int a,int b,float amount){int r=Math.round((a>>16&255)*(1-amount)+(b>>16&255)*amount),g=Math.round((a>>8&255)*(1-amount)+(b>>8&255)*amount),v=Math.round((a&255)*(1-amount)+(b&255)*amount);return 0xFF000000|r<<16|g<<8|v;}
-    static String sceneName(){return scene==Settings.BackgroundScene.AURORA?"AURORA":"OCEAN";}
+    static String sceneName(){return scene.name();}
     static void background(GuiGraphics g,int width,int height){
-        if(scene==Settings.BackgroundScene.AURORA){AuroraBackdrop.draw(g,0,0,width,height,motion,glow);return;}
+        if(scene==Settings.BackgroundScene.SPACE||scene==Settings.BackgroundScene.CITY||scene==Settings.BackgroundScene.FOREST){WorldBackdrop.draw(g,0,0,width,height,scene,motion,settings.sceneDesign());return;}
+        if(scene==Settings.BackgroundScene.AURORA){AuroraBackdrop.draw(g,0,0,width,height,motion,glow,settings.sceneDesign());return;}
         int top=palette==Settings.MenuPalette.PAPER?0xEA344F54:palette==Settings.MenuPalette.DUSK?0xEF171E36:0xEF071E2D;
         int bottom=palette==Settings.MenuPalette.PAPER?0xE9A8BDAB:palette==Settings.MenuPalette.DUSK?0xEE63516A:0xEF23545B;
         g.fillGradient(0,0,width,height,top,bottom);
-        double phase=motion?(System.nanoTime()/1_000_000_000d)*.22:0;
-        for(int row=0;row<3;row++)wave(g,0,height-23-row*14,width,4+row,0x28000000|(accent()&0xFFFFFF),phase+row*1.8);
+        double phase=motion?(System.nanoTime()/1_000_000_000d)*(.05+settings.sceneDesign().speed*.5):0;
+        for(int row=0;row<1+(int)(settings.sceneDesign().density*5);row++)wave(g,0,height-23-row*14,width,4+row,((int)(15+settings.sceneDesign().intensity*60)<<24)|settings.sceneDesign().tint,phase+row*1.8);
     }
     static void panel(GuiGraphics g,int x,int y,int w,int h){
         TrackerHud.rounded(g,x-1,y+4,x+w+1,y+h+5,0x50000000);

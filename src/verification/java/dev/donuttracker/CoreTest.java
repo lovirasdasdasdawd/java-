@@ -213,6 +213,16 @@ public final class CoreTest {
         check(auroraLoaded.auroraGlow==.42&&!auroraLoaded.menuMotion&&auroraLoaded.profit.accent==0x123456&&auroraLoaded.profit.x==73,"aurora controls preserve HUD preferences");
         Files.writeString(auroraFile,"menu.palette=DUSK\nocean.track=RAINY_COAST\nprofit.accent=654321\n");var previousScene=Settings.load(auroraFile);
         check(previousScene.backgroundScene==Settings.BackgroundScene.OCEAN&&previousScene.menuPalette==Settings.MenuPalette.DUSK&&previousScene.oceanTrack==Settings.OceanTrack.RAINY_COAST&&previousScene.profit.accent==0x654321,"old profiles keep their ocean scene, palette, sound and HUD colour");
+        for(var scene:Settings.BackgroundScene.values()){
+            var design=aurora.sceneDesigns.get(scene);design.intensity=.31;design.speed=.72;design.density=.93;design.tint=0xAABB33;
+            aurora.backgroundScene=scene;aurora.oceanTrack=switch(scene){case SPACE->Settings.OceanTrack.DEEP_SPACE;case CITY->Settings.OceanTrack.CITY_RAIN;case FOREST->Settings.OceanTrack.FOREST_BREEZE;default->Settings.OceanTrack.AURORA_DRIFT;};
+            aurora.save(auroraFile);var roundtrip=Settings.load(auroraFile);
+            check(roundtrip.backgroundScene==scene&&roundtrip.oceanTrack==aurora.oceanTrack,"scene and soundtrack survive reload: "+scene);
+            var restoredDesign=roundtrip.sceneDesign();check(restoredDesign.intensity==.31&&restoredDesign.speed==.72&&restoredDesign.density==.93&&restoredDesign.tint==0xAABB33,"independent scene details survive reload: "+scene);
+        }
+        Files.writeString(auroraFile,"scene.SPACE.intensity=9\nscene.SPACE.speed=-3\nscene.SPACE.density=4\n");var boundedScene=Settings.load(auroraFile).sceneDesigns.get(Settings.BackgroundScene.SPACE);
+        check(boundedScene.intensity==1&&boundedScene.speed==0&&boundedScene.density==1,"scene controls clamp to safe bounds");
+        Files.writeString(auroraFile,"scene.CITY.speed=NaN\n");boolean invalidScene=false;try{Settings.load(auroraFile);}catch(java.io.IOException expected){invalidScene=true;}check(invalidScene,"non-finite scene speed rejected");
         Files.writeString(auroraFile,"menu.auroraGlow=4\n");check(Settings.load(auroraFile).auroraGlow==1,"aurora brightness upper bound");
         Files.writeString(auroraFile,"menu.auroraGlow=-1\n");check(Settings.load(auroraFile).auroraGlow==0,"aurora brightness lower bound");
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");

@@ -1,14 +1,18 @@
 package dev.donuttracker.fabric;
 
+import dev.donuttracker.core.Settings;
 import net.minecraft.client.gui.GuiGraphics;
 
 /** Bounded, shader-free aurora curtains with a deterministic starfield. */
 final class AuroraBackdrop {
     private AuroraBackdrop(){}
     static void draw(GuiGraphics g,int x,int y,int w,int h,boolean motion,float strength){
+        draw(g,x,y,w,h,motion,strength,new Settings.SceneDesign());
+    }
+    static void draw(GuiGraphics g,int x,int y,int w,int h,boolean motion,float strength,Settings.SceneDesign d){
         g.fillGradient(x,y,x+w,y+h,0xFF050B20,0xFF142840);
-        double time=motion?System.nanoTime()/1_000_000_000d*.10:0;
-        int stars=Math.min(76,Math.max(12,w/6));
+        double time=motion?System.nanoTime()/1_000_000_000d*(.03+d.speed*.18):0;
+        int stars=Math.min(150,Math.max(8,(int)(w/4*(.1+d.density))));
         for(int i=0;i<stars;i++){
             int seed=i*1103515245+12345;
             int sx=x+Math.floorMod(seed,w),sy=y+Math.floorMod(seed>>>7,Math.max(1,h*3/4));
@@ -27,7 +31,7 @@ final class AuroraBackdrop {
                 int length=(int)(h*(.25+.045*Math.cos(u*7+time*.5+offset)));
                 int middle=top+length*2/3,bottom=top+length;
                 int alpha=(int)((50+70*(.5+.5*Math.sin(u*24+offset+time*.8)))*strength);
-                int colour=colours[ribbon],end=x+Math.min(w,dx+step);
+                int colour=CoastalStyle.mix(0xFF000000|colours[ribbon],0xFF000000|d.tint,.45f)&0xFFFFFF,end=x+Math.min(w,dx+step);
                 g.fillGradient(x+dx,top,end,middle,colour,alpha<<24|colour);
                 g.fillGradient(x+dx,middle,end,bottom,alpha<<24|colour,colour);
             }
