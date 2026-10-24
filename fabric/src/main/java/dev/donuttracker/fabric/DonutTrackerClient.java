@@ -32,6 +32,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
     private boolean pendingStart, pendingStop;
     private long pendingAt;
     private boolean settingsWritable = true, stateWritable = true;
+    private final PaymentBalanceSync paymentBalanceSync = new PaymentBalanceSync();
 
     @Override public void onInitializeClient() {
         try { settings = Settings.load(config); } catch (IOException ex) { settings = new Settings(); settingsWritable = false; LOG.error("Settings could not be read; original file preserved", ex); status = "Invalid settings file: " + config; }
@@ -43,18 +44,22 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if ((pendingStart || pendingStop) && now - pendingAt > 10_000) {
                 pendingStart = pendingStop = false; status = "No matching /bal response. Check Detection or enter a manual balance.";
             }
-            if (settings.pollBalance && tracker.running() && now - lastRequest >= 15_000 && client.getConnection() != null) requestBalance();
+            boolean connected = client.getConnection() != null;
+            if (paymentBalanceSync.shouldRequest(connected, tracker.running(), pendingStart || pendingStop, now, lastRequest)
+                    || (settings.pollBalance && tracker.running() && now - lastRequest >= 15_000 && connected)) requestBalance();
         });
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             // Server-generated chat only. Player chat cannot inject queue entries.
             if (overlay) return;
             try {
                 ChatParser.Result result = new ChatParser(settings).accept(message.getString(), tracker, queue);
+                paymentBalanceSync.received(result, tracker.running());
                 if (result == ChatParser.Result.BALANCE) {
                     status = "Balance: " + Money.format(tracker.balance());
                     if (pendingStart) { pendingStart = false; tracker.start(); status = "Session started with a fresh balance."; }
                     if (pendingStop) { pendingStop = false; tracker.stop(); status = "Session ended: " + Money.signed(tracker.profit()); save(); }
-                } else if (result == ChatParser.Result.PAYMENT) { status = "Payment queued."; save(); }
+                } else if (result == ChatParser.Result.PAYMENT) { status = tracker.running() ? "Payment queued; updating session balance…" : "Payment queued. Start Tracker to track session profit."; save(); }
+                else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment below queue minimum; updating session balance…";
             } catch (RuntimeException ex) { status = "Message not recorded: " + ex.getMessage(); LOG.warn(status); }
         });
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("donuttracker", "hud"), (g, delta) -> {
@@ -65,6 +70,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if (tracker.running()) { tracker.stop(); status = "Disconnected: session ended at last observed balance."; }
             save(); var history = tracker.history(); tracker = new Tracker(); tracker.restoreHistory(history);
             pendingStart = pendingStop = false;
+            paymentBalanceSync.reset();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> save());
         LOG.info("Donut Tracker initialized; press Right Shift for settings.");
@@ -73,7 +79,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         var connection = Minecraft.getInstance().getConnection();
         if (connection == null) throw new IllegalStateException("Join a server first.");
         if (System.currentTimeMillis() - lastRequest < 2500) throw new IllegalStateException("Wait a moment before requesting /bal again.");
-        connection.sendCommand("bal"); lastRequest = System.currentTimeMillis(); status = "Waiting for /bal response…";
+        connection.sendCommand("bal"); lastRequest = System.currentTimeMillis(); paymentBalanceSync.requested(); status = "Waiting for /bal response…";
     }
     void startFresh() {
         if (tracker.running()) throw new IllegalStateException("End the current session first.");

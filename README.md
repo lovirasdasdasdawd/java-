@@ -6,12 +6,16 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.1.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.1.1.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
 
-## New in 1.1.0
+## Fixed in 1.1.1
+
+During an active Tracker session, incoming payment messages now automatically request `/bal`, even with periodic polling disabled. The server balance response updates profit and money/hour. Multiple payments are coalesced with a command cooldown; below-minimum payments refresh profit too, while remaining excluded from the queue. Payments never directly add to the stored balance, so a later balance response cannot double count them. Start a session first: an idle tracker deliberately stays idle.
+
+## Module controls
 
 Right Shift now opens two module cards: **Tracker** and **Payment Queue**. Open either card to configure that module on its own screen. Detection is scoped to the selected module, and session history belongs to Tracker.
 
@@ -58,8 +62,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.1.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.1.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.1.1.jar` — installable mod.
+- `build/libs/donut-tracker-1.1.1.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -72,10 +76,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.1.0.jar
+java -jar build/libs/donut-tracker-1.1.1.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.1.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.1.1.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.
