@@ -18,7 +18,6 @@ final class TrackerScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("Open Payment settings"), b -> minecraft.setScreen(new ModuleSettingsScreen(mod, this, true))).bounds(left + card + gap + 10, top + 116, card - 20, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Move HUD boxes"), b -> minecraft.setScreen(new HudEditorScreen(mod, this))).bounds(left, top + 151, panelWidth / 2 - 5, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Save & close"), b -> onClose()).bounds(left + panelWidth / 2 + 5, top + 151, panelWidth / 2 - 5, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Payment actions [P] - return 2x / 3x"), b -> minecraft.setScreen(new PaymentActionScreen(mod, this))).bounds(left, top + 176, panelWidth, 20).build());
     }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
         g.fill(0, 0, width, height, 0xB0060912);

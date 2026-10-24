@@ -6,18 +6,18 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.1.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
 
-## New in 1.3.0: one-click 2x / 3x returns
+## New in 1.3.1: return controls inside chat
 
-The active payment has 2x and 3x controls. Press **P** to release the cursor and click them directly on the HUD, or open Payment actions from the module menu. Hovering a control shows its exact command. A 1M incoming payment sends `/pay <that IGN> 2000000` or `/pay <that IGN> 3000000`. Commands are sent immediately on click. Amounts use exact decimal multiplication.
+Server payment messages now keep their original chat position and formatting and append clickable **[2×] [3×]** buttons to that same line. Open normal chat with **T** and click a multiplier. Hovering shows the exact return command. There are no return buttons above the HUD and no P overlay.
 
-The queue entry is marked **2x requested** or **3x requested** and both buttons are disabled after dispatch. This marker is persisted before the command is sent, survives restart, and prevents a second click from sending another return. The player remains active until you choose **Next player**. The label means the command was requested, not that the server confirmed a transfer: check the server chat for insufficient funds, cooldown or other rejection. Failed/ambiguous sends are never automatically retried. No live server funds were used in tests.
+For example, `1arp_ paid you $1M` gets buttons that immediately send `/pay 1arp_ 2000000` or `/pay 1arp_ 3000000`. Buttons reference that exact receipt, even if another player is at the front of the HUD queue. A removed receipt or a button from an earlier server session cannot pay another player. Each click gives visible chat feedback. The server response determines whether a transfer succeeds.
 
-Existing queues remain readable. Known old default payment patterns are upgraded for optional trailing currency markers; user-defined patterns remain intact. Minecraft formatting spaces are normalized.
+One return is permitted per queue entry: its request marker is persisted before dispatch and survives restart. Repeated clicks cannot send another return; ambiguous/failed sends are never automatically retried. No live funds are used in tests. Old queue files remain readable, known old default patterns upgrade, and custom patterns remain intact.
 
 ## Clean HUD design
 
@@ -74,8 +74,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.3.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.1.jar` — installable mod.
+- `build/libs/donut-tracker-1.3.1.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -88,10 +88,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.3.0.jar
+java -jar build/libs/donut-tracker-1.3.1.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.3.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.3.1.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

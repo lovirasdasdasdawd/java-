@@ -24,13 +24,18 @@ public final class PaymentQueue {
     public Payment active() { return payments.peek(); }
     public Payment next() { return payments.poll(); }
     Payment reserveReturn(Payment expected, int multiplier) {
-        if (expected == null || payments.peek() != expected) throw new IllegalStateException("The active payment changed. Select the current player again.");
+        if (expected == null || payments.stream().noneMatch(p -> p == expected)) throw new IllegalStateException("This payment is no longer queued or a return was already requested.");
         if (expected.returnRequested()) throw new IllegalStateException("A return command was already requested for this payment.");
         Payment reserved = new Payment(expected.player(), expected.amount(), expected.receivedAt(), multiplier);
-        payments.removeFirst(); payments.addFirst(reserved); return reserved;
+        replace(expected, reserved); return reserved;
     }
     void undoReservation(Payment reserved, Payment original) {
-        if (payments.peek() == reserved) { payments.removeFirst(); payments.addFirst(original); }
+        replace(reserved, original);
+    }
+    private void replace(Payment expected, Payment replacement) {
+        var updated = new ArrayDeque<Payment>();
+        for (Payment payment : payments) updated.add(payment == expected ? replacement : payment);
+        payments.clear(); payments.addAll(updated);
     }
     public int waiting() { return Math.max(0, payments.size() - 1); }
     public List<Payment> all() { return List.copyOf(payments); }

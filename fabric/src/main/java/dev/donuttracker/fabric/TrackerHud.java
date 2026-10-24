@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.PlayerFaceRenderer;
 /** Calm, translucent cards with a clear information hierarchy. */
 final class TrackerHud {
     private TrackerHud() {}
-    static int height(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 63 : h.layout == Settings.Layout.STACKED ? 128 : 105; }
+    static int height(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 43 : h.layout == Settings.Layout.STACKED ? 128 : 105; }
     static int width() { return 200; }
     static int x(Settings.Hud h, int screenWidth) { return Math.max(0, Math.min(h.x, screenWidth - (int)(width() * h.scale))); }
     static int y(Settings.Hud h, int screenHeight) { return Math.max(0, Math.min(h.y, screenHeight - (int)(height(h) * h.scale))); }
@@ -70,7 +70,6 @@ final class TrackerHud {
         if (h.layout == Settings.Layout.MINIMAL) {
             scaled(g, active == null ? "Waiting for payments" : active.player(), 11, 29, .8f, ink);
             if (active != null) right(g, "+" + Money.format(active.amount()), width() - 11, 29, .85f, value);
-            if (active != null) returnChips(g, h, active, 44);
             return;
         }
         if (active == null) {
@@ -90,7 +89,6 @@ final class TrackerHud {
             scaled(g, name, 51, 42, .85f, ink);
             scaled(g, "CURRENT PLAYER", 51, 57, .58f, muted);
             right(g, amount, width() - 11, 44, amountScale, value);
-            returnChips(g, h, active, 60);
         }
         divider(g, 79, h);
         var waiting = mod.queue.all().stream().skip(1).toList();
@@ -104,20 +102,6 @@ final class TrackerHud {
                 var p = waiting.get(i);
                 scaled(g, p.player() + "  -  " + Money.format(p.amount()), 11, 105 + (i - 1) * 12, .7f, muted);
             }
-        }
-    }
-    static int returnButtonY(Settings.Hud h) { return h.layout == Settings.Layout.MINIMAL ? 44 : 60; }
-    static int returnButtonX(int multiplier) { return multiplier == 2 ? width() - 65 : width() - 34; }
-    private static void returnChips(GuiGraphics g, Settings.Hud h, PaymentQueue.Payment payment, int y) {
-        if (payment.returnRequested()) {
-            right(g, payment.returnMultiplier() + "x requested", width() - 11, y + 4, .6f, blend(h.text, h.background, .65f));
-            return;
-        }
-        for (int multiplier : new int[]{2,3}) {
-            int x = returnButtonX(multiplier);
-            rounded(g,x,y,x+24,y+14,blend(h.accent,h.background,.13f));
-            border(g,x,y,x+24,y+14,blend(h.accent,h.background,.35f));
-            centered(g,multiplier + "x",x+12,y+4,.7f,opaque(h.accent));
         }
     }
     private static void divider(GuiGraphics g, int y, Settings.Hud h) { g.fill(11, y, width() - 11, y + 1, blend(h.text, h.background, .15f)); }

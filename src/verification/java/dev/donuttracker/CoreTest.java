@@ -119,6 +119,11 @@ public final class CoreTest {
         PaymentQueue ambiguousSend = new PaymentQueue(); ambiguousSend.add("Steve",Money.parse("1M"),BigDecimal.ZERO);
         try { ReturnPayments.send(ambiguousSend,ambiguousSend.active(),3,() -> {},command -> {throw new IllegalStateException("connection interrupted");}); throw new AssertionError("must fail send"); }
         catch(IllegalStateException expected) { check(ambiguousSend.active().returnMultiplier()==3,"ambiguous send remains blocked to prevent duplicate return"); }
+        PaymentQueue chatQueue = new PaymentQueue();chatQueue.add("FirstPlayer",Money.parse("10K"),BigDecimal.ZERO);chatQueue.add("1arp_",Money.parse("1M"),BigDecimal.ZERO);
+        var chatReceipt = chatQueue.all().getLast();var firstReceipt = chatQueue.active();
+        ReturnPayments.send(chatQueue,chatReceipt,3,() -> {},sent::add);
+        check(sent.getLast().equals("pay 1arp_ 3000000"),"chat button pays its exact receipt even when not the active HUD player");
+        check(chatQueue.active()==firstReceipt && chatQueue.all().getLast().returnMultiplier()==3,"return from chat preserves queue order and marks only clicked receipt");
         Settings chatSettings = new Settings(); PaymentQueue screenshotQueue = new PaymentQueue();
         check(new ChatParser(chatSettings).accept("1arp_ paid you $1M $",new Tracker(),screenshotQueue)==ChatParser.Result.PAYMENT,"payment suffix currency accepted");
         check(new ChatParser(chatSettings).accept("1arp_ paid you $\u00a01M",new Tracker(),screenshotQueue)==ChatParser.Result.PAYMENT,"nonbreaking space in styled message accepted");
