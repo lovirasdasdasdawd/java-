@@ -60,6 +60,8 @@ public final class DonutTrackerClient implements ClientModInitializer {
                 .executes(context -> returnFromChat(StringArgumentType.getString(context,"receipt"), IntegerArgumentType.getInteger(context,"multiplier")));
             var receipt = ClientCommandManager.argument("receipt", StringArgumentType.word()).then(multiplier);
             dispatcher.register(ClientCommandManager.literal("donuttracker_return").then(receipt));
+            dispatcher.register(ClientCommandManager.literal("sstart").executes(context -> sessionCommand(true)));
+            dispatcher.register(ClientCommandManager.literal("sstop").executes(context -> sessionCommand(false)));
         });
         ClientReceiveMessageEvents.MODIFY_GAME.register(this::receiveServerMessage);
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("donuttracker", "hud"), (g, delta) -> {
@@ -84,14 +86,14 @@ public final class DonutTrackerClient implements ClientModInitializer {
                 if (pendingStart) { pendingStart = false; tracker.start(); status = "Session started with a fresh balance."; }
                 if (pendingStop) { pendingStop = false; tracker.stop(); status = "Session ended: " + Money.signed(tracker.profit()); save(); }
             } else if (result == ChatParser.Result.PAYMENT) {
-                status = "Payment queued. Balance changes only when you refresh it manually.";
+                status = "Payment queued. Active session updated immediately.";
                 save();
                 chatReceipts.entrySet().removeIf(entry -> queue.all().stream().noneMatch(payment -> payment == entry.getValue()));
                 String token = UUID.randomUUID().toString();
                 PaymentQueue.Payment receipt = queue.all().getLast();
                 chatReceipts.put(token,receipt);
                 return message.copy().append(chatReturnButton(token,receipt,2)).append(chatReturnButton(token,receipt,3));
-            } else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment below queue minimum. No automatic balance command sent.";
+            } else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment added to session; below queue minimum.";
         } catch (RuntimeException ex) { status = "Message not recorded: " + ex.getMessage(); LOG.warn(status); }
         return message;
     }
@@ -111,6 +113,17 @@ public final class DonutTrackerClient implements ClientModInitializer {
         } catch (RuntimeException ex) {
             status = ex.getMessage();
             client.gui.getChat().addMessage(Component.literal(status).withStyle(style -> style.withColor(0xF08091)));
+            return 0;
+        }
+    }
+    private int sessionCommand(boolean start) {
+        try {
+            if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking received payments live. Use /sstop to finish."; }
+            else { tracker.stop(); cancelPending(); status = "Session ended: " + Money.signed(tracker.profit()); }
+            save(); return 1;
+        } catch (RuntimeException ex) {
+            status = ex.getMessage();
+            Minecraft.getInstance().gui.getChat().addMessage(Component.literal(status).withStyle(style -> style.withColor(0xF08091)));
             return 0;
         }
     }

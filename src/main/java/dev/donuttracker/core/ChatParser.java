@@ -12,8 +12,11 @@ public final class ChatParser {
         if (balance.matches()) { tracker.balance(Money.parse(balance.group(1))); return Result.BALANCE; }
         var payment = Pattern.compile(settings.paymentPattern).matcher(line);
         if (payment.matches()) {
-            // Incoming payments are NOT added to the balance: a later balance line is authoritative.
-            return queue.add(payment.group(1), Money.parse(payment.group(2)), settings.minimumPayment) ? Result.PAYMENT : Result.BELOW_MINIMUM;
+            var amount = Money.parse(payment.group(2));
+            boolean queued = queue.add(payment.group(1), amount, settings.minimumPayment);
+            // Queue minimum only filters the queue, never the session's received total.
+            if (amount.signum() > 0) tracker.incomingPayment(amount);
+            return queued ? Result.PAYMENT : Result.BELOW_MINIMUM;
         }
         return Result.IGNORED;
     }

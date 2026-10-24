@@ -11,7 +11,8 @@ public final class Tracker {
         public BigDecimal profit() { return endingBalance.subtract(startingBalance); }
     }
     private final Clock clock;
-    private BigDecimal balance, start;
+    private BigDecimal balance, start, finishedProfit = BigDecimal.ZERO, received = BigDecimal.ZERO;
+    private boolean paymentsOnly;
     private long started, elapsed;
     private boolean running, hasSession;
     private final List<Session> history = new ArrayList<>();
@@ -26,19 +27,33 @@ public final class Tracker {
     public void start() {
         if (running) throw new IllegalStateException("A session is already running.");
         if (!hasBalance()) throw new IllegalStateException("Read or enter your current balance before starting.");
+        paymentsOnly = false; received = BigDecimal.ZERO;
         start = balance; started = clock.millis(); elapsed = 0; hasSession = true; running = true;
+    }
+    /** Starts a received-payments total without requesting or requiring /bal. */
+    public void startPayments() {
+        if (running) throw new IllegalStateException("A session is already running.");
+        start = balance(); received = BigDecimal.ZERO; paymentsOnly = true;
+        started = clock.millis(); elapsed = 0; hasSession = true; running = true;
+    }
+    public void incomingPayment(BigDecimal amount) {
+        if (amount.signum() <= 0) throw new IllegalArgumentException("Payment must be positive.");
+        if (!running) return;
+        received = received.add(amount);
+        if (!paymentsOnly) balance = balance.add(amount);
     }
     public Session stop() {
         if (!running) throw new IllegalStateException("No active session.");
+        finishedProfit = profit();
         elapsed = Math.max(0, clock.millis() - started); running = false;
-        Session session = new Session(started, started + elapsed, start, balance);
+        Session session = new Session(started, started + elapsed, start, start.add(finishedProfit));
         history.add(0, session);
         if (history.size() > 100) history.remove(history.size() - 1);
         return session;
     }
-    public void reset() { running = false; hasSession = false; start = null; elapsed = 0; }
+    public void reset() { running = false; hasSession = false; start = null; elapsed = 0; received = BigDecimal.ZERO; finishedProfit = BigDecimal.ZERO; paymentsOnly = false; }
     public boolean running() { return running; }
-    public BigDecimal profit() { return hasSession ? balance.subtract(start) : BigDecimal.ZERO; }
+    public BigDecimal profit() { return !hasSession ? BigDecimal.ZERO : !running ? finishedProfit : paymentsOnly ? received : balance.subtract(start); }
     public long elapsedMillis() { return running ? Math.max(0, clock.millis() - started) : elapsed; }
     public BigDecimal perHour() {
         long ms = elapsedMillis();
