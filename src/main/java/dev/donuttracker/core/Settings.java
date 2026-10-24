@@ -28,7 +28,6 @@ public final class Settings {
     public static final String LEGACY_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*!?$";
     public static final String DEFAULT_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?\\s*[!.]?$";
     public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
-    public boolean pollBalance = false;
     public Settings() { queue.x = 280; queue.y = 16; queue.accent = 0x70CFEA; }
     public static int color(String hex) {
         String s = hex.strip().replaceFirst("^#", "");
@@ -51,7 +50,6 @@ public final class Settings {
             s.balancePattern = p.getProperty("balance.pattern", s.balancePattern);
             s.paymentPattern = p.getProperty("payment.pattern", s.paymentPattern);
             if (s.paymentPattern.equals(LEGACY_PAYMENT_PATTERN)) s.paymentPattern = DEFAULT_PAYMENT_PATTERN;
-            s.pollBalance = Boolean.parseBoolean(p.getProperty("balance.poll", "false"));
             s.validatePatterns();
         } catch (IllegalArgumentException e) { throw new IOException("Invalid settings in " + file + ": " + e.getMessage(), e); }
         return s;
@@ -82,7 +80,6 @@ public final class Settings {
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
         p.setProperty("queue.minimum", minimumPayment.toPlainString());
         p.setProperty("balance.pattern", balancePattern); p.setProperty("payment.pattern", paymentPattern);
-        p.setProperty("balance.poll", "" + pollBalance);
         atomicSave(file, p, "Donut Tracker — per-HUD design and server detection patterns");
     }
     private static void write(Properties p, String k, Hud h) {

@@ -42,7 +42,6 @@ public final class DonutTrackerClient implements ClientModInitializer {
     private boolean pendingStart, pendingStop;
     private long pendingAt;
     private boolean settingsWritable = true, stateWritable = true;
-    private final PaymentBalanceSync paymentBalanceSync = new PaymentBalanceSync();
     private final Map<String, PaymentQueue.Payment> chatReceipts = new HashMap<>();
 
     @Override public void onInitializeClient() {
@@ -55,9 +54,6 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if ((pendingStart || pendingStop) && now - pendingAt > 10_000) {
                 pendingStart = pendingStop = false; status = "No matching /bal response. Check Detection or enter a manual balance.";
             }
-            boolean connected = client.getConnection() != null;
-            if (paymentBalanceSync.shouldRequest(connected, tracker.running(), pendingStart || pendingStop, now, lastRequest)
-                    || (settings.pollBalance && tracker.running() && now - lastRequest >= 15_000 && connected)) requestBalance();
         });
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             var multiplier = ClientCommandManager.argument("multiplier", IntegerArgumentType.integer(2,3))
@@ -74,7 +70,6 @@ public final class DonutTrackerClient implements ClientModInitializer {
             if (tracker.running()) { tracker.stop(); status = "Disconnected: session ended at last observed balance."; }
             save(); var history = tracker.history(); tracker = new Tracker(); tracker.restoreHistory(history);
             pendingStart = pendingStop = false;
-            paymentBalanceSync.reset();
             chatReceipts.clear();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> save());
@@ -84,20 +79,19 @@ public final class DonutTrackerClient implements ClientModInitializer {
         if (overlay) return message;
         try {
             ChatParser.Result result = new ChatParser(settings).accept(message.getString(), tracker, queue);
-            paymentBalanceSync.received(result, tracker.running());
             if (result == ChatParser.Result.BALANCE) {
                 status = "Balance: " + Money.format(tracker.balance());
                 if (pendingStart) { pendingStart = false; tracker.start(); status = "Session started with a fresh balance."; }
                 if (pendingStop) { pendingStop = false; tracker.stop(); status = "Session ended: " + Money.signed(tracker.profit()); save(); }
             } else if (result == ChatParser.Result.PAYMENT) {
-                status = tracker.running() ? "Payment queued; updating session balance…" : "Payment queued. Start Tracker to track session profit.";
+                status = "Payment queued. Balance changes only when you refresh it manually.";
                 save();
                 chatReceipts.entrySet().removeIf(entry -> queue.all().stream().noneMatch(payment -> payment == entry.getValue()));
                 String token = UUID.randomUUID().toString();
                 PaymentQueue.Payment receipt = queue.all().getLast();
                 chatReceipts.put(token,receipt);
                 return message.copy().append(chatReturnButton(token,receipt,2)).append(chatReturnButton(token,receipt,3));
-            } else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment below queue minimum; updating session balance…";
+            } else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment below queue minimum. No automatic balance command sent.";
         } catch (RuntimeException ex) { status = "Message not recorded: " + ex.getMessage(); LOG.warn(status); }
         return message;
     }
@@ -113,11 +107,10 @@ public final class DonutTrackerClient implements ClientModInitializer {
             PaymentQueue.Payment receipt = chatReceipts.get(token);
             if (receipt == null) throw new IllegalStateException("Deze betaling is niet meer beschikbaar. Gebruik een nieuw betaalbericht uit deze sessie.");
             returnPayment(receipt,multiplier);
-            client.gui.getChat().addMessage(Component.literal("[Donut Tracker] " + status).withStyle(style -> style.withColor(0x8AE8C3)));
             return 1;
         } catch (RuntimeException ex) {
             status = ex.getMessage();
-            client.gui.getChat().addMessage(Component.literal("[Donut Tracker] " + status).withStyle(style -> style.withColor(0xF08091)));
+            client.gui.getChat().addMessage(Component.literal(status).withStyle(style -> style.withColor(0xF08091)));
             return 0;
         }
     }
@@ -125,7 +118,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         var connection = Minecraft.getInstance().getConnection();
         if (connection == null) throw new IllegalStateException("Join a server first.");
         if (System.currentTimeMillis() - lastRequest < 2500) throw new IllegalStateException("Wait a moment before requesting /bal again.");
-        connection.sendCommand("bal"); lastRequest = System.currentTimeMillis(); paymentBalanceSync.requested(); status = "Waiting for /bal response…";
+        connection.sendCommand("bal"); lastRequest = System.currentTimeMillis(); status = "Waiting for /bal response…";
     }
     void startFresh() {
         if (tracker.running()) throw new IllegalStateException("End the current session first.");
@@ -143,7 +136,6 @@ public final class DonutTrackerClient implements ClientModInitializer {
         try {
             String command = ReturnPayments.send(queue, expected, multiplier, () -> StateStore.save(state, tracker, queue), connection::sendCommand);
             status = "Sent /" + command + ". Check the server response in chat.";
-            paymentBalanceSync.received(ChatParser.Result.PAYMENT, tracker.running());
         } catch (IOException ex) { throw new java.io.UncheckedIOException("Could not save the return request; no command sent.", ex); }
     }
     void save() {

@@ -44,46 +44,15 @@ public final class CoreTest {
         check(parser.accept("You paid Steve $100M", t, q) == ChatParser.Result.IGNORED, "outgoing payment ignored");
         rejects(() -> q.add("bad name", Money.parse("1"), BigDecimal.ZERO), "bad IGN");
         check(!q.add("Steve", Money.parse("-1"), BigDecimal.ZERO), "negative payment ignored");
-        // A real incoming 1M payment must refresh profit without periodic polling.
-        Settings liveSettings = new Settings();
-        Tracker live = new Tracker(clock); PaymentQueue liveQueue = new PaymentQueue();
-        ChatParser liveParser = new ChatParser(liveSettings); PaymentBalanceSync sync = new PaymentBalanceSync();
-        liveParser.accept("You Have $ 500,000", live, liveQueue); live.start();
-        sync.received(liveParser.accept("Imunknown67 paid you $1M", live, liveQueue), live.running());
-        check(!liveSettings.pollBalance, "regression uses polling OFF, as in existing installations");
-        check(sync.shouldRequest(true, live.running(), false, 4000, 0), "1M payment schedules automatic /bal");
-        check(liveQueue.active().amount().equals(Money.parse("1M")), "1M payment queued");
-        check(live.profit().signum() == 0, "do not invent balance before server response");
-        check(!sync.shouldRequest(true, true, false, 2000, 0), "refresh respects command cooldown");
-        sync.received(liveParser.accept("OtherPlayer paid you $100K", live, liveQueue), true);
-        sync.requested();
-        check(!sync.shouldRequest(true, true, false, 4000, 0), "burst payments coalesce into one request");
-        sync.received(liveParser.accept("You Have $ 1,600,000", live, liveQueue), true);
-        check(live.profit().equals(Money.parse("1.1M")), "payment balance response updates exact session profit");
-        sync.received(liveParser.accept("You Have $ 1,600,000", live, liveQueue), true);
-        check(live.profit().equals(Money.parse("1.1M")), "repeated balance response never double counts payments");
-        sync.received(liveParser.accept("SmallPlayer paid you $1", live, liveQueue), true);
-        check(sync.shouldRequest(true, true, false, 4000, 0), "below-minimum payments still refresh profit");
-        check(liveQueue.all().size() == 2, "below-minimum payment excluded from queue only");
-        check(!sync.shouldRequest(false, true, false, 4000, 0), "no request while disconnected");
-        check(!sync.shouldRequest(true, true, true, 4000, 0), "do not compete with start/end balance request");
-        sync.reset();
-        sync.received(ChatParser.Result.PAYMENT, false);
-        check(!sync.shouldRequest(true, false, false, 4000, 0), "idle tracker never starts itself on payment");
-        sync.received(ChatParser.Result.IGNORED, true);
-        check(!sync.shouldRequest(true, true, false, 4000, 0), "unrelated chat does not request balance");
-        sync.received(ChatParser.Result.PAYMENT, true);
-        sync.received(ChatParser.Result.BALANCE, true);
-        check(!sync.shouldRequest(true, true, false, 4000, 0), "natural balance update satisfies pending refresh");
         var dir = Files.createTempDirectory("donut-tests-"); var settingsPath = dir.resolve("settings.properties"); var statePath = dir.resolve("state.properties");
         s.profit.theme = Settings.Theme.NEON; s.queue.theme = Settings.Theme.CLEAN;
         s.profit.accent = Settings.color("#AABBCC"); s.profit.scale = 1.75; s.profit.opacity = .3; s.profit.x = 52;
-        s.queue.layout = Settings.Layout.MINIMAL; s.queue.enabled = false; s.profit.showRate = false; s.pollBalance = true;
+        s.queue.layout = Settings.Layout.MINIMAL; s.queue.enabled = false; s.profit.showRate = false;
         s.save(settingsPath); s.save(settingsPath); Settings loaded = Settings.load(settingsPath);
         check(loaded.profit.theme == Settings.Theme.NEON && loaded.queue.theme == Settings.Theme.CLEAN, "independent clean/neon saved");
         check(loaded.profit.accent == 0xAABBCC && loaded.profit.scale == 1.75 && loaded.profit.opacity == .3 && loaded.profit.x == 52, "colour/size/opacity/position saved");
         check(loaded.queue.layout == Settings.Layout.MINIMAL && !loaded.queue.enabled && !loaded.profit.showRate, "layout and display flags saved");
-        check(loaded.minimumPayment.equals(Money.parse("1")) && loaded.pollBalance, "threshold and polling saved");
+        check(loaded.minimumPayment.equals(Money.parse("1")), "payment threshold saved");
         rejects(() -> Settings.color("#XYZ"), "invalid hex"); s.paymentPattern = "("; rejects(s::validatePatterns, "invalid regex");
         StateStore.save(statePath, t, q); StateStore.save(statePath, t, q);
         Tracker restored = new Tracker(); PaymentQueue restoredQueue = new PaymentQueue(); StateStore.load(statePath, restored, restoredQueue);
@@ -135,6 +104,11 @@ public final class CoreTest {
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");
         PaymentQueue migratedQueue = new PaymentQueue();StateStore.load(legacyQueue,new Tracker(),migratedQueue);
         check(!migratedQueue.active().returnRequested(),"old queue file remains readable");
+        var oldPolling = dir.resolve("old-polling.properties");Files.writeString(oldPolling,"balance.poll=true\nqueue.minimum=1\n");
+        Settings noAuto = Settings.load(oldPolling);noAuto.save(oldPolling);
+        var updatedProperties = new java.util.Properties();try(var reader=Files.newBufferedReader(oldPolling)){updatedProperties.load(reader);}
+        check(!updatedProperties.containsKey("balance.poll"),"legacy automatic-polling setting is retired");
+        check(noAuto.minimumPayment.equals(Money.parse("1")),"retiring auto polling preserves unrelated settings");
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }

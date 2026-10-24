@@ -6,16 +6,16 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.1.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.2.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
 
-## New in 1.3.1: return controls inside chat
+## New in 1.3.2: return controls inside chat
 
 Server payment messages now keep their original chat position and formatting and append clickable **[2×] [3×]** buttons to that same line. Open normal chat with **T** and click a multiplier. Hovering shows the exact return command. There are no return buttons above the HUD and no P overlay.
 
-For example, `1arp_ paid you $1M` gets buttons that immediately send `/pay 1arp_ 2000000` or `/pay 1arp_ 3000000`. Buttons reference that exact receipt, even if another player is at the front of the HUD queue. A removed receipt or a button from an earlier server session cannot pay another player. Each click gives visible chat feedback. The server response determines whether a transfer succeeds.
+For example, `1arp_ paid you $1M` gets buttons that immediately send `/pay 1arp_ 2000000` or `/pay 1arp_ 3000000`. Buttons reference that exact receipt, even if another player is at the front of the HUD queue. A removed receipt or a button from an earlier server session cannot pay another player. Successful clicks do not add a mod-branded chat confirmation; only the server response appears. Local errors remain visible without a mod prefix. The server response determines whether a transfer succeeds.
 
 One return is permitted per queue entry: its request marker is persisted before dispatch and survives restart. Repeated clicks cannot send another return; ambiguous/failed sends are never automatically retried. No live funds are used in tests. Old queue files remain readable, known old default patterns upgrade, and custom patterns remain intact.
 
@@ -25,7 +25,7 @@ The gameplay HUDs now use the clean design preview: rounded translucent charcoal
 
 ## Payment refresh fix
 
-During an active Tracker session, incoming payment messages now automatically request `/bal`, even with periodic polling disabled. The server balance response updates profit and money/hour. Multiple payments are coalesced with a command cooldown; below-minimum payments refresh profit too, while remaining excluded from the queue. Payments never directly add to the stored balance, so a later balance response cannot double count them. Start a session first: an idle tracker deliberately stays idle.
+Automatic `/bal` commands are removed in 1.3.2. Receiving payments, clicking 2×/3×, and ticking a running session never request a balance. Old `balance.poll=true` settings are ignored and retired. Balance/profit updates require a balance message you request yourself or a manual balance entry. Payments are not added to the stored balance, preventing double counting.
 
 ## Module controls
 
@@ -56,7 +56,7 @@ Imunknown67 paid you $ 1
 
 Only server-generated chat is parsed; ordinary player chat is ignored. Patterns can be changed in **Detection**. Server prefixes or different wording may require a pattern update. Matching has been tested with the supplied examples; live DonutSMP behaviour needs verification on your client.
 
-**Start tracking** and **End tracking** send `/bal` and wait up to 10 seconds for a fresh matching balance before recording their endpoint. Timeout preserves the existing session. Optional **Auto /bal every 15s** updates a running session; it is off initially. With it off, run `/bal` yourself for intermediate live updates. Manual balance/start/end controls are available as a fallback. Profit is ending balance minus starting balance, so spending and losses count too. Payment messages only populate the queue and are never added again to the balance.
+**Start tracking** and **End tracking** send `/bal` and wait up to 10 seconds for a fresh matching balance before recording their endpoint. Timeout preserves the existing session. There is no periodic polling or automatic refresh after incoming or outgoing payments. Run `/bal` yourself for intermediate live updates. Start/End buttons labelled `/bal` and Read /bal now are explicit manual requests; Start manual and End at last balance send no command. Manual balance/start/end controls are available as a fallback. Profit is ending balance minus starting balance, so spending and losses count too. Payment messages only populate the queue and are never added again to the balance.
 
 The default minimum payment is **100K**. Set it to **1** in Payment Queue → Queue to include the sample `$1` payment. The minimum affects future arrivals, not payments already queued. On disconnect, an active session ends at its last observed balance, which may be stale.
 
@@ -74,8 +74,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.1.jar` — installable mod.
-- `build/libs/donut-tracker-1.3.1.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.2.jar` — installable mod.
+- `build/libs/donut-tracker-1.3.2.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -88,10 +88,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.3.1.jar
+java -jar build/libs/donut-tracker-1.3.2.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.3.1.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.3.2.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

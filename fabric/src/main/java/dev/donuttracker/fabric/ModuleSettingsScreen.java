@@ -91,8 +91,8 @@ final class ModuleSettingsScreen extends Screen {
     private void session(int y) {
         int x = left + 12, w = panelWidth - 24;
         caption("Start / End requests a fresh /bal before recording.", x, y + 3, 0xFFA7B4CB); y += 16;
-        button("Start tracking", x, y, w / 2 - 3, () -> mod.act(mod::startFresh));
-        button("End tracking", x + w / 2, y, w / 2 - 3, () -> mod.act(mod::stopFresh)); y += 23;
+        button("Start (/bal)", x, y, w / 2 - 3, () -> mod.act(mod::startFresh));
+        button("End (/bal)", x + w / 2, y, w / 2 - 3, () -> mod.act(mod::stopFresh)); y += 23;
         caption("Manual balance (fallback)", x, y + 6, 0xFFE3DBEE);
         EditBox balance = input(mod.tracker.hasBalance() ? mod.tracker.balance().toPlainString() : "", x + w / 2, y, w / 2 - 58, 30);
         button("Set", x + w - 53, y, 50, () -> mod.act(() -> { mod.tracker.balance(Money.parse(balance.getValue())); mod.status = "Manual balance recorded."; })); y += 23;
@@ -126,7 +126,6 @@ final class ModuleSettingsScreen extends Screen {
             mod.status = "Detection pattern saved.";
         })); y += 25;
         if (tab == 0) {
-            button("Auto /bal every 15s: " + on(mod.settings.pollBalance), x, y, w - 3, () -> change(() -> mod.settings.pollBalance = !mod.settings.pollBalance)); y += 25;
             button("Read /bal now", x, y, w - 3, () -> mod.act(mod::requestBalance));
         }
     }
