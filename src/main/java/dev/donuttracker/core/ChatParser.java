@@ -3,7 +3,7 @@ package dev.donuttracker.core;
 import java.util.regex.Pattern;
 
 public final class ChatParser {
-    public enum Result { BALANCE, PAYMENT, BELOW_MINIMUM, IGNORED }
+    public enum Result { BALANCE, PAYMENT, BELOW_MINIMUM, EXPENSE, IGNORED }
     private final Settings settings;
     public ChatParser(Settings settings) { this.settings = settings; settings.validatePatterns(); }
     public Result accept(String message, Tracker tracker, PaymentQueue queue) {
@@ -14,9 +14,16 @@ public final class ChatParser {
         if (payment.matches()) {
             var amount = Money.parse(payment.group(2));
             boolean queued = queue.add(payment.group(1), amount, settings.minimumPayment);
-            // Queue minimum only filters the queue, never the session's received total.
+            // Queue minimum only filters the queue, never the session's net total.
             if (amount.signum() > 0) tracker.incomingPayment(amount);
             return queued ? Result.PAYMENT : Result.BELOW_MINIMUM;
+        }
+        var expense = Pattern.compile(settings.expensePattern).matcher(line);
+        if (expense.matches()) {
+            var amount = Money.parse(expense.group(1));
+            if (amount.signum() <= 0) return Result.IGNORED;
+            tracker.outgoingPayment(amount);
+            return Result.EXPENSE;
         }
         return Result.IGNORED;
     }

@@ -58,7 +58,7 @@ final class TrackerHud {
             clock(g, 12, 78, muted);
             scaled(g, mod.tracker.duration(), 25, 79, .8f, ink);
         }
-        if (h.showRate) right(g, Money.signed(mod.tracker.perHour()) + " / hr", width() - 11, 79, .75f, ink);
+        if (h.showRate) right(g, Money.signed(mod.tracker.perHour()) + " / hr", width() - 11, 79, .75f, mod.tracker.perHour().signum() < 0 ? opaque(h.negative) : ink);
         divider(g, 91, h);
         scaled(g, "Balance", 11, 97, .65f, muted);
         right(g, mod.tracker.hasBalance() ? Money.format(mod.tracker.balance()) : "Run /bal", width() - 11, 97, .65f, ink);

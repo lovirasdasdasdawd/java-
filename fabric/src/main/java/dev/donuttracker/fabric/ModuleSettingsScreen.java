@@ -129,7 +129,14 @@ final class ModuleSettingsScreen extends Screen {
             mod.status = "Detection pattern saved.";
         })); y += 25;
         if (tab == 0) {
-            button("Read /bal now", x, y, w - 3, () -> mod.act(mod::requestBalance));
+            caption("Expense pattern (1 capture: amount)",x,y,0xFFA7B4CB); y+=15;
+            EditBox expense = input(mod.settings.expensePattern,x,y,w-3,1024); y+=25;
+            button("Save expense pattern",x,y,w/2-3,()->mod.act(()->{
+                String old=mod.settings.expensePattern;mod.settings.expensePattern=expense.getValue();
+                try {mod.settings.validatePatterns();} catch(RuntimeException ex){mod.settings.expensePattern=old;throw ex;}
+                mod.status="Expense detection pattern saved.";
+            }));
+            button("Read /bal now", x+w/2, y, w/2-3, () -> mod.act(mod::requestBalance));
         }
     }
     private void history(int y) {

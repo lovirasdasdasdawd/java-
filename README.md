@@ -6,16 +6,18 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.2.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.3.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
 
-## New in 1.4.2: live received-payment sessions
+## New in 1.4.3: live net profit
 
-Use `/start` to start a received-payments session immediately, without `/bal` or a known starting balance. Each matching server payment adds to the HUD total and hourly rate as it arrives, including payments below the queue minimum. Use `/stop` to freeze the total and save it in history. Starting again begins at zero; starting twice while running is rejected. This mode totals money received, rather than net profit after spending or return payments. Manual balance messages do not alter this mode's total.
+`/start` starts a live net session; `/stop` freezes and saves it. Incoming payments add to the total, and confirmed outgoing payments subtract. Example: receive 3M, pay 2M → +1M, pay another 2M → -1M. Negative totals use the HUD's loss colour, including the hourly rate. Queue thresholds only filter the queue, not the tracker.
 
-Regular balance-based sessions also estimate incoming payments live; a manual balance reading replaces the estimate without adding the same payment twice. A stopped session's result stays frozen.
+Only matching server confirmations change the total: submitting `/pay` or clicking 2×/3× does not subtract until confirmed. Default expense detection supports `You paid Steve $2M`, `You paid $2M to Steve`, `You successfully paid $2M to Steve!`, `You sent $2M to Steve`, and `You lost $3M`. Actual server wording may differ; adjust Tracker → Messages → Expense pattern (one amount capture). No automatic `/bal` is sent. Other losses without a matching chat message cannot be detected immediately; a manual balance reading reconciles changes if an earlier balance is known. Without a prior balance, the first reading establishes a baseline for later reconciliation.
+
+`/sstart` and `/sstop` remain aliases. Session results stay frozen after stopping. Manual balance readings replace the estimated balance without counting recognized payments twice. With no starting balance, history endpoints are accounting values representing the net result, not verified bank balances.
 
 ## New in 1.4.0: clearer settings
 
@@ -33,11 +35,11 @@ One return is permitted per queue entry: its request marker is persisted before 
 
 ## Clean HUD design
 
-The gameplay HUDs now use the clean design preview: rounded translucent charcoal cards, subtle borders, large centered session profit, a timer/rate row and balance footer. Payment Queue includes the active player head, name, amount, waiting-count pill and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Design → Clean preset for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. The arrow in the queue footer is decorative; Next Player is available in the module menu in the module menu.
+The gameplay HUDs now use the clean design preview: rounded translucent charcoal cards, subtle borders, large centered session profit, a timer/rate row and balance footer. Payment Queue includes the active player head, name, amount, waiting-count pill and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Design → Clean preset for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. The arrow in the queue footer is decorative; Next Player is available in the module menu.
 
 ## Payment refresh fix
 
-Automatic `/bal` commands are removed in 1.4.0. Receiving payments, clicking 2×/3×, and ticking a running session never request a balance. Old `balance.poll=true` settings are ignored and retired. Incoming payments update active sessions immediately in 1.4.2. In balance-based sessions, manual balance readings replace the estimated balance; in `/start` sessions, they leave the received total unchanged.
+Automatic `/bal` commands are removed in 1.4.0. Receiving payments, clicking 2×/3×, and ticking a running session never request a balance. Old `balance.poll=true` settings are ignored and retired. Incoming payments update active sessions immediately in 1.4.2. In balance-based sessions, manual balance readings replace the estimated balance; in `/start` sessions, later readings reconcile any unreported changes against the last known balance.
 
 ## Module controls
 
@@ -86,8 +88,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.2.jar` — installable mod.
-- `build/libs/donut-tracker-1.4.2.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.4.3.jar` — installable mod.
+- `build/libs/donut-tracker-1.4.3.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -100,10 +102,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.4.2.jar
+java -jar build/libs/donut-tracker-1.4.3.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.4.2.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.4.3.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

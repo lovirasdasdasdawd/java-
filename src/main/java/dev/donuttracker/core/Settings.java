@@ -28,6 +28,8 @@ public final class Settings {
     public static final String LEGACY_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*!?$";
     public static final String DEFAULT_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?\\s*[!.]?$";
     public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
+    // One amount capture shared by outgoing confirmations and explicit monetary loss lines.
+    public String expensePattern = "(?i)^you\\s+(?:(?:have\\s+)?(?:successfully\\s+)?(?:paid|sent)\\s+(?:[A-Za-z0-9_]{1,16}\\s+|(?=\\$|[0-9]))|lost\\s+)\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?(?:\\s+to\\s+[A-Za-z0-9_]{1,16})?\\s*[!.]?$";
     public Settings() { queue.x = 280; queue.y = 16; queue.accent = 0x70CFEA; }
     public static int color(String hex) {
         String s = hex.strip().replaceFirst("^#", "");
@@ -36,6 +38,7 @@ public final class Settings {
     }
     public void validatePatterns() {
         if (Pattern.compile(balancePattern).matcher("").groupCount() != 1) throw new IllegalArgumentException("Balance pattern needs one capture group: amount.");
+        if (Pattern.compile(expensePattern).matcher("").groupCount() != 1) throw new IllegalArgumentException("Expense pattern needs one capture group: amount.");
         if (Pattern.compile(paymentPattern).matcher("").groupCount() != 2) throw new IllegalArgumentException("Payment pattern needs two capture groups: player, amount.");
     }
     public static Settings load(Path file) throws IOException {
@@ -48,6 +51,7 @@ public final class Settings {
             s.minimumPayment = Money.parse(p.getProperty("queue.minimum", "100K"));
             if (s.minimumPayment.signum() < 0) throw new IllegalArgumentException("Minimum payment must be nonnegative.");
             s.balancePattern = p.getProperty("balance.pattern", s.balancePattern);
+            s.expensePattern = p.getProperty("expense.pattern", s.expensePattern);
             s.paymentPattern = p.getProperty("payment.pattern", s.paymentPattern);
             if (s.paymentPattern.equals(LEGACY_PAYMENT_PATTERN)) s.paymentPattern = DEFAULT_PAYMENT_PATTERN;
             s.validatePatterns();
@@ -79,7 +83,7 @@ public final class Settings {
         validatePatterns();
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
         p.setProperty("queue.minimum", minimumPayment.toPlainString());
-        p.setProperty("balance.pattern", balancePattern); p.setProperty("payment.pattern", paymentPattern);
+        p.setProperty("balance.pattern", balancePattern); p.setProperty("payment.pattern", paymentPattern); p.setProperty("expense.pattern", expensePattern);
         atomicSave(file, p, "Donut Tracker — per-HUD design and server detection patterns");
     }
     private static void write(Properties p, String k, Hud h) {

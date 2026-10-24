@@ -95,6 +95,8 @@ public final class DonutTrackerClient implements ClientModInitializer {
                 PaymentQueue.Payment receipt = queue.all().getLast();
                 chatReceipts.put(token,receipt);
                 return message.copy().append(chatReturnButton(token,receipt,2)).append(chatReturnButton(token,receipt,3));
+            } else if (result == ChatParser.Result.EXPENSE) {
+                status = "Confirmed expense recorded. Session: " + Money.signed(tracker.profit()); save();
             } else if (result == ChatParser.Result.BELOW_MINIMUM && tracker.running()) status = "Payment added to session; below queue minimum.";
         } catch (RuntimeException ex) { status = "Message not recorded: " + ex.getMessage(); LOG.warn(status); }
         return message;
@@ -120,7 +122,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
     }
     private int sessionCommand(boolean start) {
         try {
-            if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking received payments live. Use /stop to finish."; }
+            if (start) { tracker.startPayments(); cancelPending(); settings.profit.enabled = true; status = "Tracking income and confirmed expenses live. Use /stop to finish."; }
             else { tracker.stop(); cancelPending(); status = "Session ended: " + Money.signed(tracker.profit()); }
             save(); return 1;
         } catch (RuntimeException ex) {
