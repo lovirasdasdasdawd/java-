@@ -12,7 +12,7 @@ public final class StateStore {
         Properties p = new Properties(); int i = 0;
         for (var s : tracker.history()) p.setProperty("session." + i++, s.startedAt() + ";" + s.endedAt() + ";" + s.startingBalance() + ";" + s.endingBalance());
         i = 0;
-        for (var q : queue.all()) p.setProperty("payment." + i++, q.player() + ";" + q.amount() + ";" + q.receivedAt());
+        for (var q : queue.all()) p.setProperty("payment." + i++, q.player() + ";" + q.amount() + ";" + q.receivedAt() + ";" + q.returnMultiplier());
         Settings.atomicSave(file, p, "Completed sessions and pending payments. Live balances are not restored.");
     }
     public static void load(Path file, Tracker tracker, PaymentQueue queue) throws IOException {
@@ -26,7 +26,7 @@ public final class StateStore {
             }
             for (int i = 0; i < 500 && p.containsKey("payment." + i); i++) {
                 String[] v = p.getProperty("payment." + i).split(";");
-                payments.add(new PaymentQueue.Payment(v[0], Money.parse(v[1]), Long.parseLong(v[2])));
+                payments.add(new PaymentQueue.Payment(v[0], Money.parse(v[1]), Long.parseLong(v[2]), v.length >= 4 ? Integer.parseInt(v[3]) : 0));
             }
         } catch (RuntimeException e) { throw new IOException("Invalid history/queue data in " + file, e); }
         tracker.restoreHistory(sessions); queue.restore(payments);

@@ -38,8 +38,10 @@ public final class DonutTrackerClient implements ClientModInitializer {
         try { settings = Settings.load(config); } catch (IOException ex) { settings = new Settings(); settingsWritable = false; LOG.error("Settings could not be read; original file preserved", ex); status = "Invalid settings file: " + config; }
         try { StateStore.load(state, tracker, queue); } catch (IOException ex) { stateWritable = false; LOG.error("History could not be read; original file preserved", ex); status = "Invalid history file: " + state; }
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
+        KeyMapping payments = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.payments", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (menu.consumeClick()) if (client.player != null) client.setScreen(new TrackerScreen(this, client.screen));
+            while (payments.consumeClick()) if (client.player != null) client.setScreen(new PaymentActionScreen(this, client.screen));
             long now = System.currentTimeMillis();
             if ((pendingStart || pendingStop) && now - pendingAt > 10_000) {
                 pendingStart = pendingStop = false; status = "No matching /bal response. Check Detection or enter a manual balance.";
@@ -64,7 +66,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         });
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("donuttracker", "hud"), (g, delta) -> {
             Minecraft client = Minecraft.getInstance();
-            if (client.player != null && !client.options.hideGui) TrackerHud.render(g, this, false);
+            if (client.player != null && !client.options.hideGui && !(client.screen instanceof PaymentActionScreen)) TrackerHud.render(g, this, false);
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             if (tracker.running()) { tracker.stop(); status = "Disconnected: session ended at last observed balance."; }
@@ -90,6 +92,16 @@ public final class DonutTrackerClient implements ClientModInitializer {
         requestBalance(); pendingStop = true; pendingStart = false; pendingAt = System.currentTimeMillis();
     }
     void cancelPending() { pendingStart = pendingStop = false; }
+    void returnPayment(PaymentQueue.Payment expected, int multiplier) {
+        var connection = Minecraft.getInstance().getConnection();
+        if (connection == null || Minecraft.getInstance().player == null) throw new IllegalStateException("Join a server first.");
+        if (!stateWritable) throw new IllegalStateException("Fix the history file before sending return payments.");
+        try {
+            String command = ReturnPayments.send(queue, expected, multiplier, () -> StateStore.save(state, tracker, queue), connection::sendCommand);
+            status = "Sent /" + command + ". Check the server response in chat.";
+            paymentBalanceSync.received(ChatParser.Result.PAYMENT, tracker.running());
+        } catch (IOException ex) { throw new java.io.UncheckedIOException("Could not save the return request; no command sent.", ex); }
+    }
     void save() {
         try {
             if (settingsWritable) settings.save(config);

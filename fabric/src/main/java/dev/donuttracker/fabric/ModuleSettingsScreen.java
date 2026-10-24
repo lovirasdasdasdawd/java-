@@ -114,6 +114,7 @@ final class ModuleSettingsScreen extends Screen {
         button("Add payment", x, y, w - 3, () -> mod.act(() -> {
             mod.status = mod.queue.add(name.getValue().strip(), Money.parse(amount.getValue()), mod.settings.minimumPayment) ? "Payment added." : "Below minimum payment.";
         }));
+        button("Open 2x / 3x payment actions [P]", x, y + 23, w - 3, () -> minecraft.setScreen(new PaymentActionScreen(mod, this)));
     }
     private void detection(int y) {
         int x = left + 12, w = panelWidth - 24;

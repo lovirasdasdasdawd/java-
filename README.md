@@ -6,14 +6,22 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.2.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.0.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
 
-## New in 1.2.0
+## New in 1.3.0: one-click 2x / 3x returns
 
-The gameplay HUDs now use the clean design preview: rounded translucent charcoal cards, subtle borders, large centered session profit, a timer/rate row and balance footer. Payment Queue includes the active player head, name, amount, waiting-count pill and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Design → Apply clean preview style for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. The arrow in the queue footer is decorative; Next Player stays in the module menu.
+The active payment has 2x and 3x controls. Press **P** to release the cursor and click them directly on the HUD, or open Payment actions from the module menu. Hovering a control shows its exact command. A 1M incoming payment sends `/pay <that IGN> 2000000` or `/pay <that IGN> 3000000`. Commands are sent immediately on click. Amounts use exact decimal multiplication.
+
+The queue entry is marked **2x requested** or **3x requested** and both buttons are disabled after dispatch. This marker is persisted before the command is sent, survives restart, and prevents a second click from sending another return. The player remains active until you choose **Next player**. The label means the command was requested, not that the server confirmed a transfer: check the server chat for insufficient funds, cooldown or other rejection. Failed/ambiguous sends are never automatically retried. No live server funds were used in tests.
+
+Existing queues remain readable. Known old default payment patterns are upgraded for optional trailing currency markers; user-defined patterns remain intact. Minecraft formatting spaces are normalized.
+
+## Clean HUD design
+
+The gameplay HUDs now use the clean design preview: rounded translucent charcoal cards, subtle borders, large centered session profit, a timer/rate row and balance footer. Payment Queue includes the active player head, name, amount, waiting-count pill and next-player summary. Clean mode has no accent outline or glow; Neon remains available. Each module has Design → Apply clean preview style for the mint/lavender/cyan palette without overwriting saved custom colours automatically. Positions, scaling, layouts and display toggles remain supported. Minecraft’s native pixel font is used rather than the mockup’s smooth font. The arrow in the queue footer is decorative; Next Player is available in the module menu and P controls.
 
 ## Payment refresh fix
 
@@ -66,8 +74,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.2.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.2.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.3.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.3.0.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -80,10 +88,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.2.0.jar
+java -jar build/libs/donut-tracker-1.3.0.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.2.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.3.0.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

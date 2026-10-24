@@ -25,7 +25,9 @@ public final class Settings {
     public BigDecimal minimumPayment = new BigDecimal("100000");
     // Anchored patterns: capture only confirmed balance/payment lines, never arbitrary chat amounts.
     public String balancePattern = "(?i)^(?:you have|(?:your )?balance\\s*[:»])\\s*\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*$";
-    public String paymentPattern = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*!?$";
+    public static final String LEGACY_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*!?$";
+    public static final String DEFAULT_PAYMENT_PATTERN = "(?i)^([A-Za-z0-9_]{1,16})\\s+(?:paid you|sent you)\\s+\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?\\s*[!.]?$";
+    public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
     public boolean pollBalance = false;
     public Settings() { queue.x = 280; queue.y = 16; queue.accent = 0x70CFEA; }
     public static int color(String hex) {
@@ -48,6 +50,7 @@ public final class Settings {
             if (s.minimumPayment.signum() < 0) throw new IllegalArgumentException("Minimum payment must be nonnegative.");
             s.balancePattern = p.getProperty("balance.pattern", s.balancePattern);
             s.paymentPattern = p.getProperty("payment.pattern", s.paymentPattern);
+            if (s.paymentPattern.equals(LEGACY_PAYMENT_PATTERN)) s.paymentPattern = DEFAULT_PAYMENT_PATTERN;
             s.pollBalance = Boolean.parseBoolean(p.getProperty("balance.poll", "false"));
             s.validatePatterns();
         } catch (IllegalArgumentException e) { throw new IOException("Invalid settings in " + file + ": " + e.getMessage(), e); }

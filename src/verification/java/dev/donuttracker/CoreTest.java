@@ -89,6 +89,47 @@ public final class CoreTest {
         Tracker restored = new Tracker(); PaymentQueue restoredQueue = new PaymentQueue(); StateStore.load(statePath, restored, restoredQueue);
         check(restored.history().size() == 2, "session persistence"); check(restoredQueue.all().equals(q.all()), "queue persistence");
         check(!restored.hasBalance() && !restored.running(), "stale balance/running state never restored");
+        // Return commands are tested with fake senders; these tests never pay on a server.
+        PaymentQueue returns = new PaymentQueue(); returns.add("1arp_", Money.parse("1M"), BigDecimal.ZERO);
+        var original = returns.active(); var sent = new java.util.ArrayList<String>();
+        check(ReturnPayments.command(original,2).equals("pay 1arp_ 2000000"), "screenshot IGN: 1M returns 2M");
+        check(ReturnPayments.command(original,3).equals("pay 1arp_ 3000000"), "1M returns 3M");
+        check(ReturnPayments.command(new PaymentQueue.Payment("Alex",Money.parse("1.25"),1),3).equals("pay Alex 3.75"), "decimal return is exact");
+        check(ReturnPayments.command(new PaymentQueue.Payment("Steve",Money.parse("100B"),1),3).equals("pay Steve 300000000000"), "large return uses plain decimal amount");
+        rejects(() -> ReturnPayments.command(original,4), "only 2x or 3x allowed");
+        rejects(() -> ReturnPayments.command(null,2), "empty queue cannot pay");
+        rejects(() -> ReturnPayments.command(new PaymentQueue.Payment("Alex pay Evil",Money.parse("1M"),1),2), "IGN cannot inject a command");
+        rejects(() -> ReturnPayments.command(new PaymentQueue.Payment("Alex",BigDecimal.ZERO,1),2), "zero return rejected");
+        var payoutFile = dir.resolve("returns.properties");
+        String dispatched = ReturnPayments.send(returns,original,2,() -> StateStore.save(payoutFile,restored,returns),sent::add);
+        check(dispatched.equals("pay 1arp_ 2000000") && sent.size()==1, "click dispatches exactly one command");
+        check(returns.active().returnMultiplier()==2, "active entry marked requested");
+        rejects(() -> { try { ReturnPayments.send(returns,original,3,() -> {},sent::add); } catch(java.io.IOException ex){throw new RuntimeException(ex);} }, "stale second click cannot send 3x");
+        rejects(() -> { try { ReturnPayments.send(returns,returns.active(),2,() -> {},sent::add); } catch(java.io.IOException ex){throw new RuntimeException(ex);} }, "same entry cannot pay again");
+        check(sent.size()==1,"double click never dispatches twice");
+        PaymentQueue loadedReturns = new PaymentQueue(); StateStore.load(payoutFile,new Tracker(),loadedReturns);
+        check(loadedReturns.active().returnMultiplier()==2,"return marker persists across restart");
+        rejects(() -> ReturnPayments.command(loadedReturns.active(),3),"restart cannot resend marked entry");
+        PaymentQueue nextQueue = new PaymentQueue(); nextQueue.add("Alex",Money.parse("1M"),BigDecimal.ZERO); var stale = nextQueue.active(); nextQueue.next(); nextQueue.add("Steve",Money.parse("1M"),BigDecimal.ZERO);
+        rejects(() -> { try { ReturnPayments.send(nextQueue,stale,2,() -> {},sent::add); } catch(java.io.IOException ex){throw new RuntimeException(ex);} }, "changed active player prevents stale click");
+        check(sent.size()==1,"stale click never pays the next IGN");
+        PaymentQueue failedSave = new PaymentQueue(); failedSave.add("Alex",Money.parse("1M"),BigDecimal.ZERO);
+        try { ReturnPayments.send(failedSave,failedSave.active(),2,() -> {throw new java.io.IOException("disk full");},sent::add); throw new AssertionError("must fail saving"); }
+        catch(java.io.IOException expected) { check(sent.size()==1 && !failedSave.active().returnRequested(),"failed persistence sends nothing and restores entry"); }
+        PaymentQueue ambiguousSend = new PaymentQueue(); ambiguousSend.add("Steve",Money.parse("1M"),BigDecimal.ZERO);
+        try { ReturnPayments.send(ambiguousSend,ambiguousSend.active(),3,() -> {},command -> {throw new IllegalStateException("connection interrupted");}); throw new AssertionError("must fail send"); }
+        catch(IllegalStateException expected) { check(ambiguousSend.active().returnMultiplier()==3,"ambiguous send remains blocked to prevent duplicate return"); }
+        Settings chatSettings = new Settings(); PaymentQueue screenshotQueue = new PaymentQueue();
+        check(new ChatParser(chatSettings).accept("1arp_ paid you $1M $",new Tracker(),screenshotQueue)==ChatParser.Result.PAYMENT,"payment suffix currency accepted");
+        check(new ChatParser(chatSettings).accept("1arp_ paid you $\u00a01M",new Tracker(),screenshotQueue)==ChatParser.Result.PAYMENT,"nonbreaking space in styled message accepted");
+        var legacySettings = dir.resolve("legacy.properties"); var properties = new java.util.Properties(); properties.setProperty("payment.pattern",Settings.LEGACY_PAYMENT_PATTERN);
+        try(var writer=Files.newBufferedWriter(legacySettings)){properties.store(writer,"");}
+        check(Settings.load(legacySettings).paymentPattern.equals(Settings.DEFAULT_PAYMENT_PATTERN),"known old default pattern upgraded");
+        properties.setProperty("payment.pattern","^CUSTOM ([A-Za-z0-9_]+) ([0-9]+)$"); try(var writer=Files.newBufferedWriter(legacySettings)){properties.store(writer,"");}
+        check(Settings.load(legacySettings).paymentPattern.equals(properties.getProperty("payment.pattern")),"custom detection pattern preserved");
+        var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");
+        PaymentQueue migratedQueue = new PaymentQueue();StateStore.load(legacyQueue,new Tracker(),migratedQueue);
+        check(!migratedQueue.active().returnRequested(),"old queue file remains readable");
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }
