@@ -52,6 +52,11 @@ final class ModuleSettingsScreen extends Screen {
         slider("Size", x, y, w - 3, (h.scale - .5) / 1.5, v -> h.scale = .5 + v * 1.5, v -> Math.round((.5 + v * 1.5) * 100) + "%"); y += 23;
         slider("Opacity", x, y, w - 3, h.opacity, v -> h.opacity = v, v -> Math.round(v * 100) + "%"); y += 23;
         button("Position / move box", x, y, w - 3, () -> { section = 6; rebuildWidgets(); });
+        button("Apply clean preview style", x, y + 23, w - 3, () -> change(() -> {
+            h.theme = Settings.Theme.CLEAN; h.accent = tab == 0 ? 0xB8A5F4 : 0x9BCEDB;
+            h.text = 0xE9EAF2; h.positive = 0x8AE8C3; h.negative = 0xF08091;
+            h.background = 0x171B24; h.opacity = .9;
+        }));
     }
     private void display(int y) {
         Settings.Hud h = hud(); int x = left + 12, w = panelWidth - 24, half = w / 2;
