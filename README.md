@@ -1,1 +1,84 @@
-# java-
+# Donut Tracker
+
+Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and an executable desktop settings companion.
+
+## Install the Minecraft mod
+
+1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
+2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.0.0.jar` into that folder.
+4. Launch the Fabric profile and press **Right Shift** while in a world/server.
+
+The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
+
+## Features and controls
+
+- **Profit Tracker:** start/end sessions, total profit or loss, elapsed time, money/hour, and the latest 100 completed sessions.
+- **Payment Queue:** one active player, up to 499 waiting payments, IGN and amount, a manual Next Player button, and a configurable payment minimum. Online players' heads use Minecraft's existing skin data; unavailable skins show an initial.
+- **Independent HUD designs:** Clean or Neon, custom HEX accent/text/profit/loss/background colours, colour presets, 50–200% size, background opacity, compact/stacked/minimal layouts, and display toggles.
+- **Move HUDs:** drag either card, then Escape to save. Settings, completed history, and pending payments persist under Minecraft's `config` folder. A live session is not resumed after restarting.
+- Money uses **K / M / B / T**, including decimals and negative values. Calculations use decimal arithmetic; abbreviations affect display only.
+
+The default design is **Clean**, dark purple with pink/purple and cyan accents. **Neon** adds an accent-coloured glow; it does not flash or animate.
+
+### Balances and payments
+
+The parser matches these user-provided server messages, ignoring Minecraft colour formatting and extra spaces after `$`:
+
+```text
+You Have $ 2,311,178,968
+Imunknown67 paid you $ 1
+```
+
+Only server-generated chat is parsed; ordinary player chat is ignored. Patterns can be changed in **Detection**. Server prefixes or different wording may require a pattern update. Matching has been tested with the supplied examples; live DonutSMP behaviour needs verification on your client.
+
+**Start tracking** and **End tracking** send `/bal` and wait up to 10 seconds for a fresh matching balance before recording their endpoint. Timeout preserves the existing session. Optional **Auto /bal every 15s** updates a running session; it is off initially. With it off, run `/bal` yourself for intermediate live updates. Manual balance/start/end controls are available as a fallback. Profit is ending balance minus starting balance, so spending and losses count too. Payment messages only populate the queue and are never added again to the balance.
+
+The default minimum payment is **100K**. Set it to **1** in Payment Queue → Queue to include the sample `$1` payment. The minimum affects future arrivals, not payments already queued. On disconnect, an active session ends at its last observed balance, which may be stale.
+
+Files: `config/donut-tracker.properties` and `config/donut-tracker-sessions.properties`. Invalid files are preserved and saving is blocked until corrected and the client restarted.
+
+## Build
+
+On a machine with JDK 21:
+
+```sh
+./gradlew -PwithFabric build :fabric:build
+```
+
+Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1**. Versions are pinned for Minecraft, Fabric Loader, Fabric API, and Loom.
+
+Outputs:
+
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.0.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.0.0.jar` — executable desktop companion, not a Minecraft mod.
+
+For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
+
+`coreTest` runs an assertion-based verification runner with formatting, supplied chat examples, profit/rate/timer calculations, losses, FIFO queue behaviour, filtering, and design/history persistence checks. There is no JUnit suite; Gradle's `test` tasks report `NO-SOURCE` on a clean build.
+
+## Run
+
+```sh
+# Minecraft development client
+./gradlew -PwithFabric :fabric:runClient
+
+# Desktop companion (requires a graphical desktop)
+java -jar build/libs/donut-tracker-1.0.0.jar
+
+# Render the actual companion settings screen without a display
+java -jar build/libs/donut-tracker-1.0.0.jar --render settings-preview.png
+```
+
+The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.
+
+## Cloud environment
+
+The task is already isolated; use `/workspace/java-` directly and do not create a worktree.
+
+```sh
+bash .cloud/install.sh       # repeatable setup, build and verification
+source .cloud/env.sh         # initialize each fresh shell
+```
+
+Cloud setup installs a checksum-verified Temurin JDK under `/workspace/toolchains`, configures Gradle for the existing HTTPS proxy and its platform CA, and keeps TLS verification enabled. It does not install system packages or require root. Cached dependencies and tools are retained in the published snapshot; running processes must be restarted. A graphical Minecraft client additionally needs a display or virtual framebuffer.

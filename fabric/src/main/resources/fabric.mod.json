@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "donuttracker",
+  "version": "${version}",
+  "name": "Donut Tracker",
+  "description": "Customizable profit and payment queue HUDs. Right Shift opens settings.",
+  "environment": "client",
+  "entrypoints": {"client": ["dev.donuttracker.fabric.DonutTrackerClient"]},
+  "depends": {"fabricloader": ">=0.18.4", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*"}
+}

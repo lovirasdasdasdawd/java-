@@ -1,0 +1,20 @@
+plugins { id 'java'; id 'application' }
+group = 'dev.donuttracker'
+version = '1.0.0'
+java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
+application { mainClass = 'dev.donuttracker.desktop.DonutTrackerApp' }
+sourceSets {
+    verification {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+jar { manifest { attributes 'Main-Class': application.mainClass.get() } }
+tasks.register('coreTest', JavaExec) {
+    dependsOn verificationClasses
+    classpath = sourceSets.verification.runtimeClasspath
+    mainClass = 'dev.donuttracker.CoreTest'
+    jvmArgs '-ea', '-Djava.awt.headless=true'
+}
+check.dependsOn coreTest

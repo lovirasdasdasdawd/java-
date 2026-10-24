@@ -1,0 +1,6 @@
+pluginManagement {
+    repositories { maven { url = 'https://maven.fabricmc.net/' }; gradlePluginPortal(); mavenCentral() }
+}
+rootProject.name = 'donut-tracker'
+// The desktop executable and core tests need no Minecraft downloads.
+if (providers.gradleProperty('withFabric').isPresent()) include 'fabric'
