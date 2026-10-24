@@ -28,11 +28,11 @@ final class ColourPickerScreen extends Screen {
         size = Math.min(150, Math.min(height - 115, width - 160)); size = Math.max(60, size);
         left = (width - size - 124) / 2; top = Math.max(30, (height - size - 75) / 2);
         hex = new EditBox(font, left + size + 28, top + 53, 90, 20, Component.literal("HEX colour")); hex.setMaxLength(7); hex.setValue(String.format("#%06X", colour())); addRenderableWidget(hex);
-        addRenderableWidget(Button.builder(Component.literal("Use HEX"), b -> mod.act(() -> { int c = Settings.color(hex.getValue()); float[] hsv = Color.RGBtoHSB(c >> 16 & 255, c >> 8 & 255, c & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]; apply(); })).bounds(left + size + 28, top + 78, 90, 20).build());
+        addRenderableWidget(new MenuWidgets.Action(left + size + 28, top + 78, 90, 20, "Use HEX", () -> 0xB8A5F4, MenuWidgets.Kind.SECONDARY, () -> mod.act(() -> { int c = Settings.color(hex.getValue()); float[] hsv = Color.RGBtoHSB(c >> 16 & 255, c >> 8 & 255, c & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]; apply(); })));
         int[] colours = {0xCB8CF6,0xF277D7,0x70CFEA,0x39DA94,0xFF657A,0xFFCC74,0xFFFFFF,0x10131F};
         int cell = (size + 120) / colours.length;
         for (int i = 0; i < colours.length; i++) { int c = colours[i]; addRenderableWidget(new ColourButton(left + i * cell, top + size + 9, cell - 3, 18, c, "", () -> { float[] hsv = Color.RGBtoHSB(c >> 16 & 255, c >> 8 & 255, c & 255, null); hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]; apply(); })); }
-        addRenderableWidget(Button.builder(Component.literal("Done - save colour"), b -> onClose()).bounds(left, top + size + 34, size + 120, 20).build());
+        addRenderableWidget(new MenuWidgets.Action(left,top+size+34,size+120,20,"Done - save colour",()->0xB8A5F4,MenuWidgets.Kind.PRIMARY,this::onClose));
     }
     private void apply() { setter.accept(colour()); hex.setValue(String.format("#%06X", colour())); mod.save(); }
     private void pick(double x, double y) {

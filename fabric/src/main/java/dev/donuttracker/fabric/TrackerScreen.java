@@ -14,10 +14,10 @@ final class TrackerScreen extends Screen {
     @Override protected void init() {
         panelWidth = Math.min(560, width - 24); left = (width - panelWidth) / 2; top = Math.max(12, (height - 200) / 2);
         int gap = 12, card = (panelWidth - gap) / 2;
-        addRenderableWidget(Button.builder(Component.literal("Open Tracker settings"), b -> minecraft.setScreen(new ModuleSettingsScreen(mod, this, false))).bounds(left + 10, top + 116, card - 20, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Open Payment settings"), b -> minecraft.setScreen(new ModuleSettingsScreen(mod, this, true))).bounds(left + card + gap + 10, top + 116, card - 20, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Move HUD boxes"), b -> minecraft.setScreen(new HudEditorScreen(mod, this))).bounds(left, top + 151, panelWidth / 2 - 5, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Save & close"), b -> onClose()).bounds(left + panelWidth / 2 + 5, top + 151, panelWidth / 2 - 5, 20).build());
+        addRenderableWidget(new MenuWidgets.Action(left+10,top+116,card-20,20,"Open Tracker",()->mod.settings.profit.accent,MenuWidgets.Kind.PRIMARY,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false))));
+        addRenderableWidget(new MenuWidgets.Action(left+card+gap+10,top+116,card-20,20,"Open Payment Queue",()->mod.settings.queue.accent,MenuWidgets.Kind.PRIMARY,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true))));
+        addRenderableWidget(new MenuWidgets.Action(left,top+151,panelWidth/2-5,20,"Move HUD boxes",()->mod.settings.profit.accent,MenuWidgets.Kind.SECONDARY,()->minecraft.setScreen(new HudEditorScreen(mod,this))));
+        addRenderableWidget(new MenuWidgets.Action(left+panelWidth/2+5,top+151,panelWidth/2-5,20,"Save & close",()->mod.settings.profit.accent,MenuWidgets.Kind.SECONDARY,this::onClose));
     }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
         g.fill(0, 0, width, height, 0xB0060912);

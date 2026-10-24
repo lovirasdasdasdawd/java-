@@ -2,8 +2,6 @@ package dev.donuttracker.fabric;
 
 import dev.donuttracker.core.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -11,25 +9,25 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.DoubleConsumer;
 
 final class ModuleSettingsScreen extends Screen {
     private final DonutTrackerClient mod;
     private final Screen parent;
     private int tab, section, left, top, panelWidth, panelHeight;
     private int historyPage;
+    private int previewX, previewY, previewWidth;
     private final List<Caption> captions = new ArrayList<>();
     private record Caption(String text, int x, int y, int color) {}
     ModuleSettingsScreen(DonutTrackerClient mod, Screen parent, boolean payment) { super(Component.literal(payment ? "Payment Queue" : "Profit Tracker")); this.mod = mod; this.parent = parent; this.tab = payment ? 1 : 0; }
     @Override public boolean isPauseScreen() { return false; }
     private Settings.Hud hud() { return tab == 1 ? mod.settings.queue : mod.settings.profit; }
     @Override protected void init() {
-        captions.clear(); panelWidth = Math.min(600, width - 16); panelHeight = Math.min(360, height - 12);
+        captions.clear(); previewWidth = 0; panelWidth = Math.min(600, width - 16); panelHeight = Math.min(280, height - 12);
         left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
         int y = top + 31;
-        String[] pages = tab == 0 ? new String[]{"Design", "Colours", "Display", "Session", "Detection", "History"} : new String[]{"Design", "Colours", "Display", "Queue", "Detection", "Position"};
+        String[] pages = tab == 0 ? new String[]{"Design", "Colours", "Display", "Session", "Messages", "History"} : new String[]{"Design", "Colours", "Display", "Queue", "Messages", "Position"};
         int cell = (panelWidth - 20) / pages.length;
-        for (int i = 0; i < pages.length; i++) { int page = i; button(pages[i], left + 10 + i * cell, y, cell - 2, () -> { section = page; rebuildWidgets(); }); }
+        for (int i = 0; i < pages.length; i++) { int page = i; addRenderableWidget(new MenuWidgets.Action(left + 10 + i * cell,y,cell-2,20,pages[i],()->hud().accent,MenuWidgets.Kind.TAB,()->section==page,-1,()->{section=page;rebuildWidgets();})); }
         y += 27;
         switch (section) {
             case 0 -> design(y);
@@ -40,32 +38,37 @@ final class ModuleSettingsScreen extends Screen {
             case 5 -> { if (tab == 0) history(y); else position(y); }
             case 6 -> position(y);
         }
-        button("Back to modules", left + panelWidth - 114, top + panelHeight - 26, 104, this::onClose);
-        button("Move this HUD", left + 10, top + panelHeight - 26, 104, () -> { mod.save(); minecraft.setScreen(new HudEditorScreen(mod, this, hud())); });
+        addRenderableWidget(new MenuWidgets.Action(left+panelWidth-114,top+panelHeight-26,104,20,"Done",()->hud().accent,MenuWidgets.Kind.PRIMARY,()->{mod.save();minecraft.setScreen(null);}));
+        button("Back to modules",left+10,top+panelHeight-26,104,this::onClose);
     }
     private void design(int y) {
-        Settings.Hud h = hud(); int x = left + 12, w = panelWidth - 24, half = w / 2;
-        button("HUD: " + (h.enabled ? "ON" : "OFF"), x, y, half - 3, () -> change(() -> h.enabled = !h.enabled));
-        button("Style: " + h.theme, x + half, y, half - 3, () -> change(() -> h.theme = h.theme == Settings.Theme.CLEAN ? Settings.Theme.NEON : Settings.Theme.CLEAN));
-        y += 23;
-        button("Layout: " + h.layout, x, y, w - 3, () -> change(() -> h.layout = Settings.Layout.values()[(h.layout.ordinal() + 1) % 3])); y += 23;
-        slider("Size", x, y, w - 3, (h.scale - .5) / 1.5, v -> h.scale = .5 + v * 1.5, v -> Math.round((.5 + v * 1.5) * 100) + "%"); y += 23;
-        slider("Opacity", x, y, w - 3, h.opacity, v -> h.opacity = v, v -> Math.round(v * 100) + "%"); y += 23;
-        button("Position / move box", x, y, w - 3, () -> { section = 6; rebuildWidgets(); });
-        button("Apply clean preview style", x, y + 23, w - 3, () -> change(() -> {
-            h.theme = Settings.Theme.CLEAN; h.accent = tab == 0 ? 0xB8A5F4 : 0x9BCEDB;
-            h.text = 0xE9EAF2; h.positive = 0x8AE8C3; h.negative = 0xF08091;
-            h.background = 0x171B24; h.opacity = .9;
-        }));
+        Settings.Hud h=hud();int x=left+12,total=panelWidth-24,w=total>=500?(total-16)*3/5:total,half=(w-6)/2;
+        addRenderableWidget(new MenuWidgets.Toggle(x,y,half,30,"HUD visible",()->h.enabled,()->h.accent,()->change(()->h.enabled=!h.enabled)));
+        int themeX=x+half+6,themeW=w-half-6;
+        caption("STYLE",themeX,y+1,0xFF8F9CB2);
+        for(int i=0;i<2;i++) { var choice=Settings.Theme.values()[i];int index=i;
+            addRenderableWidget(new MenuWidgets.Action(themeX+index*(themeW/2),y+12,themeW/2-2,18,choice==Settings.Theme.CLEAN?"Clean":"Neon",()->h.accent,MenuWidgets.Kind.TAB,()->h.theme==choice,-1,()->change(()->h.theme=choice)));
+        }
+        int cardW=(w-8)/3;
+        for(int i=0;i<3;i++) { var choice=Settings.Layout.values()[i];String label=switch(choice){case COMPACT->"Compact";case STACKED->"Stacked";case MINIMAL->"Minimal";};
+            addRenderableWidget(new MenuWidgets.Action(x+i*(cardW+4),y+35,cardW,31,label,()->h.accent,MenuWidgets.Kind.CHOICE,()->h.layout==choice,i,()->change(()->h.layout=choice)));
+        }
+        addRenderableWidget(new MenuWidgets.Slider(x,y+72,half,37,"HUD size",(h.scale-.5)/1.5,v->{h.scale=.5+v*1.5;mod.save();},v->Math.round((.5+v*1.5)*100)+"%",()->h.accent));
+        addRenderableWidget(new MenuWidgets.Slider(x+half+6,y+72,w-half-6,37,"Opacity",h.opacity,v->{h.opacity=v;mod.save();},v->Math.round(v*100)+"%",()->h.accent));
+        addRenderableWidget(new MenuWidgets.Action(x,y+115,half,22,"Move HUD...",()->h.accent,MenuWidgets.Kind.SECONDARY,()->minecraft.setScreen(new HudEditorScreen(mod,this,h))));
+        addRenderableWidget(new MenuWidgets.Action(x+half+6,y+115,w-half-6,22,"Clean preset",()->h.accent,MenuWidgets.Kind.PRIMARY,()->change(()->{
+            h.theme=Settings.Theme.CLEAN;h.accent=tab==0?0xB8A5F4:0x9BCEDB;h.text=0xE9EAF2;h.positive=0x8AE8C3;h.negative=0xF08091;h.background=0x171B24;h.opacity=.9;
+        })));
+        if(total>=500) { previewX=x+w+12;previewY=y;previewWidth=total-w-12; }
     }
     private void display(int y) {
-        Settings.Hud h = hud(); int x = left + 12, w = panelWidth - 24, half = w / 2;
-        if (tab == 0) {
-            button("Profit: " + on(h.showProfit), x, y, half - 3, () -> change(() -> h.showProfit = !h.showProfit));
-            button("Timer: " + on(h.showTimer), x + half, y, half - 3, () -> change(() -> h.showTimer = !h.showTimer)); y += 23;
-            button("Money/hour: " + on(h.showRate), x, y, half - 3, () -> change(() -> h.showRate = !h.showRate));
+        Settings.Hud h=hud();int x=left+12,w=panelWidth-24;
+        if(tab==0) {
+            addRenderableWidget(new MenuWidgets.Toggle(x,y,w,27,"Session profit",()->h.showProfit,()->h.accent,()->change(()->h.showProfit=!h.showProfit)));y+=33;
+            addRenderableWidget(new MenuWidgets.Toggle(x,y,w,27,"Elapsed time",()->h.showTimer,()->h.accent,()->change(()->h.showTimer=!h.showTimer)));y+=33;
+            addRenderableWidget(new MenuWidgets.Toggle(x,y,w,27,"Money per hour",()->h.showRate,()->h.accent,()->change(()->h.showRate=!h.showRate)));y+=33;
         }
-        button("Donut icon: " + on(h.showIcon), x + (tab == 0 ? half : 0), y, half - 3, () -> change(() -> h.showIcon = !h.showIcon));
+        addRenderableWidget(new MenuWidgets.Toggle(x,y,w,27,"Module icon",()->h.showIcon,()->h.accent,()->change(()->h.showIcon=!h.showIcon)));
     }
     private void colors(int y) {
         Settings.Hud h = hud(); int x = left + 12, w = panelWidth - 24;
@@ -146,24 +149,33 @@ final class ModuleSettingsScreen extends Screen {
     private static String on(boolean enabled) { return enabled ? "ON" : "OFF"; }
     private void caption(String text, int x, int y, int c) { captions.add(new Caption(text, x, y, c)); }
     private void button(String label, int x, int y, int w, Runnable action) {
-        addRenderableWidget(Button.builder(Component.literal(label), b -> action.run()).bounds(x, y, w, 20).build());
+        addRenderableWidget(new MenuWidgets.Action(x,y,w,20,label,()->hud().accent,MenuWidgets.Kind.SECONDARY,action));
     }
     private EditBox input(String value, int x, int y, int w, int max) {
         EditBox field = new EditBox(font, x, y, w, 20, Component.literal("Value")); field.setMaxLength(max); field.setValue(value); addRenderableWidget(field); return field;
     }
-    private void slider(String label, int x, int y, int w, double initial, DoubleConsumer setter, java.util.function.DoubleFunction<String> format) {
-        addRenderableWidget(new AbstractSliderButton(x, y, w, 20, Component.literal(label + ": " + format.apply(initial)), initial) {
-            @Override protected void updateMessage() { setMessage(Component.literal(label + ": " + format.apply(value))); }
-            @Override protected void applyValue() { setter.accept(value); mod.save(); }
-        });
-    }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
         g.fill(0, 0, width, height, 0xAC060912);
-        TrackerHud.rounded(g, left, top, left + panelWidth, top + panelHeight, 0xF50D1020);
-        TrackerHud.border(g, left, top, left + panelWidth, top + panelHeight, 0xFF000000 | (tab == 1 ? mod.settings.queue.accent : mod.settings.profit.accent));
-        g.drawString(font, (tab == 0 ? "TRACKER" : "PAYMENT QUEUE") + "  /  " + hud().theme, left + 12, top + 11, 0xFF000000 | hud().accent, false);
+        TrackerHud.rounded(g, left, top, left + panelWidth, top + panelHeight, 0xF50E1320);
+        TrackerHud.border(g, left, top, left + panelWidth, top + panelHeight, 0xFF30394B);
+        TrackerHud.rounded(g,left+12,top+9,left+17,top+20,0xFF000000|hud().accent);
+        g.drawString(font,tab==0?"Tracker settings":"Payment Queue settings",left+24,top+11,0xFFE8EDF6,false);
+        String saved="Auto-saved";g.drawString(font,saved,left+panelWidth-font.width(saved)-14,top+11,0xFF8D9BB2,false);
+        g.fill(left+12,top+26,left+panelWidth-12,top+27,0xFF252D3D);
+        if(previewWidth>0) {
+            int ph=Math.min(151,top+panelHeight-34-previewY);
+            TrackerHud.rounded(g,previewX,previewY,previewX+previewWidth,previewY+ph,0xFF141B29);
+            TrackerHud.border(g,previewX,previewY,previewX+previewWidth,previewY+ph,0xFF2A3447);
+            g.drawString(font,"LIVE PREVIEW",previewX+12,previewY+11,0xFF91A1B9,false);
+            float scale=Math.min(.88f,Math.min((previewWidth-20f)/TrackerHud.width(),(ph-58f)/TrackerHud.height(hud())));
+            float factor=scale/(float)hud().scale;
+            g.pose().pushMatrix();g.pose().translate(previewX+(previewWidth-TrackerHud.width()*scale)/2-TrackerHud.x(hud(),width)*factor,previewY+32-TrackerHud.y(hud(),height)*factor);g.pose().scale(factor,factor);
+            TrackerHud.draw(g,mod,hud(),tab==1,true);g.pose().popMatrix();
+            g.drawString(font,hud().enabled?"Visible in game":"Hidden in game",previewX+12,previewY+ph-15,0xFF8D9BB2,false);
+        }
         for (var c : captions) g.drawString(font, c.text(), c.x(), c.y(), c.color(), false);
-        String status = font.plainSubstrByWidth(mod.status, Math.max(50, panelWidth - 240));
+        int available=Math.max(50,panelWidth-240);
+        String status=font.width(mod.status)>available?font.plainSubstrByWidth(mod.status,available-font.width("..."))+"...":mod.status;
         g.drawString(font, status, left + 120, top + panelHeight - 19, 0xFFA7B4CB, false);
         super.render(g, mx, my, delta);
     }
