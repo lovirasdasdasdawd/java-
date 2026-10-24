@@ -24,10 +24,11 @@ final class AtmosphereScreen extends Screen {
         else addRenderableWidget(new MenuWidgets.Action(left+w-82,top+h-26,68,20,"Done",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,this::onClose));
     }
     private void scene(int x,int cw){
-        var scenes=new Settings.BackgroundScene[]{Settings.BackgroundScene.AURORA,Settings.BackgroundScene.OCEAN,Settings.BackgroundScene.SPACE,Settings.BackgroundScene.CITY,Settings.BackgroundScene.FOREST,Settings.BackgroundScene.DESERT,Settings.BackgroundScene.SNOW,Settings.BackgroundScene.ABYSS,Settings.BackgroundScene.SAKURA,Settings.BackgroundScene.STORM};
+        var scenes=new Settings.BackgroundScene[]{Settings.BackgroundScene.AURORA,Settings.BackgroundScene.OCEAN,Settings.BackgroundScene.SPACE,Settings.BackgroundScene.CITY,Settings.BackgroundScene.FOREST,Settings.BackgroundScene.DESERT,Settings.BackgroundScene.SNOW,Settings.BackgroundScene.ABYSS,Settings.BackgroundScene.SAKURA,Settings.BackgroundScene.STORM,Settings.BackgroundScene.VOLCANO,Settings.BackgroundScene.MARSH,Settings.BackgroundScene.RAILWAY};
         int cell=(cw-12)/3;
-        for(int i=0;i<5;i++)addRenderableWidget(new SceneButton(x+(i%3)*(cell+6),top+49+(i/3)*64,cell,57,scenes[scenePage*5+i]));
-        pager(x,top+180,cw,scenePage,2,false);
+        for(int i=0;i<Math.min(5,scenes.length-scenePage*5);i++)addRenderableWidget(new SceneButton(x+(i%3)*(cell+6),top+49+(i/3)*64,cell,57,scenes[scenePage*5+i]));
+        pager(x,top+180,cw,scenePage,(scenes.length+4)/5,false);
+        addRenderableWidget(new MenuWidgets.Toggle(x+2*(cell+6),top+125,cell,26,"Glass panels",()->mod.settings.menuGlass,CoastalStyle::accent,()->change(()->mod.settings.menuGlass=!mod.settings.menuGlass)));
     }
     private void details(int x,int cw){
         int half=(cw-8)/2;var d=mod.settings.sceneDesign();
@@ -49,10 +50,10 @@ final class AtmosphereScreen extends Screen {
     }
     private void sound(int x,int cw){
         addRenderableWidget(new MenuWidgets.Toggle(x,top+49,cw,24,"Background sound",()->mod.settings.oceanEnabled,CoastalStyle::accent,()->change(()->mod.settings.oceanEnabled=!mod.settings.oceanEnabled)));
-        String[] names={"Aurora drift","Shoreline","Open sea","Rainy coast","Deep space","City rain","Forest breeze","Desert wind","Snow hush","Abyssal drift","Garden chimes","Distant storm"};
-        Settings.OceanTrack[] choices={Settings.OceanTrack.AURORA_DRIFT,Settings.OceanTrack.SHORELINE,Settings.OceanTrack.OPEN_SEA,Settings.OceanTrack.RAINY_COAST,Settings.OceanTrack.DEEP_SPACE,Settings.OceanTrack.CITY_RAIN,Settings.OceanTrack.FOREST_BREEZE,Settings.OceanTrack.DESERT_WIND,Settings.OceanTrack.SNOW_HUSH,Settings.OceanTrack.ABYSSAL_DRIFT,Settings.OceanTrack.GARDEN_CHIMES,Settings.OceanTrack.DISTANT_STORM};int cell=(cw-8)/3;
-        for(int i=0;i<6;i++){int index=soundPage*6+i;var choice=choices[index];addRenderableWidget(new MenuWidgets.Action(x+(i%3)*(cell+4),top+77+(i/3)*24,cell,22,names[index],CoastalStyle::accent,MenuWidgets.Kind.TAB,()->mod.settings.oceanTrack==choice,-1,()->change(()->mod.settings.oceanTrack=choice)));}
-        pager(x,top+125,cw,soundPage,2,true);
+        String[] names={"Aurora drift","Shoreline","Open sea","Rainy coast","Deep space","City rain","Forest breeze","Desert wind","Snow hush","Abyssal drift","Garden chimes","Distant storm","Ember wind","Marsh night","Night rail"};
+        Settings.OceanTrack[] choices={Settings.OceanTrack.AURORA_DRIFT,Settings.OceanTrack.SHORELINE,Settings.OceanTrack.OPEN_SEA,Settings.OceanTrack.RAINY_COAST,Settings.OceanTrack.DEEP_SPACE,Settings.OceanTrack.CITY_RAIN,Settings.OceanTrack.FOREST_BREEZE,Settings.OceanTrack.DESERT_WIND,Settings.OceanTrack.SNOW_HUSH,Settings.OceanTrack.ABYSSAL_DRIFT,Settings.OceanTrack.GARDEN_CHIMES,Settings.OceanTrack.DISTANT_STORM,Settings.OceanTrack.EMBER_WIND,Settings.OceanTrack.MARSH_NIGHT,Settings.OceanTrack.NIGHT_RAIL};int cell=(cw-8)/3;
+        for(int i=0;i<Math.min(6,choices.length-soundPage*6);i++){int index=soundPage*6+i;var choice=choices[index];addRenderableWidget(new MenuWidgets.Action(x+(i%3)*(cell+4),top+77+(i/3)*24,cell,22,names[index],CoastalStyle::accent,MenuWidgets.Kind.TAB,()->mod.settings.oceanTrack==choice,-1,()->change(()->mod.settings.oceanTrack=choice)));}
+        pager(x,top+125,cw,soundPage,(choices.length+5)/6,true);
         addRenderableWidget(new MenuWidgets.Slider(x,top+149,cw,28,"Ambience volume",mod.settings.oceanVolume,v->{mod.settings.oceanVolume=v;mod.save();},v->Math.round(v*100)+"%",CoastalStyle::accent));
         addRenderableWidget(new MenuWidgets.Toggle(x,top+181,cw,18,"Also play while in game",()->mod.settings.oceanInGame,CoastalStyle::accent,()->change(()->mod.settings.oceanInGame=!mod.settings.oceanInGame)));
     }
@@ -64,21 +65,21 @@ final class AtmosphereScreen extends Screen {
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
         CoastalStyle.background(g,width,height);CoastalStyle.panel(g,left,top,w,h);
         TrackerHud.text(g,"Atmosphere",left+14,top+13,CoastalStyle.ink());
-        TrackerHud.scaled(g,section==0?"10 SCENES / PAGE "+(scenePage+1)+" OF 2":section==1?sceneName(mod.settings.backgroundScene)+" / YOUR DETAILS":mod.oceanStatus(),left+14,top+32,.6f,CoastalStyle.muted());
+        TrackerHud.scaled(g,section==0?Settings.BackgroundScene.values().length+" SCENES / PAGE "+(scenePage+1)+" OF "+((Settings.BackgroundScene.values().length+4)/5):section==1?sceneName(mod.settings.backgroundScene)+" / YOUR DETAILS":mod.oceanStatus(),left+14,top+32,.6f,CoastalStyle.muted());
         if(section==1)TrackerHud.scaled(g,"INTERFACE PALETTE",left+14,top+160,.55f,CoastalStyle.muted());
         else if(section==2&&h>=250)TrackerHud.scaled(g,"Minecraft Master and Ambient volume also apply.",left+14,top+205,.65f,CoastalStyle.muted());
-        if(section!=1){String page="Page "+((section==0?scenePage:soundPage)+1)+" / 2";TrackerHud.scaled(g,page,left+w/2-22,top+(section==0?186:131),.75f,CoastalStyle.muted());}
+        if(section!=1){String page="Page "+((section==0?scenePage:soundPage)+1)+" / "+(section==0?(Settings.BackgroundScene.values().length+4)/5:(Settings.OceanTrack.values().length+5)/6);TrackerHud.scaled(g,page,left+w/2-22,top+(section==0?186:131),.75f,CoastalStyle.muted());}
         super.render(g,mx,my,delta);
     }
     private final class SceneButton extends Button.Plain {
         private final Settings.BackgroundScene scene;
-        SceneButton(int x,int y,int w,int h,Settings.BackgroundScene scene){super(x,y,w,h,Component.literal(sceneName(scene)),b->{mod.settings.backgroundScene=scene;mod.settings.menuPalette=switch(scene){case AURORA,SPACE->Settings.MenuPalette.AURORA;case OCEAN,FOREST->Settings.MenuPalette.SEA_GLASS;case CITY,DESERT,SAKURA,STORM->Settings.MenuPalette.DUSK;case SNOW->Settings.MenuPalette.AURORA;case ABYSS->Settings.MenuPalette.SEA_GLASS;};mod.settings.oceanTrack=switch(scene){case AURORA->Settings.OceanTrack.AURORA_DRIFT;case OCEAN->Settings.OceanTrack.SHORELINE;case SPACE->Settings.OceanTrack.DEEP_SPACE;case CITY->Settings.OceanTrack.CITY_RAIN;case FOREST->Settings.OceanTrack.FOREST_BREEZE;case DESERT->Settings.OceanTrack.DESERT_WIND;case SNOW->Settings.OceanTrack.SNOW_HUSH;case ABYSS->Settings.OceanTrack.ABYSSAL_DRIFT;case SAKURA->Settings.OceanTrack.GARDEN_CHIMES;case STORM->Settings.OceanTrack.DISTANT_STORM;};matched=false;soundPage=mod.settings.oceanTrack.ordinal()/6;CoastalStyle.configure(mod.settings);mod.save();rebuildWidgets();},DEFAULT_NARRATION);this.scene=scene;}
+        SceneButton(int x,int y,int w,int h,Settings.BackgroundScene scene){super(x,y,w,h,Component.literal(sceneName(scene)),b->{mod.settings.backgroundScene=scene;mod.settings.menuPalette=switch(scene){case AURORA,SPACE->Settings.MenuPalette.AURORA;case OCEAN,FOREST->Settings.MenuPalette.SEA_GLASS;case CITY,DESERT,SAKURA,STORM->Settings.MenuPalette.DUSK;case SNOW,RAILWAY->Settings.MenuPalette.AURORA;case VOLCANO->Settings.MenuPalette.DUSK;case MARSH->Settings.MenuPalette.SEA_GLASS;case ABYSS->Settings.MenuPalette.SEA_GLASS;};mod.settings.oceanTrack=switch(scene){case AURORA->Settings.OceanTrack.AURORA_DRIFT;case OCEAN->Settings.OceanTrack.SHORELINE;case SPACE->Settings.OceanTrack.DEEP_SPACE;case CITY->Settings.OceanTrack.CITY_RAIN;case FOREST->Settings.OceanTrack.FOREST_BREEZE;case DESERT->Settings.OceanTrack.DESERT_WIND;case SNOW->Settings.OceanTrack.SNOW_HUSH;case ABYSS->Settings.OceanTrack.ABYSSAL_DRIFT;case SAKURA->Settings.OceanTrack.GARDEN_CHIMES;case STORM->Settings.OceanTrack.DISTANT_STORM;case VOLCANO->Settings.OceanTrack.EMBER_WIND;case MARSH->Settings.OceanTrack.MARSH_NIGHT;case RAILWAY->Settings.OceanTrack.NIGHT_RAIL;};matched=false;soundPage=mod.settings.oceanTrack.ordinal()/6;CoastalStyle.configure(mod.settings);mod.save();rebuildWidgets();},DEFAULT_NARRATION);this.scene=scene;}
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta){
             int x=getX(),y=getY(),w=getWidth(),h=getHeight();boolean selected=mod.settings.backgroundScene==scene;
             TrackerHud.rounded(g,x,y,x+w,y+h,isHoveredOrFocused()?CoastalStyle.hover():CoastalStyle.surface());
             TrackerHud.border(g,x,y,x+w,y+h,selected?CoastalStyle.accent():CoastalStyle.line());
             TrackerHud.scaled(g,getMessage().getString(),x+7,y+8,.8f,CoastalStyle.ink());
-            TrackerHud.scaled(g,switch(scene){case AURORA->"Polar sky";case OCEAN->"Slow tides";case SPACE->"Quiet orbit";case CITY->"After hours";case FOREST->"Amber trails";case DESERT->"Evening dunes";case SNOW->"Winter silence";case ABYSS->"Below the surface";case SAKURA->"Petals & lanterns";case STORM->"Windward shore";},x+7,y+21,.55f,CoastalStyle.muted());
+            TrackerHud.scaled(g,switch(scene){case AURORA->"Polar sky";case OCEAN->"Slow tides";case SPACE->"Quiet orbit";case CITY->"After hours";case FOREST->"Amber trails";case DESERT->"Evening dunes";case SNOW->"Winter silence";case ABYSS->"Below the surface";case SAKURA->"Petals & lanterns";case STORM->"Windward shore";case VOLCANO->"Ash & embers";case MARSH->"Fireflies at dusk";case RAILWAY->"Last train home";},x+7,y+21,.55f,CoastalStyle.muted());
             int px=x+5,py=y+32;
             if(scene==Settings.BackgroundScene.AURORA)AuroraBackdrop.draw(g,px,py,w-10,17,false,.9f);
             else if(scene!=Settings.BackgroundScene.OCEAN)WorldBackdrop.draw(g,px,py,w-10,17,scene,false,mod.settings.sceneDesigns.get(scene));
@@ -86,6 +87,6 @@ final class AtmosphereScreen extends Screen {
             if(selected)g.fill(x+5,y+h-3,x+w-5,y+h-2,CoastalStyle.accent());
         }
     }
-    private static String sceneName(Settings.BackgroundScene s){return switch(s){case AURORA->"Aurora";case OCEAN->"Ocean";case SPACE->"Space";case CITY->"Rainy city";case FOREST->"Autumn forest";case DESERT->"Desert dusk";case SNOW->"Snowfall";case ABYSS->"Deep ocean";case SAKURA->"Sakura garden";case STORM->"Storm coast";};}
+    private static String sceneName(Settings.BackgroundScene s){return switch(s){case AURORA->"Aurora";case OCEAN->"Ocean";case SPACE->"Space";case CITY->"Rainy city";case FOREST->"Autumn forest";case DESERT->"Desert dusk";case SNOW->"Snowfall";case ABYSS->"Deep ocean";case SAKURA->"Sakura garden";case STORM->"Storm coast";case VOLCANO->"Volcanic night";case MARSH->"Firefly marsh";case RAILWAY->"Midnight railway";};}
     @Override public void onClose(){mod.save();minecraft.setScreen(parent);}
 }

@@ -1,3 +1,11 @@
+## Glass & Night Routes — 1.12.0
+Three new configurable atmospheres: **Volcanic Night / Ember wind**, **Firefly Marsh / Marsh night**, **Midnight Railway / Night rail**. Thirteen scenes and fifteen original sound loops total. The browsers now have three pages.
+
+**Glass panels** on Atmosphere → Scenes toggles translucent menu panels. Each HUD independently supports **Appearance → Style → Glass**, alongside Clean and Neon. Glass uses tinted transparency and a thin highlight; no blur shader is required. Existing settings retain opaque menus and their saved HUD styles.
+
+## Standalone Auction Mod
+The complete independent project is in [auctionmod](auctionmod/README.md). Install its own `auctionmod-1.21.11-1.0.0.jar` to get the O keybind, searchable item picker, timed auctions, minimum/higher-payment detection and final-winner HUD. It can be used without Donut Tracker. Build from that directory with `./gradlew build`. All sources, Gradle wrapper, config example and tests are included.
+
 ## Seasons — 1.11.0
 
 Actual Minecraft previews: [New scenes](releases/seasons-catalog-1.11.png) · [Sidebar divider](releases/seasons-divider-1.11.png) · [New sounds](releases/seasons-sound-1.11.png)

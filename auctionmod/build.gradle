@@ -1,0 +1,27 @@
+plugins { id 'net.fabricmc.fabric-loom-remap' }
+group = project.maven_group
+version = project.mod_version
+base { archivesName = project.archives_base_name }
+repositories { mavenCentral() }
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21; withSourcesJar() }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand version: project.version } }
+sourceSets {
+    verification {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+tasks.register('auctionTest', JavaExec) {
+    dependsOn verificationClasses
+    classpath = sourceSets.verification.runtimeClasspath
+    mainClass = 'dev.auctionmod.AuctionTest'
+    jvmArgs '-ea', '-Djava.awt.headless=true'
+}
+check.dependsOn auctionTest

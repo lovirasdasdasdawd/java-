@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "auctionmod",
+  "version": "${version}",
+  "name": "Auction Mod",
+  "description": "Client-side timed auctions with a searchable item picker and DonutSMP payment detection.",
+  "authors": ["claude"],
+  "environment": "client",
+  "entrypoints": {"client": ["dev.auctionmod.AuctionModClient"]},
+  "depends": {"fabricloader": ">=0.18.4", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*"}
+}

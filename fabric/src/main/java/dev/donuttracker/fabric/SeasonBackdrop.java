@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 final class SeasonBackdrop {
     static void draw(GuiGraphics g,int x,int y,int w,int h,Settings.BackgroundScene scene,double t,Settings.SceneDesign d,int tint){
         g.enableScissor(x,y,x+w,y+h);
-        try{switch(scene){case DESERT->desert(g,x,y,w,h,t,d,tint);case SNOW->snow(g,x,y,w,h,t,d,tint);case ABYSS->abyss(g,x,y,w,h,t,d,tint);case SAKURA->sakura(g,x,y,w,h,t,d,tint);case STORM->storm(g,x,y,w,h,t,d,tint);default->{}}}finally{g.disableScissor();}
+        try{switch(scene){case DESERT->desert(g,x,y,w,h,t,d,tint);case SNOW->snow(g,x,y,w,h,t,d,tint);case ABYSS->abyss(g,x,y,w,h,t,d,tint);case SAKURA->sakura(g,x,y,w,h,t,d,tint);case STORM->storm(g,x,y,w,h,t,d,tint);default->NightBackdrop.draw(g,x,y,w,h,scene,t,d,tint);}}finally{g.disableScissor();}
     }
     private static int mix(int a,int b,double n){return CoastalStyle.mix(a,b,(float)n);}
     private static int seed(int i,int n){return Math.floorMod(i*1103515245+12345,Math.max(1,n));}

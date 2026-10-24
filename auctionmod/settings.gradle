@@ -1,0 +1,5 @@
+pluginManagement {
+    repositories { maven { url = 'https://maven.fabricmc.net/' }; gradlePluginPortal(); mavenCentral() }
+    plugins { id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" }
+}
+rootProject.name = 'auctionmod'

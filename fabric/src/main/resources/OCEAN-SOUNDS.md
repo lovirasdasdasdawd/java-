@@ -13,3 +13,6 @@ Deep space, City rain and Forest breeze are original 32-second periodic DSP comp
 
 ## Seasons (1.11)
 Desert wind, Snow hush, Abyssal drift, Garden chimes and Distant storm are original 32-second periodic DSP compositions from `scripts/make_season_audio.py`. Filtered wind, soft ice/bell tones, low underwater pads and distant rain/rumble. No recordings or third-party samples; CC0.
+
+## Night Routes (1.12)
+Ember wind, Marsh night and Night rail are original periodic DSP compositions from `scripts/make_night_audio.py`. Low filtered wind/ember textures, quiet insect-like tones, and rhythmic rail/air textures. CC0; no recordings or third-party samples.

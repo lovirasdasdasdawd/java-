@@ -44,8 +44,8 @@ final class ModuleSettingsScreen extends Screen {
         addRenderableWidget(new MenuWidgets.Toggle(x,y,half,30,"HUD visible",()->h.enabled,()->h.accent,()->change(()->h.enabled=!h.enabled)));
         int themeX=x+half+6,themeW=w-half-6;
         caption("STYLE",themeX,y+1,CoastalStyle.muted());
-        for(int i=0;i<2;i++) { var choice=Settings.Theme.values()[i];int index=i;
-            addRenderableWidget(new MenuWidgets.Action(themeX+index*(themeW/2),y+12,themeW/2-2,18,choice==Settings.Theme.CLEAN?"Clean":"Neon",()->h.accent,MenuWidgets.Kind.TAB,()->h.theme==choice,-1,()->change(()->h.theme=choice)));
+        for(int i=0;i<3;i++) { var choice=Settings.Theme.values()[i];int index=i;
+            addRenderableWidget(new MenuWidgets.Action(themeX+index*(themeW/3),y+12,themeW/3-2,18,choice==Settings.Theme.CLEAN?"Clean":choice==Settings.Theme.NEON?"Neon":"Glass",()->h.accent,MenuWidgets.Kind.TAB,()->h.theme==choice,-1,()->change(()->h.theme=choice)));
         }
         int cardW=(w-8)/3;
         for(int i=0;i<3;i++) { var choice=Settings.Layout.values()[i];String label=switch(choice){case COMPACT->"Compact";case STACKED->"Stacked";case MINIMAL->"Minimal";};

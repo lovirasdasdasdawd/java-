@@ -94,5 +94,29 @@
         "stream": true
       }
     ]
+  },
+  "ocean.ember_wind": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/ember_wind",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.marsh_night": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/marsh_night",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.night_rail": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/night_rail",
+        "stream": true
+      }
+    ]
   }
 }

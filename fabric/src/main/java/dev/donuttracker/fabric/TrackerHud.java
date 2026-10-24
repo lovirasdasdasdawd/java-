@@ -19,7 +19,7 @@ final class TrackerHud {
         int w=width(),ht=height(h),ink=opaque(h.text),muted=blend(h.text,h.background,.56f),accent=opaque(h.accent);
         if(h.theme==Settings.Theme.NEON)for(int n=3;n>0;n--)border(g,-n,-n,w+n,ht+n,0x14000000|h.accent);
         g.fill(2,ht,w+2,ht+2,((int)(65*h.opacity)<<24));
-        g.fill(0,0,w,ht,((int)(255*h.opacity)<<24)|h.background);
+        g.fill(0,0,w,ht,((int)((h.theme==Settings.Theme.GLASS?145:255)*h.opacity)<<24)|h.background);
         border(g,0,0,w,ht,((int)(160*h.opacity)<<24)|(blend(h.text,h.background,.22f)&0xFFFFFF));
         g.fill(0,0,2,ht,accent);g.fill(2,0,w,1,((int)(100*h.opacity)<<24)|h.accent);
         if(h.layout==Settings.Layout.MINIMAL){

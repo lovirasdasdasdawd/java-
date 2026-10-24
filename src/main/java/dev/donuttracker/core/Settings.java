@@ -12,15 +12,15 @@ import java.util.regex.Pattern;
 
 public final class Settings {
     public enum MenuPalette { SEA_GLASS, DUSK, PAPER, AURORA }
-    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST, AURORA_DRIFT, DEEP_SPACE, CITY_RAIN, FOREST_BREEZE, DESERT_WIND, SNOW_HUSH, ABYSSAL_DRIFT, GARDEN_CHIMES, DISTANT_STORM }
-    public enum BackgroundScene { OCEAN, AURORA, SPACE, CITY, FOREST, DESERT, SNOW, ABYSS, SAKURA, STORM }
+    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST, AURORA_DRIFT, DEEP_SPACE, CITY_RAIN, FOREST_BREEZE, DESERT_WIND, SNOW_HUSH, ABYSSAL_DRIFT, GARDEN_CHIMES, DISTANT_STORM, EMBER_WIND, MARSH_NIGHT, NIGHT_RAIL }
+    public enum BackgroundScene { OCEAN, AURORA, SPACE, CITY, FOREST, DESERT, SNOW, ABYSS, SAKURA, STORM, VOLCANO, MARSH, RAILWAY }
     public static final class SceneDesign {
         public double intensity=.75, density=.6, speed=.4;
         public int tint=0xA9B8FA;
     }
     public final java.util.EnumMap<BackgroundScene,SceneDesign> sceneDesigns=new java.util.EnumMap<>(BackgroundScene.class);
     public SceneDesign sceneDesign(){return sceneDesigns.get(backgroundScene);}
-    public enum Theme { CLEAN, NEON }
+    public enum Theme { CLEAN, NEON, GLASS }
     public enum Layout { COMPACT, STACKED, MINIMAL }
     public static final class Hud {
         public boolean enabled = true, showProfit = true, showTimer = true, showRate = true, showIcon = true;
@@ -35,6 +35,7 @@ public final class Settings {
     public BackgroundScene backgroundScene = BackgroundScene.AURORA;
     public OceanTrack oceanTrack = OceanTrack.AURORA_DRIFT;
     public boolean oceanEnabled = true, oceanInGame = false, menuMotion = true;
+    public boolean menuGlass=false;
     public double auroraGlow = .85;
     public double oceanVolume = .18;
     public boolean oceanShouldPlay(boolean moduleMenu,boolean inGame){return oceanEnabled&&oceanVolume>0&&(moduleMenu||oceanInGame&&inGame);}
@@ -47,7 +48,7 @@ public final class Settings {
     public String paymentPattern = DEFAULT_PAYMENT_PATTERN;
     // One amount capture shared by outgoing confirmations and explicit monetary loss lines.
     public String expensePattern = "(?i)^you\\s+(?:(?:have\\s+)?(?:successfully\\s+)?(?:paid|sent)\\s+(?:[A-Za-z0-9_]{1,16}\\s+|(?=\\$|[0-9]))|lost\\s+)\\$?\\s*([0-9][0-9,.]*[KMBT]?)\\s*\\$?(?:\\s+to\\s+[A-Za-z0-9_]{1,16})?\\s*[!.]?$";
-    public Settings() { for(var scene:BackgroundScene.values()){var d=new SceneDesign();if(scene==BackgroundScene.AURORA)d.intensity=.85;d.tint=switch(scene){case AURORA->0x68EFBE;case OCEAN->0x83C7BB;case SPACE->0xA9B8FA;case CITY->0xF2AE91;case FOREST->0xE7AD68;case DESERT->0xEBA56C;case SNOW->0xC6DBF1;case ABYSS->0x50CFC8;case SAKURA->0xE9A5BB;case STORM->0x93ACC6;};sceneDesigns.put(scene,d);} queue.x = 280; queue.y = 16; queue.accent = 0xB6C6E9; }
+    public Settings() { for(var scene:BackgroundScene.values()){var d=new SceneDesign();if(scene==BackgroundScene.AURORA)d.intensity=.85;d.tint=switch(scene){case AURORA->0x68EFBE;case OCEAN->0x83C7BB;case SPACE->0xA9B8FA;case CITY->0xF2AE91;case FOREST->0xE7AD68;case DESERT->0xEBA56C;case SNOW->0xC6DBF1;case ABYSS->0x50CFC8;case SAKURA->0xE9A5BB;case STORM->0x93ACC6;case VOLCANO->0xF09059;case MARSH->0xB5D78C;case RAILWAY->0xA5B9E4;};sceneDesigns.put(scene,d);} queue.x = 280; queue.y = 16; queue.accent = 0xB6C6E9; }
     public static int color(String hex) {
         String s = hex.strip().replaceFirst("^#", "");
         if (!s.matches("[0-9a-fA-F]{6}")) throw new IllegalArgumentException("Use a six-digit HEX colour, e.g. #CB8CF6.");
@@ -66,6 +67,7 @@ public final class Settings {
         try {
             for(var scene:BackgroundScene.values()){var d=s.sceneDesigns.get(scene);String k="scene."+scene.name()+".";
                 d.intensity=bounded(p.getProperty(k+"intensity",scene==BackgroundScene.AURORA?p.getProperty("menu.auroraGlow",".85"):".75"),0,1);d.density=bounded(p.getProperty(k+"density",".6"),0,1);d.speed=bounded(p.getProperty(k+"speed",".4"),0,1);d.tint=color(p.getProperty(k+"tint",String.format("%06X",d.tint)));}
+            s.menuGlass=Boolean.parseBoolean(p.getProperty("menu.glass","false"));
             s.menuPalette=MenuPalette.valueOf(p.getProperty("menu.palette",MenuPalette.SEA_GLASS.name()));
             s.auroraGlow=bounded(p.getProperty("menu.auroraGlow","0.85"),0,1);
             s.backgroundScene=BackgroundScene.valueOf(p.getProperty("menu.background",BackgroundScene.OCEAN.name()));
@@ -111,6 +113,7 @@ public final class Settings {
         validatePatterns();
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
         for(var scene:BackgroundScene.values()){var d=sceneDesigns.get(scene);String k="scene."+scene.name()+".";p.setProperty(k+"intensity",Double.toString(Math.clamp(d.intensity,0,1)));p.setProperty(k+"density",Double.toString(Math.clamp(d.density,0,1)));p.setProperty(k+"speed",Double.toString(Math.clamp(d.speed,0,1)));p.setProperty(k+"tint",String.format("%06X",d.tint));}
+        p.setProperty("menu.glass",Boolean.toString(menuGlass));
         p.setProperty("menu.palette",menuPalette.name());p.setProperty("menu.background",backgroundScene.name());p.setProperty("menu.auroraGlow",Double.toString(Math.clamp(auroraGlow,0,1)));p.setProperty("menu.motion",Boolean.toString(menuMotion));
         p.setProperty("ocean.enabled",Boolean.toString(oceanEnabled));p.setProperty("ocean.inGame",Boolean.toString(oceanInGame));
         p.setProperty("ocean.track",oceanTrack.name());p.setProperty("ocean.volume",Double.toString(Math.clamp(oceanVolume,0,1)));
