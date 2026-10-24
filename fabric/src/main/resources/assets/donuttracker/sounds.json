@@ -1,5 +1,34 @@
 {
-  "ocean.shoreline": {"sounds": [{"name": "donuttracker:ocean/shoreline", "stream": true}]},
-  "ocean.open_sea": {"sounds": [{"name": "donuttracker:ocean/open_sea", "stream": true}]},
-  "ocean.rainy_coast": {"sounds": [{"name": "donuttracker:ocean/rainy_coast", "stream": true}]}
+  "ocean.shoreline": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/shoreline",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.open_sea": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/open_sea",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.rainy_coast": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/rainy_coast",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.aurora_drift": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/aurora_drift",
+        "stream": true
+      }
+    ]
+  }
 }

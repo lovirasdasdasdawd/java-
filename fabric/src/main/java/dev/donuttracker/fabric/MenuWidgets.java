@@ -28,7 +28,7 @@ final class MenuWidgets {
         }
         Action(int x,int y,int w,int h,String label,IntSupplier accent,Kind kind,Runnable action) { this(x,y,w,h,label,accent,kind,()->false,-1,action); }
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta) {
-            int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=CoastalStyle.controlAccent(accent.getAsInt());boolean chosen=selected.getAsBoolean(),hover=isHoveredOrFocused();
+            int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=active?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line();boolean chosen=selected.getAsBoolean(),hover=isHoveredOrFocused();
             int bg=kind==Kind.PRIMARY ? CoastalStyle.accent() : chosen?CoastalStyle.hover():hover?CoastalStyle.hover():CoastalStyle.surface();
             if(kind==Kind.NAV) {
                 if(chosen||hover)TrackerHud.rounded(g,x,y,x+w,y+h,chosen?CoastalStyle.hover():CoastalStyle.surface());
@@ -79,15 +79,15 @@ final class MenuWidgets {
             this.label=label;this.setter=setter;this.format=format;this.accent=accent;
         }
         @Override public void renderWidget(GuiGraphics g,int mx,int my,float delta) {
-            int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=CoastalStyle.controlAccent(accent.getAsInt());
+            int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=active?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line();
             TrackerHud.rounded(g,x,y,x+w,y+h,CoastalStyle.surface());
             if(isFocused()||isHoveredOrFocused())TrackerHud.border(g,x,y,x+w,y+h,isFocused()?a:CoastalStyle.line());
             text(g,label,x+9,y+7,CoastalStyle.muted());
-            String v=format.apply(value);text(g,v,x+w-9-Minecraft.getInstance().font.width(v),y+7,CoastalStyle.ink());
+            String v=format.apply(value);text(g,v,x+w-9-Minecraft.getInstance().font.width(v),y+7,active?CoastalStyle.ink():CoastalStyle.muted());
             int start=x+12,end=x+w-12,track=y+h-10,knob=start+(int)Math.round((end-start)*value);
             TrackerHud.rounded(g,start,track,end,track+3,CoastalStyle.line());
             if(knob>start)TrackerHud.rounded(g,start,track,knob,track+3,a);
-            TrackerHud.rounded(g,knob-3,track-3,knob+4,track+6,CoastalStyle.ink());
+            TrackerHud.rounded(g,knob-3,track-3,knob+4,track+6,active?CoastalStyle.ink():CoastalStyle.line());
         }
         private void pick(double x) { setValue(Math.clamp((x-getX()-12)/Math.max(1,getWidth()-24),0,1)); }
         @Override public void onClick(MouseButtonEvent e,boolean twice) { pick(e.x()); }

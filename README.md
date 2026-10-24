@@ -6,10 +6,22 @@ Java 21 / Gradle project with a **Fabric client mod for Minecraft 1.21.11** and 
 
 1. Install Fabric Loader **0.18.4 or later** for Minecraft **1.21.11**.
 2. Install Fabric API **0.141.6+1.21.11** in your Minecraft `mods` folder.
-3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.7.0.jar` into that folder.
+3. Copy `fabric/build/libs/donut-tracker-fabric-1.21.11-1.8.0.jar` into that folder.
 4. Launch the Fabric profile and press **Right Shift** while in a world/server.
 
 The mod is client-only. It needs no server plugin, account password or API key. The JAR is loaded by Fabric; running it with `java -jar` prints installation instructions.
+
+## New in 1.8.0: Aurora atmosphere and floating dashboard
+
+Actual Minecraft previews: [Aurora dashboard](releases/aurora-overview-1.8.png) · [Backdrop controls](releases/aurora-backdrop-1.8.png) · [Sound controls](releases/aurora-sound-1.8.png).
+
+Select Right Shift → Atmosphere → Backdrop → Aurora for animated green/violet curtains, stars, ridgelines and pine silhouettes. The new overview uses floating glass panels with a larger profit display and distinct session, HUD-position and atmosphere controls. Aurora is drawn procedurally with ordinary GUI gradients; no custom shader or external image download is required.
+
+Aurora and Ocean scene presets select a matching menu palette and sound. They preserve volume, mute, playback scope and custom HUD design. Palette choices can then be mixed independently. Match HUD colours is an explicit action; it preserves HUD size, position, opacity and Clean/Neon choice. Animation and Aurora glow are adjustable; disabling animation makes the backdrop static.
+
+Atmosphere has separate Backdrop and Sound tabs. Aurora drift adds an original 32-second synthesized pad/wind/glass-tone loop, alongside the three ocean loops. All four sounds are bundled, with volume, mute and optional in-game playback. This is imagined aurora-themed ambience, not a field recording of northern lights. The optional authoring script is `scripts/make_aurora_audio.py`.
+
+New profiles start with Aurora. Existing profiles keep their saved ocean palette and sound until a scene is explicitly selected. The old ocean.* audio settings keys remain compatible. Financial tracking, payment queue, lever advance, chat payouts and gameplay HUD rendering remain unchanged.
 
 ## New in 1.7.0: Tideline coastal HUD and ocean ambience
 
@@ -120,8 +132,8 @@ Windows: use `gradlew.bat`. The checksum-pinned wrapper downloads Gradle **9.2.1
 
 Outputs:
 
-- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.7.0.jar` — installable mod.
-- `build/libs/donut-tracker-1.7.0.jar` — executable desktop companion, not a Minecraft mod.
+- `fabric/build/libs/donut-tracker-fabric-1.21.11-1.8.0.jar` — installable mod.
+- `build/libs/donut-tracker-1.8.0.jar` — executable desktop companion, not a Minecraft mod.
 
 For only the companion and core verification (no Minecraft dependencies): `./gradlew build`.
 
@@ -134,10 +146,10 @@ For only the companion and core verification (no Minecraft dependencies): `./gra
 ./gradlew -PwithFabric :fabric:runClient
 
 # Desktop companion (requires a graphical desktop)
-java -jar build/libs/donut-tracker-1.7.0.jar
+java -jar build/libs/donut-tracker-1.8.0.jar
 
 # Render the actual companion settings screen without a display
-java -jar build/libs/donut-tracker-1.7.0.jar --render settings-preview.png
+java -jar build/libs/donut-tracker-1.8.0.jar --render settings-preview.png
 ```
 
 The companion has manual balance/payment controls and a parser test panel. It does **not** connect to Minecraft or read a running game's chat. Its settings/history live separately in `~/.donut-tracker`, or a directory supplied with `--config DIRECTORY`.

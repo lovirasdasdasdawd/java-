@@ -11,8 +11,9 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 public final class Settings {
-    public enum MenuPalette { SEA_GLASS, DUSK, PAPER }
-    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST }
+    public enum MenuPalette { SEA_GLASS, DUSK, PAPER, AURORA }
+    public enum OceanTrack { SHORELINE, OPEN_SEA, RAINY_COAST, AURORA_DRIFT }
+    public enum BackgroundScene { OCEAN, AURORA }
     public enum Theme { CLEAN, NEON }
     public enum Layout { COMPACT, STACKED, MINIMAL }
     public static final class Hud {
@@ -24,9 +25,11 @@ public final class Settings {
         public int x = 16, y = 16;
     }
     public final Hud profit = new Hud(), queue = new Hud();
-    public MenuPalette menuPalette = MenuPalette.SEA_GLASS;
-    public OceanTrack oceanTrack = OceanTrack.SHORELINE;
+    public MenuPalette menuPalette = MenuPalette.AURORA;
+    public BackgroundScene backgroundScene = BackgroundScene.AURORA;
+    public OceanTrack oceanTrack = OceanTrack.AURORA_DRIFT;
     public boolean oceanEnabled = true, oceanInGame = false, menuMotion = true;
+    public double auroraGlow = .85;
     public double oceanVolume = .18;
     public boolean oceanShouldPlay(boolean moduleMenu,boolean inGame){return oceanEnabled&&oceanVolume>0&&(moduleMenu||oceanInGame&&inGame);}
     public boolean advanceOnLever = true;
@@ -55,8 +58,10 @@ public final class Settings {
         Properties p = new Properties();
         try (Reader r = Files.newBufferedReader(file)) { p.load(r); }
         try {
-            s.menuPalette=MenuPalette.valueOf(p.getProperty("menu.palette",s.menuPalette.name()));
-            s.oceanTrack=OceanTrack.valueOf(p.getProperty("ocean.track",s.oceanTrack.name()));
+            s.menuPalette=MenuPalette.valueOf(p.getProperty("menu.palette",MenuPalette.SEA_GLASS.name()));
+            s.auroraGlow=bounded(p.getProperty("menu.auroraGlow","0.85"),0,1);
+            s.backgroundScene=BackgroundScene.valueOf(p.getProperty("menu.background",BackgroundScene.OCEAN.name()));
+            s.oceanTrack=OceanTrack.valueOf(p.getProperty("ocean.track",OceanTrack.SHORELINE.name()));
             s.oceanEnabled=Boolean.parseBoolean(p.getProperty("ocean.enabled","true"));
             s.oceanInGame=Boolean.parseBoolean(p.getProperty("ocean.inGame","false"));
             s.menuMotion=Boolean.parseBoolean(p.getProperty("menu.motion","true"));
@@ -97,7 +102,7 @@ public final class Settings {
     public void save(Path file) throws IOException {
         validatePatterns();
         Properties p = new Properties(); write(p, "profit.", profit); write(p, "queue.", queue);
-        p.setProperty("menu.palette",menuPalette.name());p.setProperty("menu.motion",Boolean.toString(menuMotion));
+        p.setProperty("menu.palette",menuPalette.name());p.setProperty("menu.background",backgroundScene.name());p.setProperty("menu.auroraGlow",Double.toString(Math.clamp(auroraGlow,0,1)));p.setProperty("menu.motion",Boolean.toString(menuMotion));
         p.setProperty("ocean.enabled",Boolean.toString(oceanEnabled));p.setProperty("ocean.inGame",Boolean.toString(oceanInGame));
         p.setProperty("ocean.track",oceanTrack.name());p.setProperty("ocean.volume",Double.toString(Math.clamp(oceanVolume,0,1)));
         p.setProperty("queue.minimum", minimumPayment.toPlainString());

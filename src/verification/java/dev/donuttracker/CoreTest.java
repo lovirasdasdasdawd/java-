@@ -205,6 +205,16 @@ public final class CoreTest {
         try{Settings.load(oceanFile);throw new AssertionError("invalid volume should be rejected");}catch(java.io.IOException expected){check(true,"nonfinite ocean volume rejected");}
         Files.writeString(oceanFile,"profit.accent=654321\n");var oceanLegacy=Settings.load(oceanFile);
         check(oceanLegacy.profit.accent==0x654321&&oceanLegacy.oceanTrack==Settings.OceanTrack.SHORELINE,"old configs migrate without replacing custom colours");
+        Settings aurora=new Settings();
+        check(aurora.backgroundScene==Settings.BackgroundScene.AURORA&&aurora.menuPalette==Settings.MenuPalette.AURORA&&aurora.oceanTrack==Settings.OceanTrack.AURORA_DRIFT,"fresh profiles start with the aurora scene and sound");
+        aurora.auroraGlow=.42;aurora.menuMotion=false;aurora.profit.accent=0x123456;aurora.profit.x=73;
+        var auroraFile=dir.resolve("aurora.properties");aurora.save(auroraFile);var auroraLoaded=Settings.load(auroraFile);
+        check(auroraLoaded.backgroundScene==Settings.BackgroundScene.AURORA&&auroraLoaded.menuPalette==Settings.MenuPalette.AURORA&&auroraLoaded.oceanTrack==Settings.OceanTrack.AURORA_DRIFT,"aurora scene, palette and soundtrack persist");
+        check(auroraLoaded.auroraGlow==.42&&!auroraLoaded.menuMotion&&auroraLoaded.profit.accent==0x123456&&auroraLoaded.profit.x==73,"aurora controls preserve HUD preferences");
+        Files.writeString(auroraFile,"menu.palette=DUSK\nocean.track=RAINY_COAST\nprofit.accent=654321\n");var previousScene=Settings.load(auroraFile);
+        check(previousScene.backgroundScene==Settings.BackgroundScene.OCEAN&&previousScene.menuPalette==Settings.MenuPalette.DUSK&&previousScene.oceanTrack==Settings.OceanTrack.RAINY_COAST&&previousScene.profit.accent==0x654321,"old profiles keep their ocean scene, palette, sound and HUD colour");
+        Files.writeString(auroraFile,"menu.auroraGlow=4\n");check(Settings.load(auroraFile).auroraGlow==1,"aurora brightness upper bound");
+        Files.writeString(auroraFile,"menu.auroraGlow=-1\n");check(Settings.load(auroraFile).auroraGlow==0,"aurora brightness lower bound");
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");
         PaymentQueue migratedQueue = new PaymentQueue();StateStore.load(legacyQueue,new Tracker(),migratedQueue);
         check(!migratedQueue.active().returnRequested(),"old queue file remains readable");

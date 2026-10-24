@@ -37,10 +37,10 @@ final class OceanAmbience {
         if(current!=null)current.target=(float)Math.clamp(settings.oceanVolume,0,1);
     }
     String status(Minecraft client,Settings settings){
-        if(!settings.oceanEnabled||settings.oceanVolume<=0)return "Ocean off";
+        if(!settings.oceanEnabled||settings.oceanVolume<=0)return "Ambience off";
         if(client.options.getSoundSourceVolume(SoundSource.MASTER)==0||client.options.getSoundSourceVolume(SoundSource.AMBIENT)==0)return "Muted by Minecraft audio";
-        if(current!=null&&client.getSoundManager().isActive(current))return "Playing: "+switch(current.track){case SHORELINE->"Shoreline";case OPEN_SEA->"Open sea";case RAINY_COAST->"Rainy coast";};
-        return "Starting ocean ambience";
+        if(current!=null&&client.getSoundManager().isActive(current))return "Playing: "+switch(current.track){case SHORELINE->"Shoreline";case OPEN_SEA->"Open sea";case RAINY_COAST->"Rainy coast";case AURORA_DRIFT->"Aurora drift";};
+        return "Starting ambience";
     }
     void stop(Minecraft client){if(current!=null)client.getSoundManager().stop(current);for(var old:retiring)client.getSoundManager().stop(old);current=null;retiring.clear();retryAt=0;}
     private static final class Loop extends AbstractTickableSoundInstance {

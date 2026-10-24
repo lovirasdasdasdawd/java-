@@ -16,36 +16,32 @@ final class TrackerScreen extends Screen {
     TrackerScreen(DonutTrackerClient mod,Screen parent){super(Component.literal("Donut Tracker"));this.mod=mod;this.parent=parent;}
     @Override public boolean isPauseScreen(){return false;}
     @Override protected void init(){
-        panelWidth=Math.min(620,width-20);panelHeight=Math.min(240,height-16);
-        left=(width-panelWidth)/2;top=(height-panelHeight)/2;bodyY=top+57;bodyHeight=panelHeight-108;
-        trackerWidth=(panelWidth-44)*55/100;queueX=left+trackerWidth+28;queueWidth=panelWidth-trackerWidth-44;
-        control(left+16,bodyY+bodyHeight-24,trackerWidth,23,"Tracker settings",3,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false)));
+        panelWidth=Math.min(560,width-28);panelHeight=Math.min(248,height-20);
+        left=(width-panelWidth)/2;top=(height-panelHeight)/2;bodyY=top+44;bodyHeight=panelHeight-94;
+        trackerWidth=(panelWidth-12)*58/100;queueX=left+trackerWidth+12;queueWidth=panelWidth-trackerWidth-12;
+        control(left,bodyY+bodyHeight-24,trackerWidth,23,"Tracker settings",3,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false)));
         control(queueX,bodyY+bodyHeight-24,queueWidth,23,"Queue settings",3,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true)));
-        int actionWidth=(panelWidth-48)/3;
-        control(left+16,top+panelHeight-36,actionWidth,24,mod.tracker.running()?"End session":"Start session",0,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();});
-        control(left+24+actionWidth,top+panelHeight-36,actionWidth,24,"Arrange HUDs",1,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
-        control(left+32+2*actionWidth,top+panelHeight-36,panelWidth-48-2*actionWidth,24,"Ocean & style",4,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
-        control(left+panelWidth-103,top+17,87,21,"Back to game",2,this::onClose);
+        int actionWidth=(panelWidth-16)/3;
+        control(left,top+panelHeight-28,actionWidth,24,mod.tracker.running()?"End session":"Start session",0,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();});
+        control(left+8+actionWidth,top+panelHeight-28,actionWidth,24,"Arrange HUDs",1,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
+        control(left+16+2*actionWidth,top+panelHeight-28,panelWidth-16-2*actionWidth,24,"Atmosphere",4,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
+        control(left+panelWidth-78,top+4,78,21,"Back to game",2,this::onClose);
     }
     private void control(int x,int y,int w,int h,String label,int kind,Runnable action){addRenderableWidget(new OverviewButton(x,y,w,h,label,kind,action));}
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
         INK=CoastalStyle.ink();MUTED=CoastalStyle.muted();LINE=CoastalStyle.line();
-        CoastalStyle.background(g,width,height);CoastalStyle.panel(g,left,top,panelWidth,panelHeight);
-        TrackerHud.rounded(g,left+16,top+15,left+40,top+39,CoastalStyle.surface());
-        ring(g,left+22,top+21,CoastalStyle.controlAccent(mod.settings.profit.accent));
-        label(g,"Donut Tracker",left+49,top+15,1.05f,INK);
-        label(g,"TIDELINE / SESSION OVERVIEW",left+49,top+30,.6f,MUTED);
-        CoastalStyle.headerWave(g,left+16,top+46,panelWidth-32);
-        card(g,left+16,trackerWidth);card(g,queueX,queueWidth);
+        CoastalStyle.background(g,width,height);
+        TrackerHud.rounded(g,left,top+2,left+27,top+29,CoastalStyle.surface());
+        ring(g,left+7,top+9,CoastalStyle.accent());
+        label(g,"Donut Tracker",left+36,top+4,1.2f,0xFFE6EDF8);
+        label(g,CoastalStyle.sceneName()+" / SESSION CONTROL",left+36,top+24,.6f,0xFFA6B5CE);
+        card(g,left,trackerWidth);card(g,queueX,queueWidth);
         tracker(g);queue(g);
         super.render(g,mx,my,delta);
     }
-    private void card(GuiGraphics g,int x,int w){
-        TrackerHud.rounded(g,x,bodyY,x+w,bodyY+bodyHeight,CoastalStyle.surface());
-        TrackerHud.border(g,x,bodyY,x+w,bodyY+bodyHeight,CoastalStyle.line());
-    }
+    private void card(GuiGraphics g,int x,int w){CoastalStyle.glass(g,x,bodyY,w,bodyHeight);}
     private void tracker(GuiGraphics g){
-        int x=left+29,w=trackerWidth-26;
+        int x=left+13,w=trackerWidth-26;
         label(g,"NET PROFIT",x,bodyY+12,.7f,MUTED);
         String state=mod.tracker.running()?"LIVE":"IDLE";
         int stateWidth=Math.round(font.width(state)*.65f);
@@ -53,11 +49,12 @@ final class TrackerScreen extends Screen {
         label(g,state,x+w-stateWidth,bodyY+12,.65f,MUTED);
         String amount=Money.signed(mod.tracker.profit());
         int profitColour=CoastalStyle.value(mod.tracker.profit().signum()<0,mod.tracker.profit().signum()<0?mod.settings.profit.negative:mod.settings.profit.positive);
-        label(g,amount,x,bodyY+29,Math.min(2.8f,w/(float)Math.max(1,font.width(amount))),profitColour);
+        label(g,amount,x,bodyY+29,Math.min(3.1f,w/(float)Math.max(1,font.width(amount))),profitColour);
         int metricY=bodyY+bodyHeight-58,mid=x+w/2+4;
-        label(g,"DURATION",x,metricY,.58f,MUTED);
+        TrackerHud.rounded(g,x-3,metricY-5,mid-12,metricY+23,CoastalStyle.surface());
+        TrackerHud.rounded(g,mid-4,metricY-5,x+w+3,metricY+23,CoastalStyle.surface());
+        label(g,"ELAPSED",x,metricY,.58f,MUTED);
         label(g,mod.tracker.duration(),x,metricY+12,.85f,INK);
-        g.fill(mid-9,metricY,mid-8,metricY+21,LINE);
         label(g,"PER HOUR",mid,metricY,.58f,MUTED);
         String rate=Money.signed(mod.tracker.perHour());
         float rateScale=Math.min(.85f,(w/2-4)/(float)Math.max(1,font.width(rate)));
@@ -94,10 +91,9 @@ final class TrackerScreen extends Screen {
         g.drawString(font,text,0,0,colour,false);g.pose().popMatrix();
     }
     private void ring(GuiGraphics g,int x,int y,int colour){
-        TrackerHud.rounded(g,x+3,y,x+10,y+7,CoastalStyle.ink());
-        g.fill(x-1,y+5,x+14,y+7,CoastalStyle.surface());
-        CoastalStyle.wave(g,x-1,y+7,15,1,colour,0);
-        CoastalStyle.wave(g,x-1,y+11,15,1,colour,1.4);
+        g.fill(x+5,y,x+7,y+13,colour);g.fill(x,y+5,x+12,y+7,colour);
+        g.fill(x+3,y+3,x+9,y+9,colour);g.fill(x+4,y+4,x+8,y+8,INK);
+        g.fill(x+12,y-1,x+14,y+1,INK);
     }
     private final class OverviewButton extends Button.Plain {
         private final int kind;
@@ -121,7 +117,7 @@ final class TrackerScreen extends Screen {
             }
             String text=getMessage().getString();float scale=kind==2?.75f:.85f;
             int textX=kind==2?x+(w-Math.round(font.width(text)*scale))/2:x+24+(w-24-Math.round(font.width(text)*scale))/2;
-            label(g,text,textX,y+(h-7)/2,scale,kind==0?(mod.tracker.running()?0xFF4A242E:CoastalStyle.primaryInk()):hover?INK:MUTED);
+            label(g,text,textX,y+(h-7)/2,scale,kind==0?(mod.tracker.running()?0xFF4A242E:CoastalStyle.primaryInk()):kind==2?(hover?0xFFFFFFFF:0xFFC2CFDD):hover?INK:MUTED);
             if(kind==2&&hover)g.fill(textX,y+h-3,textX+Math.round(font.width(text)*scale),y+h-2,MUTED);
         }
     }
