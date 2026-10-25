@@ -226,6 +226,7 @@ public final class CoreTest {
         check(boundedScene.intensity==1&&boundedScene.speed==0&&boundedScene.density==1,"scene controls clamp to safe bounds");
         Files.writeString(auroraFile,"scene.CITY.speed=NaN\n");boolean invalidScene=false;try{Settings.load(auroraFile);}catch(java.io.IOException expected){invalidScene=true;}check(invalidScene,"non-finite scene speed rejected");
         aurora.menuGlass=true;aurora.profit.theme=Settings.Theme.GLASS;aurora.save(auroraFile);var glassLoaded=Settings.load(auroraFile);check(glassLoaded.menuGlass&&glassLoaded.profit.theme==Settings.Theme.GLASS,"menu and HUD glass preferences persist independently");
+        for(var motion:Settings.UiMotion.values()){aurora.uiMotion=motion;aurora.menuOpacity=.48;aurora.save(auroraFile);var uiLoaded=Settings.load(auroraFile);check(uiLoaded.uiMotion==motion&&uiLoaded.menuOpacity==.48,"UI motion and glass opacity persist: "+motion);}
         Files.writeString(auroraFile,"menu.auroraGlow=4\n");check(Settings.load(auroraFile).auroraGlow==1,"aurora brightness upper bound");
         Files.writeString(auroraFile,"menu.auroraGlow=-1\n");check(Settings.load(auroraFile).auroraGlow==0,"aurora brightness lower bound");
         var legacyQueue = dir.resolve("legacy-queue.properties"); Files.writeString(legacyQueue,"payment.0=Alex;1000000;1\n");

@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 
 /** Separate scene and sound pages keep atmosphere controls easy to scan. */
 final class AtmosphereScreen extends Screen {
+    private final MenuMotion transition=new MenuMotion();
     private final DonutTrackerClient mod;
     private final Screen parent;
     private int left,top,w,h,section,scenePage,soundPage;
@@ -17,8 +18,8 @@ final class AtmosphereScreen extends Screen {
     @Override protected void init(){
         w=Math.min(500,width-16);h=Math.min(260,height-12);left=(width-w)/2;top=(height-h)/2;
         int x=left+14,cw=w-28;
-        for(int i=0;i<3;i++){int page=i;addRenderableWidget(new MenuWidgets.Action(left+w-239+i*75,top+10,71,22,i==0?"Scenes":i==1?"Details":"Sound",CoastalStyle::accent,MenuWidgets.Kind.TAB,()->section==page,-1,()->{section=page;rebuildWidgets();}));}
-        if(section==0)scene(x,cw);else if(section==1)details(x,cw);else sound(x,cw);
+        for(int i=0;i<4;i++){int page=i;addRenderableWidget(new MenuWidgets.Action(left+w-314+i*75,top+10,71,22,i==0?"Scenes":i==1?"Details":i==2?"Sound":"Panels",CoastalStyle::accent,MenuWidgets.Kind.TAB,()->section==page,-1,()->{section=page;transition.page();rebuildWidgets();}));}
+        if(section==0)scene(x,cw);else if(section==1)details(x,cw);else if(section==2)sound(x,cw);else panels(x,cw);
         addRenderableWidget(new MenuWidgets.Action(x,top+h-26,68,20,"Back",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,this::onClose));
         if(section==1)addRenderableWidget(new MenuWidgets.Action(left+w-168,top+h-26,154,20,matched?"Colours applied":"Match HUD colours",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,()->{CoastalStyle.matchHud(mod.settings);matched=true;mod.save();rebuildWidgets();}));
         else addRenderableWidget(new MenuWidgets.Action(left+w-82,top+h-26,68,20,"Done",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,this::onClose));
@@ -29,6 +30,7 @@ final class AtmosphereScreen extends Screen {
         for(int i=0;i<Math.min(5,scenes.length-scenePage*5);i++)addRenderableWidget(new SceneButton(x+(i%3)*(cell+6),top+49+(i/3)*64,cell,57,scenes[scenePage*5+i]));
         pager(x,top+180,cw,scenePage,(scenes.length+4)/5,false);
         addRenderableWidget(new MenuWidgets.Toggle(x+2*(cell+6),top+125,cell,26,"Glass panels",()->mod.settings.menuGlass,CoastalStyle::accent,()->change(()->mod.settings.menuGlass=!mod.settings.menuGlass)));
+        addRenderableWidget(new MenuWidgets.Action(x+2*(cell+6),top+155,cell,20,"UI motion: "+switch(mod.settings.uiMotion){case FULL->"Full";case REDUCED->"Reduced";case OFF->"Off";},CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->change(()->mod.settings.uiMotion=Settings.UiMotion.values()[(mod.settings.uiMotion.ordinal()+1)%Settings.UiMotion.values().length])));
     }
     private void details(int x,int cw){
         int half=(cw-8)/2;var d=mod.settings.sceneDesign();
@@ -48,6 +50,11 @@ final class AtmosphereScreen extends Screen {
         TintButton(int x,int y,int w,int h,int colour){super(x,y,w,h,Component.literal(String.format("Scene tint #%06X",colour)),b->change(()->mod.settings.sceneDesign().tint=colour),DEFAULT_NARRATION);this.colour=colour;}
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta){int x=getX(),y=getY();TrackerHud.rounded(g,x,y,x+getWidth(),y+getHeight(),0xFF000000|colour);if(mod.settings.sceneDesign().tint==colour||isHoveredOrFocused())TrackerHud.border(g,x-1,y-1,x+getWidth()+1,y+getHeight()+1,CoastalStyle.ink());}
     }
+    private void panels(int x,int cw){
+        addRenderableWidget(new MenuWidgets.Toggle(x,top+49,cw,25,"Glass GUI panels",()->mod.settings.menuGlass,CoastalStyle::accent,()->change(()->mod.settings.menuGlass=!mod.settings.menuGlass)));
+        var opacity=new MenuWidgets.Slider(x,top+82,cw,36,"Glass opacity",(mod.settings.menuOpacity-.3)/.7,v->{mod.settings.menuOpacity=.3+.7*v;CoastalStyle.configure(mod.settings);mod.save();},v->Math.round((.3+.7*v)*100)+"%",CoastalStyle::accent);opacity.active=mod.settings.menuGlass;addRenderableWidget(opacity);
+        addRenderableWidget(new MenuWidgets.Action(x,top+130,cw,24,"UI motion: "+switch(mod.settings.uiMotion){case FULL->"Full";case REDUCED->"Reduced";case OFF->"Off";},CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->change(()->mod.settings.uiMotion=Settings.UiMotion.values()[(mod.settings.uiMotion.ordinal()+1)%Settings.UiMotion.values().length])));
+    }
     private void sound(int x,int cw){
         addRenderableWidget(new MenuWidgets.Toggle(x,top+49,cw,24,"Background sound",()->mod.settings.oceanEnabled,CoastalStyle::accent,()->change(()->mod.settings.oceanEnabled=!mod.settings.oceanEnabled)));
         String[] names={"Aurora drift","Shoreline","Open sea","Rainy coast","Deep space","City rain","Forest breeze","Desert wind","Snow hush","Abyssal drift","Garden chimes","Distant storm","Ember wind","Marsh night","Night rail"};
@@ -58,18 +65,19 @@ final class AtmosphereScreen extends Screen {
         addRenderableWidget(new MenuWidgets.Toggle(x,top+181,cw,18,"Also play while in game",()->mod.settings.oceanInGame,CoastalStyle::accent,()->change(()->mod.settings.oceanInGame=!mod.settings.oceanInGame)));
     }
     private void pager(int x,int yy,int cw,int page,int pages,boolean sound){
-        var prev=new MenuWidgets.Action(x,yy,68,18,"< Previous",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->{if(sound)soundPage--;else scenePage--;rebuildWidgets();});prev.active=page>0;addRenderableWidget(prev);
-        var next=new MenuWidgets.Action(x+cw-68,yy,68,18,"Next >",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->{if(sound)soundPage++;else scenePage++;rebuildWidgets();});next.active=page<pages-1;addRenderableWidget(next);
+        var prev=new MenuWidgets.Action(x,yy,68,18,"< Previous",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->{if(sound)soundPage--;else scenePage--;transition.page();rebuildWidgets();});prev.active=page>0;addRenderableWidget(prev);
+        var next=new MenuWidgets.Action(x+cw-68,yy,68,18,"Next >",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->{if(sound)soundPage++;else scenePage++;transition.page();rebuildWidgets();});next.active=page<pages-1;addRenderableWidget(next);
     }
     private void change(Runnable action){action.run();CoastalStyle.configure(mod.settings);mod.save();rebuildWidgets();}
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
-        CoastalStyle.background(g,width,height);CoastalStyle.panel(g,left,top,w,h);
+        CoastalStyle.background(g,width,height);transition.begin(g,left,top,w,h);CoastalStyle.panel(g,left,top,w,h);
         TrackerHud.text(g,"Atmosphere",left+14,top+13,CoastalStyle.ink());
-        TrackerHud.scaled(g,section==0?Settings.BackgroundScene.values().length+" SCENES / PAGE "+(scenePage+1)+" OF "+((Settings.BackgroundScene.values().length+4)/5):section==1?sceneName(mod.settings.backgroundScene)+" / YOUR DETAILS":mod.oceanStatus(),left+14,top+32,.6f,CoastalStyle.muted());
+        TrackerHud.scaled(g,section==0?Settings.BackgroundScene.values().length+" SCENES / PAGE "+(scenePage+1)+" OF "+((Settings.BackgroundScene.values().length+4)/5):section==1?sceneName(mod.settings.backgroundScene)+" / YOUR DETAILS":section==2?mod.oceanStatus():"INTERFACE / GLASS & MOTION",left+14,top+32,.6f,CoastalStyle.muted());
         if(section==1)TrackerHud.scaled(g,"INTERFACE PALETTE",left+14,top+160,.55f,CoastalStyle.muted());
         else if(section==2&&h>=250)TrackerHud.scaled(g,"Minecraft Master and Ambient volume also apply.",left+14,top+205,.65f,CoastalStyle.muted());
-        if(section!=1){String page="Page "+((section==0?scenePage:soundPage)+1)+" / "+(section==0?(Settings.BackgroundScene.values().length+4)/5:(Settings.OceanTrack.values().length+5)/6);TrackerHud.scaled(g,page,left+w/2-22,top+(section==0?186:131),.75f,CoastalStyle.muted());}
+        if(section==0||section==2){String page="Page "+((section==0?scenePage:soundPage)+1)+" / "+(section==0?(Settings.BackgroundScene.values().length+4)/5:(Settings.OceanTrack.values().length+5)/6);TrackerHud.scaled(g,page,left+w/2-22,top+(section==0?186:131),.75f,CoastalStyle.muted());}
         super.render(g,mx,my,delta);
+        transition.end(g);
     }
     private final class SceneButton extends Button.Plain {
         private final Settings.BackgroundScene scene;

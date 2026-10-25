@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import dev.donuttracker.core.Settings;
 
 final class ColourPickerScreen extends Screen {
+    private final MenuMotion transition=new MenuMotion();
     private final DonutTrackerClient mod;
     private final Screen parent;
     private final String label;
@@ -55,6 +56,7 @@ final class ColourPickerScreen extends Screen {
     @Override public boolean mouseReleased(MouseButtonEvent e) { if(dragging!=0)pick(e.x(),e.y()); dragging = 0; setDragging(false); return super.mouseReleased(e); }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
         CoastalStyle.background(g,width,height);
+        transition.begin(g,left-14,top-32,size+148,size+97);
         CoastalStyle.panel(g,left-14,top-32,size+148,size+97);
         g.drawString(font,label+" colour",left,top-20,CoastalStyle.ink(),false);
         for(int x=0;x<size;x++)g.fillGradient(left+x,top,left+x+1,top+size,0xFF000000|(Color.HSBtoRGB(hue,(float)x/size,1)&0xFFFFFF),0xFF000000);
@@ -68,6 +70,7 @@ final class ColourPickerScreen extends Screen {
         TrackerHud.scaled(g,"Before",left+size+28,top+40,.65f,CoastalStyle.muted());
         TrackerHud.scaled(g,"After",left+size+81,top+40,.65f,CoastalStyle.muted());
         super.render(g,mx,my,delta);
+        transition.end(g);
     }
     @Override public void onClose() { apply(); minecraft.setScreen(parent); }
 }

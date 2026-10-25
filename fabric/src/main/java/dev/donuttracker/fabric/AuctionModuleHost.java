@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 
 /** Auctions live inside the same branded module shell, not a second mod or independent popup. */
 final class AuctionModuleHost implements AuctionScreen.Host {
+    private final MenuMotion transition=new MenuMotion();
     private final DonutTrackerClient mod;
     private int x,y,w,h;
     private static final int RAIL=100;
@@ -28,8 +29,12 @@ final class AuctionModuleHost implements AuctionScreen.Host {
     private void nav(Consumer<AbstractWidget> add,String label,int yy,boolean selected,Runnable action){
         add.accept(new MenuWidgets.Action(x+7,y+yy,RAIL-14,20,label,CoastalStyle::accent,MenuWidgets.Kind.NAV,()->selected,-1,action));
     }
+    @Override public boolean tooltipsReady(){return transition.tooltipsReady();}
+    @Override public void page(){transition.page();}
+    @Override public void end(GuiGraphics g){transition.end(g);}
     @Override public void render(GuiGraphics g,int width,int height){
         CoastalStyle.background(g,width,height);g.fill(0,0,width,height,0x30000000);
+        transition.begin(g,x,y,w,h);
         CoastalStyle.panel(g,x,y,w,h);g.fill(x+1,y+1,x+RAIL,y+h-1,CoastalStyle.menuSurface());g.fill(x+RAIL,y+1,x+RAIL+1,y+h-1,CoastalStyle.line());
         TrackerHud.text(g,"DONUT",x+12,y+15,CoastalStyle.ink());TrackerHud.text(g,"TRACKER",x+12,y+27,CoastalStyle.accent());TrackerHud.scaled(g,"MODULES",x+12,y+52,.7f,CoastalStyle.muted());
         int yy=y+136,mid=x+RAIL/2;g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+RAIL-9,yy+1,CoastalStyle.line());g.fill(mid-2,yy-1,mid+3,yy+2,CoastalStyle.accent());

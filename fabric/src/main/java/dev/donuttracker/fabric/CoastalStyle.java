@@ -8,12 +8,12 @@ final class CoastalStyle {
     private static Settings.MenuPalette palette=Settings.MenuPalette.AURORA;
     private static Settings.BackgroundScene scene=Settings.BackgroundScene.AURORA;
     private static boolean motion=true,glass=false;
-    private static float glow=.85f;
+    private static float glow=.85f,glassOpacity=.76f;
     private static Settings settings;
-    static void configure(Settings settings){CoastalStyle.settings=settings;glass=settings.menuGlass;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
+    static void configure(Settings settings){CoastalStyle.settings=settings;MenuMotion.configure(settings.uiMotion);glass=settings.menuGlass;glassOpacity=(float)settings.menuOpacity;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
     static int panel(){return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;};}
     static int surface(){return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;};}
-    static int menuSurface(){return (glass?0xC5000000:0xFF000000)|(surface()&0xFFFFFF);}
+    static int menuSurface(){return (glass?(int)(glassOpacity*90)<<24:0xFF000000)|(surface()&0xFFFFFF);}
     static int line(){return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;};}
     static int ink(){return palette==Settings.MenuPalette.PAPER?0xFF243F48:palette==Settings.MenuPalette.AURORA?0xFFE6EDF8:0xFFF3E8CB;}
     static int muted(){return switch(palette){case SEA_GLASS->0xFFA5BAB0;case DUSK->0xFFC1B4BD;case PAPER->0xFF617776;case AURORA->0xFFA6B5CE;};}
@@ -35,7 +35,7 @@ final class CoastalStyle {
     }
     static void panel(GuiGraphics g,int x,int y,int w,int h){
         TrackerHud.rounded(g,x-1,y+4,x+w+1,y+h+5,0x50000000);
-        TrackerHud.rounded(g,x,y,x+w,y+h,(glass?0xC0000000:0xFF000000)|(panel()&0xFFFFFF));
+        TrackerHud.rounded(g,x,y,x+w,y+h,(glass?(int)(glassOpacity*255)<<24:0xFF000000)|(panel()&0xFFFFFF));
         TrackerHud.border(g,x,y,x+w,y+h,line());
         g.fill(x+10,y+1,x+w-10,y+2,mix(panel(),ink(),.16f));
     }

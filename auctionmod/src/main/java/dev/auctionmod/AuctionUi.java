@@ -3,6 +3,9 @@ package dev.auctionmod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.input.MouseButtonEvent;
+import java.util.function.DoubleConsumer;
 import net.minecraft.network.chat.Component;
 
 final class AuctionUi {
@@ -15,4 +18,18 @@ final class AuctionUi {
         Action(int x,int y,int w,int h,String text,boolean primary,Runnable action){super(x,y,w,h,Component.literal(text),b->action.run(),DEFAULT_NARRATION);this.primary=primary;}
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta){int x=getX(),y=getY(),w=getWidth(),h=getHeight();round(g,x,y,w,h,!active?0xFF24303F:primary?isHoveredOrFocused()?0xFF91E8EF:CYAN:isHoveredOrFocused()?0xFF33485B:0xFF243346);String s=Minecraft.getInstance().font.plainSubstrByWidth(getMessage().getString(),w-10);text(g,s,x+(w-Minecraft.getInstance().font.width(s))/2,y+(h-8)/2,!active?0xFF748090:primary?0xFF102631:INK);}
     }
+    static final class ScaleSlider extends AbstractSliderButton {
+        private final DoubleConsumer setter;
+        ScaleSlider(int x,int y,int w,int h,double scale,DoubleConsumer setter){super(x,y,w,h,Component.literal("HUD size"),(scale-.4)/1.2);this.setter=setter;updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal("HUD size: "+Math.round((.4+value*1.2)*100)+"%"));}
+        @Override protected void applyValue(){setter.accept(.4+value*1.2);}
+        @Override public void renderWidget(GuiGraphics g,int mx,int my,float delta){
+            int x=getX(),y=getY(),w=getWidth();round(g,x,y,w,getHeight(),0xFF243346);text(g,getMessage().getString(),x+9,y+6,INK);int start=x+12,end=x+w-12,yy=y+getHeight()-9,knob=start+(int)((end-start)*value);g.fill(start,yy,end,yy+2,0xFF47566A);g.fill(start,yy,knob,yy+2,CYAN);round(g,knob-3,yy-3,7,8,INK);
+        }
+        private void pick(double x){setValue(Math.clamp((x-getX()-12)/Math.max(1,getWidth()-24),0,1));}
+        @Override public void onClick(MouseButtonEvent e,boolean twice){pick(e.x());}
+        @Override protected void onDrag(MouseButtonEvent e,double dx,double dy){pick(e.x());}
+        @Override public void onRelease(MouseButtonEvent e){pick(e.x());super.onRelease(e);}
+    }
+
 }

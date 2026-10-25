@@ -1,3 +1,6 @@
+## Integrated HUD controls (combined 1.14+)
+Open Right Shift → Auctions → HUD settings to hide/show, choose Glass/Solid, resize or drag the box. Hiding the HUD does not stop bidding/timing. Manual positions and size are saved; dragging pins the box and Reset position restores automatic placement. The default size is 80%, adjustable from 40–160%. No auction state or payment rules are changed by display controls.
+
 ## Current distribution: integrated into Donut Tracker 1.13+
 Auction features are now compiled directly into the single Donut Tracker + Auctions JAR, under the donuttracker mod ID and its one client entrypoint. Open Right Shift → Auctions or press O. Remove the former separate auctionmod JAR. Build the combined artifact from the repository root with `./gradlew -PwithFabric build :fabric:build`. This directory is the shared auction implementation; the standalone 1.0 project documentation below describes the earlier release.
 

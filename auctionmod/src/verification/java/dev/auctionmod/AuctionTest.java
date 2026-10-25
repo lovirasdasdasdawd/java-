@@ -41,6 +41,10 @@ public final class AuctionTest {
         check(!crossing.offer(new PaymentParser.Payment("Alex",BigDecimal.TEN)),"deadline checked again before committing bid");
         var dir=Files.createTempDirectory("auction-config-test-");var path=dir.resolve("auctionmod.json");var config=AuctionConfig.load(path);config.minimum="1.25m";config.durationSeconds=90;config.glassPanels=true;config.paymentRegex="(?i)^PAY ([A-Za-z0-9_]+) ([0-9]+)$";config.save(path);var reloaded=AuctionConfig.load(path);
         check(reloaded.durationSeconds==90&&reloaded.minimum.equals("1.25m")&&reloaded.glassPanels,"JSON settings roundtrip");check(new PaymentParser(reloaded.paymentRegex).parse("PAY Alex 2000").isPresent(),"custom JSON regex is used");
+        config.hudEnabled=false;config.hudScale=.55;config.hudPinned=true;config.hudX=76;config.hudY=109;config.save(path);var hudConfig=AuctionConfig.load(path);
+        check(!hudConfig.hudEnabled&&hudConfig.hudScale==.55&&hudConfig.hudPinned&&hudConfig.hudX==76&&hudConfig.hudY==109,"hidden/scaled/dragged HUD settings persist");
+        config.hudScale=9;config.save(path);check(AuctionConfig.load(path).hudScale==1.6,"HUD scale clamps to supported maximum");
+        Files.writeString(path,"{\"hudScale\":\"NaN\"}");boolean badScale=false;try{AuctionConfig.load(path);}catch(java.io.IOException expected){badScale=true;}check(badScale,"non-finite scale config rejected safely");
         Files.delete(path);Files.delete(dir);
         System.out.println("PASS: "+checks+" auction assertions");
     }

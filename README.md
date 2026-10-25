@@ -1,3 +1,12 @@
+## Motion & glass — 1.14.0
+One unified mod/JAR. The GUI opens with a short eased pixel reveal; module views wipe in from the sidebar, with border sweeps, hover fades, click stamps and sliding toggle switches. Full / Reduced / Off UI motion modes are saved separately from background animation. Hit boxes stay fixed during animation, and auction deadlines/tracking continue independently.
+
+The main GUI now has quick **Glass** and **Background** controls. **Atmosphere → Panels** offers glass enable/disable, opacity (30–100%) and UI motion settings. The 13 selectable backgrounds retain their own tint, speed, intensity and density; 15 ambient sounds remain available.
+
+**Auctions → HUD settings** offers hide/show, Glass/Solid, a 40–160% size slider, and **Move / drag auction box**. The box defaults to 80% size. The editor supports dragging, mouse-wheel resizing, arrow-key nudging and reset position. A manually placed box stays pinned where you put it; automatic default overlap avoidance is retained until you drag it. Hiding only removes the overlay; Stop auction still cancels an auction. Settings persist in auctionmod.json.
+
+Install only `donut-tracker-fabric-1.21.11-1.14.0.jar` alongside Fabric API, replacing the earlier combined JAR. Java 21 and Minecraft 1.21.11 required.
+
 ## Unified mod — 1.13.0
 **One JAR, one Fabric mod ID, one initializer:** Donut Tracker + Auctions. Auctions now appear beside Tracker and Payments in the Right Shift module sidebar, inside the same branded GUI shell. O opens that same Auctions module view. Includes the tracker, payment queue, auction HUD, glass menus/HUDs, 13 atmospheres and 15 sounds. Existing tracker and auction configuration paths are retained. When auction and tracker HUD positions would overlap, the auction HUD is placed below the tracker without rewriting saved positions.
 

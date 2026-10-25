@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 
 /** One small ledger, a module rail, and native pixel typography. */
 final class TrackerScreen extends Screen {
+    private final MenuMotion transition=new MenuMotion();
     private final DonutTrackerClient mod;
     private final Screen parent;
     private int x,y,w,h,rail,cx,cw;
@@ -21,10 +22,13 @@ final class TrackerScreen extends Screen {
         nav("Atmosphere",y+166,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
         addRenderableWidget(new MenuWidgets.Action(x+8,y+h-28,rail-16,20,"Close",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,this::onClose));
         addRenderableWidget(new MenuWidgets.Action(cx+cw-87,y+44,87,21,mod.tracker.running()?"End session":"Start session",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();}));
+        addRenderableWidget(new MenuWidgets.Action(cx+cw-168,y+h-19,96,16,"Background",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->minecraft.setScreen(new AtmosphereScreen(mod,this))));
+        addRenderableWidget(new MenuWidgets.Action(cx+cw-66,y+h-19,66,16,mod.settings.menuGlass?"Glass: On":"Glass: Off",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->{mod.settings.menuGlass=!mod.settings.menuGlass;CoastalStyle.configure(mod.settings);mod.save();rebuildWidgets();}));
     }
     private void nav(String name,int yy,Runnable run){addRenderableWidget(new MenuWidgets.Action(x+7,yy,rail-14,20,name,CoastalStyle::accent,MenuWidgets.Kind.NAV,run));}
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
         CoastalStyle.background(g,width,height);g.fill(0,0,width,height,0x30000000);
+        transition.begin(g,x,y,w,h);
         CoastalStyle.panel(g,x,y,w,h);
         g.fill(x+1,y+1,x+rail,y+h-1,CoastalStyle.menuSurface());g.fill(x+rail,y+1,x+rail+1,y+h-1,CoastalStyle.line());
         TrackerHud.text(g,"DONUT",x+12,y+15,CoastalStyle.ink());TrackerHud.text(g,"TRACKER",x+12,y+27,CoastalStyle.accent());
@@ -46,8 +50,9 @@ final class TrackerScreen extends Screen {
         var a=mod.queue.active();
         if(a==null){TrackerHud.text(g,"Queue empty",cx,y+168,CoastalStyle.ink());TrackerHud.scaled(g,"The next payment will appear here.",cx,y+185,.7f,CoastalStyle.muted());}
         else {TrackerHud.text(g,a.player(),cx,y+168,CoastalStyle.ink());right(g,"+"+Money.format(a.amount()),cx+cw,y+168,1f,CoastalStyle.value(false,mod.settings.queue.positive));String next=mod.queue.waiting()>0?"Next: "+mod.queue.all().get(1).player():"No players waiting";TrackerHud.scaled(g,next,cx,y+185,.75f,CoastalStyle.muted());}
-        if(h>225){line(g,y+h-22);TrackerHud.scaled(g,CoastalStyle.sceneName()+" / Right Shift",cx,y+h-14,.65f,CoastalStyle.muted());}
+        line(g,y+h-23);TrackerHud.scaled(g,CoastalStyle.sceneName(),cx,y+h-14,.65f,CoastalStyle.muted());
         super.render(g,mx,my,delta);
+        transition.end(g);
     }
     private void sidebarDivider(GuiGraphics g){
         int yy=y+136,mid=x+rail/2;

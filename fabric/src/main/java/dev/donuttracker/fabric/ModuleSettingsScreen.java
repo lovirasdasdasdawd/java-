@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class ModuleSettingsScreen extends Screen {
+    private final MenuMotion transition=new MenuMotion();
     private final DonutTrackerClient mod;
     private final Screen parent;
     private int tab, section, left, top, panelWidth, panelHeight, contentLeft, contentWidth;
@@ -25,7 +26,7 @@ final class ModuleSettingsScreen extends Screen {
         captions.clear(); previewWidth=0;panelWidth=Math.min(640,width-16);panelHeight=Math.min(292,height-12);
         left=(width-panelWidth)/2;top=(height-panelHeight)/2;contentLeft=left+110;contentWidth=panelWidth-124;
         String[] pages=tab==0?new String[]{"Appearance","Colours","Visibility","Session","Messages","History"}:new String[]{"Appearance","Colours","Visibility","Queue","Messages","Position"};
-        for(int i=0;i<pages.length;i++){int page=i;addRenderableWidget(new MenuWidgets.Action(left+8,top+49+i*24,88,22,pages[i],()->hud().accent,MenuWidgets.Kind.NAV,()->section==page,-1,()->{section=page;rebuildWidgets();}));}
+        for(int i=0;i<pages.length;i++){int page=i;addRenderableWidget(new MenuWidgets.Action(left+8,top+49+i*24,88,22,pages[i],()->hud().accent,MenuWidgets.Kind.NAV,()->section==page,-1,()->{section=page;transition.page();rebuildWidgets();}));}
         int y=top+53;
         switch (section) {
             case 0 -> design(y);
@@ -157,7 +158,7 @@ final class ModuleSettingsScreen extends Screen {
         EditBox field = new EditBox(font, x, y, w, 20, Component.literal("Value")); field.setMaxLength(max); field.setValue(value); addRenderableWidget(field); return field;
     }
     @Override public void render(GuiGraphics g, int mx, int my, float delta) {
-        CoastalStyle.background(g,width,height);CoastalStyle.panel(g,left,top,panelWidth,panelHeight);
+        CoastalStyle.background(g,width,height);transition.begin(g,left,top,panelWidth,panelHeight);CoastalStyle.panel(g,left,top,panelWidth,panelHeight);
         TrackerHud.rounded(g,left+12,top+12,left+34,top+34,CoastalStyle.surface());
         TrackerHud.scaled(g,"DT",left+17,top+19,.8f,0xFF000000|hud().accent);
         TrackerHud.scaled(g,"MODULE",left+12,top+40,.55f,CoastalStyle.muted());
@@ -181,6 +182,7 @@ final class ModuleSettingsScreen extends Screen {
         String status=font.width(mod.status)>available?font.plainSubstrByWidth(mod.status,available-font.width("..."))+"...":mod.status;
         g.drawString(font, status, contentLeft, top + panelHeight - 21, CoastalStyle.muted(), false);
         super.render(g, mx, my, delta);
+        transition.end(g);
     }
     @Override public boolean keyPressed(KeyEvent event) {
         if (event.key() == GLFW.GLFW_KEY_RIGHT_SHIFT) { onClose(); return true; } return super.keyPressed(event);

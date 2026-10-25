@@ -6,5 +6,8 @@
   "notifyWinner": true,
   "glassPanels": false,
   "hudX": 12,
-  "hudY": 12
+  "hudY": 12,
+  "hudEnabled": true,
+  "hudPinned": false,
+  "hudScale": 0.8
 }

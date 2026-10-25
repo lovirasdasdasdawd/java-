@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 /** Distinct controls: actions, navigation, radio cards, switches and labelled sliders. */
@@ -22,20 +23,25 @@ final class MenuWidgets {
         final BooleanSupplier selected;
         final Kind kind;
         final int illustration;
+        private final MenuMotion.Tween hoverFade=new MenuMotion.Tween();
+        private long pressedAt;
         Action(int x,int y,int w,int h,String label,IntSupplier accent,Kind kind,BooleanSupplier selected,int illustration,Runnable action) {
             super(x,y,w,h,Component.literal(label),b -> action.run(),DEFAULT_NARRATION);
             this.accent=accent;this.kind=kind;this.selected=selected;this.illustration=illustration;
         }
         Action(int x,int y,int w,int h,String label,IntSupplier accent,Kind kind,Runnable action) { this(x,y,w,h,label,accent,kind,()->false,-1,action); }
+        @Override public void onPress(InputWithModifiers e){pressedAt=System.nanoTime();MenuMotion.clicked(getX()+getWidth()/2,getY()+getHeight()/2);super.onPress(e);}
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta) {
             int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=active?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line();boolean chosen=selected.getAsBoolean(),hover=isHoveredOrFocused();
-            int bg=kind==Kind.PRIMARY ? CoastalStyle.accent() : chosen?CoastalStyle.hover():hover?CoastalStyle.hover():CoastalStyle.surface();
+            float warmth=(float)hoverFade.to(active&&(hover||chosen)?1:0);
+            int hoverColour=CoastalStyle.mix(CoastalStyle.surface(),CoastalStyle.hover(),warmth);
+            int bg=kind==Kind.PRIMARY ? CoastalStyle.accent() : chosen?CoastalStyle.hover():hoverColour;
             if(kind==Kind.NAV) {
-                if(chosen||hover)TrackerHud.rounded(g,x,y,x+w,y+h,chosen?CoastalStyle.hover():CoastalStyle.surface());
-                if(chosen)g.fill(x,y+6,x+2,y+h-6,a);
+                if(chosen||warmth>.001f)TrackerHud.rounded(g,x,y,x+w,y+h,hoverColour);
+                if(chosen||warmth>.01f){int length=Math.max(1,(int)((h-12)*(chosen?1:warmth)));g.fill(x,y+6,x+2,y+6+length,chosen?a:((int)(160*warmth)<<24)|(a&0xFFFFFF));}
             } else if(kind==Kind.TAB) {
-                if(chosen||hover)TrackerHud.rounded(g,x,y,x+w,y+h,chosen?CoastalStyle.hover():CoastalStyle.surface());
-                if(chosen)g.fill(x+8,y+h-2,x+w-8,y+h,a);
+                if(chosen||warmth>.001f)TrackerHud.rounded(g,x,y,x+w,y+h,hoverColour);
+                if(chosen||warmth>.01f)g.fill(x+8,y+h-2,x+8+(int)((w-16)*(chosen?1:warmth)),y+h,chosen?a:((int)(140*warmth)<<24)|(a&0xFFFFFF));
             } else {
                 TrackerHud.rounded(g,x,y,x+w,y+h,bg);
                 TrackerHud.border(g,x,y,x+w,y+h,kind==Kind.PRIMARY?CoastalStyle.accent():chosen||hover?a:CoastalStyle.line());
@@ -43,7 +49,8 @@ final class MenuWidgets {
             if(illustration>=0) miniature(g,x+w/2-13,y+5,a,illustration);
             String label=Minecraft.getInstance().font.plainSubstrByWidth(getMessage().getString(),Math.max(10,w-12));
             int tx=kind==Kind.NAV?x+12:x+(w-Minecraft.getInstance().font.width(label))/2;
-            text(g,label,tx,illustration>=0?y+h-12:y+(h-8)/2,!active?0xFF6C7488:kind==Kind.PRIMARY?CoastalStyle.primaryInk():chosen?a:CoastalStyle.ink());
+            int dip=MenuMotion.full()&&System.nanoTime()-pressedAt<100_000_000L?1:0;
+            text(g,label,tx+(kind==Kind.NAV&&MenuMotion.full()?(int)(warmth*2):0),(illustration>=0?y+h-12:y+(h-8)/2)+dip,!active?0xFF6C7488:kind==Kind.PRIMARY?CoastalStyle.primaryInk():chosen?a:CoastalStyle.ink());
         }
         private static void miniature(GuiGraphics g,int x,int y,int color,int layout) {
             if(layout==0) { g.fill(x,y,x+12,y+4,color);g.fill(x+16,y,x+27,y+2,0xFF8996AB);g.fill(x+16,y+4,x+25,y+6,0xFF8996AB); }
@@ -52,6 +59,7 @@ final class MenuWidgets {
         }
     }
     static final class Toggle extends Button.Plain {
+        @Override public void onPress(InputWithModifiers e){MenuMotion.clicked(getX()+getWidth()/2,getY()+getHeight()/2);super.onPress(e);}
         private final String label;
         private final BooleanSupplier enabled;
         private final IntSupplier accent;
@@ -64,9 +72,10 @@ final class MenuWidgets {
             TrackerHud.rounded(g,x,y,x+w,y+h,isHoveredOrFocused()?CoastalStyle.hover():CoastalStyle.surface());
             TrackerHud.border(g,x,y,x+w,y+h,isHoveredOrFocused()?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line());
             text(g,Minecraft.getInstance().font.plainSubstrByWidth(label,Math.max(30,w-61)),x+9,y+(h-8)/2,CoastalStyle.ink());
+            double position=MenuMotion.full()?MenuMotion.toggle(label+":"+x+":"+y,on).to(on?1:0):(on?1:0);
             int sx=x+w-42,sy=y+(h-14)/2;
             TrackerHud.rounded(g,sx,sy,sx+33,sy+14,on?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line());
-            TrackerHud.rounded(g,sx+(on?20:2),sy+2,sx+(on?31:13),sy+12,on?CoastalStyle.panel():CoastalStyle.ink());
+            TrackerHud.rounded(g,sx+2+(int)(18*position),sy+2,sx+13+(int)(18*position),sy+12,on?CoastalStyle.panel():CoastalStyle.ink());
         }
     }
     static final class Slider extends AbstractSliderButton {
@@ -90,7 +99,7 @@ final class MenuWidgets {
             TrackerHud.rounded(g,knob-3,track-3,knob+4,track+6,active?CoastalStyle.ink():CoastalStyle.line());
         }
         private void pick(double x) { setValue(Math.clamp((x-getX()-12)/Math.max(1,getWidth()-24),0,1)); }
-        @Override public void onClick(MouseButtonEvent e,boolean twice) { pick(e.x()); }
+        @Override public void onClick(MouseButtonEvent e,boolean twice) { MenuMotion.clicked((int)e.x(),(int)e.y());pick(e.x()); }
         @Override protected void onDrag(MouseButtonEvent e,double dx,double dy) { pick(e.x()); }
         @Override public void onRelease(MouseButtonEvent e) { pick(e.x());super.onRelease(e); }
         @Override protected void updateMessage() { if(format!=null)setMessage(Component.literal(label+": "+format.apply(value))); }
