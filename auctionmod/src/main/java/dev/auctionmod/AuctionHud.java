@@ -9,6 +9,7 @@ public final class AuctionHud {
         var client=Minecraft.getInstance();var view=mod.auction.snapshot();var phase=view.phase();
         if(client.player==null||client.options.hideGui||phase==AuctionState.Phase.IDLE)return;
         int w=Math.min(286,g.guiWidth()-8),h=86,x=Math.clamp(mod.config.hudX,0,Math.max(0,g.guiWidth()-w)),y=Math.clamp(mod.config.hudY,0,Math.max(0,g.guiHeight()-h));
+        if(mod.hudPlacement!=null)y=Math.clamp(mod.hudPlacement.y(g.guiWidth(),g.guiHeight(),x,y,w,h),0,Math.max(0,g.guiHeight()-h));
         AuctionUi.panel(g,x,y,w,h,mod.config.glassPanels);
         AuctionUi.text(g,"Auction Mod by claude",x+10,y+9,AuctionUi.CYAN);
         g.fill(x+10,y+23,x+w-10,y+24,0xFF344455);

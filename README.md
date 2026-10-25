@@ -1,5 +1,5 @@
 ## Unified mod — 1.13.0
-**One JAR, one Fabric mod ID, one initializer:** Donut Tracker + Auctions. Auctions now appear beside Tracker and Payments in the Right Shift module sidebar, inside the same branded GUI shell. O opens that same Auctions module view. Includes the tracker, payment queue, auction HUD, glass menus/HUDs, 13 atmospheres and 15 sounds. Existing tracker and auction configuration paths are retained.
+**One JAR, one Fabric mod ID, one initializer:** Donut Tracker + Auctions. Auctions now appear beside Tracker and Payments in the Right Shift module sidebar, inside the same branded GUI shell. O opens that same Auctions module view. Includes the tracker, payment queue, auction HUD, glass menus/HUDs, 13 atmospheres and 15 sounds. Existing tracker and auction configuration paths are retained. When auction and tracker HUD positions would overlap, the auction HUD is placed below the tracker without rewriting saved positions.
 
 Remove both the old Donut Tracker JAR and the separate auctionmod JAR, then install only `donut-tracker-fabric-1.21.11-1.13.0.jar` alongside Fabric API. Do not install the old separate Auction Mod; the loader reports that incompatible combination instead of registering duplicate handlers.
 

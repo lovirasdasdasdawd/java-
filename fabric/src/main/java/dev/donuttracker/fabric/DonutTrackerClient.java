@@ -62,6 +62,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         try { StateStore.load(state, tracker, queue); } catch (IOException ex) { stateWritable = false; LOG.error("History could not be read; original file preserved", ex); status = "Invalid history file: " + state; }
         CoastalStyle.configure(settings);
         auctions.onInitializeClient();
+        auctions.setHudPlacement(this::auctionHudY);
         auctions.setScreenFactory(parent->new dev.auctionmod.AuctionScreen(auctions,parent,new AuctionModuleHost(this)));
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -114,6 +115,15 @@ public final class DonutTrackerClient implements ClientModInitializer {
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {ocean.stop(client);save();});
         LOG.info("Donut Tracker initialized; press Right Shift for settings.");
+    }
+    private int auctionHudY(int sw,int sh,int x,int y,int width,int height){
+        boolean overlap=false;int below=y;
+        for(var hud:new Settings.Hud[]{settings.profit,settings.queue}){
+            if(!hud.enabled)continue;
+            int hx=TrackerHud.x(hud,sw),hy=TrackerHud.y(hud,sh),hw=(int)Math.ceil(TrackerHud.width()*hud.scale),hh=(int)Math.ceil(TrackerHud.height(hud)*hud.scale);
+            if(x<hx+hw&&x+width>hx){below=Math.max(below,hy+hh+8);if(y<hy+hh&&y+height>hy)overlap=true;}
+        }
+        return overlap?Math.min(Math.max(0,sh-height),below):y;
     }
     private void observeLever(Minecraft client){
         if(!leverAdvance.pending())return;

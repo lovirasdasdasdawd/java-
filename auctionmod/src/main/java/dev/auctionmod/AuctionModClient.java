@@ -24,6 +24,9 @@ public final class AuctionModClient implements ClientModInitializer {
     final AuctionState auction=new AuctionState();
     final Path configPath=FabricLoader.getInstance().getConfigDir().resolve("auctionmod.json");
     AuctionConfig config;
+    public interface HudPlacement { int y(int screenWidth,int screenHeight,int x,int y,int width,int height); }
+    HudPlacement hudPlacement;
+    public void setHudPlacement(HudPlacement placement){hudPlacement=placement;}
     private PaymentParser parser;
     private java.util.function.Function<net.minecraft.client.gui.screens.Screen,net.minecraft.client.gui.screens.Screen> screenFactory;
     ItemStack auctionItem=ItemStack.EMPTY;
