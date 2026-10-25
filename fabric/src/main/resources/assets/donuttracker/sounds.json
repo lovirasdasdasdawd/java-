@@ -118,5 +118,45 @@
         "stream": true
       }
     ]
+  },
+  "ocean.harbor_wind": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/harbor_wind",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.river_flow": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/river_flow",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.cloud_drift": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/cloud_drift",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.lake_night": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/lake_night",
+        "stream": true
+      }
+    ]
+  },
+  "ocean.bamboo_rustle": {
+    "sounds": [
+      {
+        "name": "donuttracker:ocean/bamboo_rustle",
+        "stream": true
+      }
+    ]
   }
 }

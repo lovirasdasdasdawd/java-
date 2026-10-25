@@ -11,13 +11,16 @@ final class CoastalStyle {
     private static float glow=.85f,glassOpacity=.76f;
     private static Settings settings;
     static void configure(Settings settings){CoastalStyle.settings=settings;MenuMotion.configure(settings.uiMotion);glass=settings.menuGlass;glassOpacity=(float)settings.menuOpacity;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
-    static int panel(){return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;};}
-    static int surface(){return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;};}
+    static int panel(){return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;case SLATE->0xFF111820;case COFFEE->0xFF28221E;case LAVENDER->0xFF242136;case MOSS->0xFF1D2923;case GLACIER->0xFF142832;case ROSE->0xFF32232A;};}
+    static int surface(){return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;case SLATE->0xFF1B2530;case COFFEE->0xFF372E27;case LAVENDER->0xFF312B46;case MOSS->0xFF29372D;case GLACIER->0xFF203844;case ROSE->0xFF443039;};}
+    static int paletteAccent(Settings.MenuPalette choice){var before=palette;try{palette=choice;return accent();}finally{palette=before;}}
+    static int palettePanel(Settings.MenuPalette choice){var before=palette;try{palette=choice;return panel();}finally{palette=before;}}
+    static String paletteName(Settings.MenuPalette choice){return switch(choice){case SEA_GLASS->"Sea glass";case DUSK->"Dusk";case PAPER->"Paper";case AURORA->"Aurora";case SLATE->"Slate";case COFFEE->"Coffee";case LAVENDER->"Lavender";case MOSS->"Moss";case GLACIER->"Glacier";case ROSE->"Rose";};}
     static int menuSurface(){return (glass?(int)(glassOpacity*90)<<24:0xFF000000)|(surface()&0xFFFFFF);}
-    static int line(){return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;};}
+    static int line(){return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;case SLATE->0xFF435563;case COFFEE->0xFF746052;case LAVENDER->0xFF71638E;case MOSS->0xFF5E7560;case GLACIER->0xFF507D8E;case ROSE->0xFF896370;};}
     static int ink(){return palette==Settings.MenuPalette.PAPER?0xFF243F48:palette==Settings.MenuPalette.AURORA?0xFFE6EDF8:0xFFF3E8CB;}
-    static int muted(){return switch(palette){case SEA_GLASS->0xFFA5BAB0;case DUSK->0xFFC1B4BD;case PAPER->0xFF617776;case AURORA->0xFFA6B5CE;};}
-    static int accent(){return switch(palette){case SEA_GLASS->0xFF90D7C2;case DUSK->0xFFE9AEAA;case PAPER->0xFF327E77;case AURORA->0xFF9CEBD2;};}
+    static int muted(){return switch(palette){case SEA_GLASS->0xFFA5BAB0;case DUSK->0xFFC1B4BD;case PAPER->0xFF617776;case AURORA->0xFFA6B5CE;case SLATE->0xFF9AAEBD;case COFFEE->0xFFC5AE99;case LAVENDER->0xFFBDB0D1;case MOSS->0xFFADBDA6;case GLACIER->0xFFA5C8D6;case ROSE->0xFFCEB0BC;};}
+    static int accent(){return switch(palette){case SEA_GLASS->0xFF90D7C2;case DUSK->0xFFE9AEAA;case PAPER->0xFF327E77;case AURORA->0xFF9CEBD2;case SLATE->0xFFB2CDDD;case COFFEE->0xFFE4BE8B;case LAVENDER->0xFFC8B2EB;case MOSS->0xFFC2D39B;case GLACIER->0xFFA0DEEA;case ROSE->0xFFF0B5C5;};}
     static int controlAccent(int custom){return palette==Settings.MenuPalette.PAPER?accent():0xFF000000|custom;}
     static int value(boolean loss,int custom){return palette==Settings.MenuPalette.PAPER?(loss?0xFF9B4951:0xFF286B55):0xFF000000|custom;}
     static int primaryInk(){return palette==Settings.MenuPalette.PAPER?0xFFFFF4D8:0xFF183A3E;}

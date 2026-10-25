@@ -23,17 +23,15 @@ final class MenuWidgets {
         final BooleanSupplier selected;
         final Kind kind;
         final int illustration;
-        private final MenuMotion.Tween hoverFade=new MenuMotion.Tween();
-        private long pressedAt;
         Action(int x,int y,int w,int h,String label,IntSupplier accent,Kind kind,BooleanSupplier selected,int illustration,Runnable action) {
             super(x,y,w,h,Component.literal(label),b -> action.run(),DEFAULT_NARRATION);
             this.accent=accent;this.kind=kind;this.selected=selected;this.illustration=illustration;
         }
         Action(int x,int y,int w,int h,String label,IntSupplier accent,Kind kind,Runnable action) { this(x,y,w,h,label,accent,kind,()->false,-1,action); }
-        @Override public void onPress(InputWithModifiers e){pressedAt=System.nanoTime();MenuMotion.clicked(getX()+getWidth()/2,getY()+getHeight()/2);super.onPress(e);}
+        @Override public void onPress(InputWithModifiers e){MenuMotion.clicked(getX()+getWidth()/2,getY()+getHeight()/2);super.onPress(e);}
         @Override protected void renderContents(GuiGraphics g,int mx,int my,float delta) {
             int x=getX(),y=getY(),w=getWidth(),h=getHeight(),a=active?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line();boolean chosen=selected.getAsBoolean(),hover=isHoveredOrFocused();
-            float warmth=(float)hoverFade.to(active&&(hover||chosen)?1:0);
+            float warmth=active&&(hover||chosen)?1:0;
             int hoverColour=CoastalStyle.mix(CoastalStyle.surface(),CoastalStyle.hover(),warmth);
             int bg=kind==Kind.PRIMARY ? CoastalStyle.accent() : chosen?CoastalStyle.hover():hoverColour;
             if(kind==Kind.NAV) {
@@ -49,8 +47,7 @@ final class MenuWidgets {
             if(illustration>=0) miniature(g,x+w/2-13,y+5,a,illustration);
             String label=Minecraft.getInstance().font.plainSubstrByWidth(getMessage().getString(),Math.max(10,w-12));
             int tx=kind==Kind.NAV?x+12:x+(w-Minecraft.getInstance().font.width(label))/2;
-            int dip=MenuMotion.full()&&System.nanoTime()-pressedAt<100_000_000L?1:0;
-            text(g,label,tx+(kind==Kind.NAV&&MenuMotion.full()?(int)(warmth*2):0),(illustration>=0?y+h-12:y+(h-8)/2)+dip,!active?0xFF6C7488:kind==Kind.PRIMARY?CoastalStyle.primaryInk():chosen?a:CoastalStyle.ink());
+            text(g,label,tx,(illustration>=0?y+h-12:y+(h-8)/2),!active?0xFF6C7488:kind==Kind.PRIMARY?CoastalStyle.primaryInk():chosen?a:CoastalStyle.ink());
         }
         private static void miniature(GuiGraphics g,int x,int y,int color,int layout) {
             if(layout==0) { g.fill(x,y,x+12,y+4,color);g.fill(x+16,y,x+27,y+2,0xFF8996AB);g.fill(x+16,y+4,x+25,y+6,0xFF8996AB); }
@@ -72,7 +69,7 @@ final class MenuWidgets {
             TrackerHud.rounded(g,x,y,x+w,y+h,isHoveredOrFocused()?CoastalStyle.hover():CoastalStyle.surface());
             TrackerHud.border(g,x,y,x+w,y+h,isHoveredOrFocused()?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line());
             text(g,Minecraft.getInstance().font.plainSubstrByWidth(label,Math.max(30,w-61)),x+9,y+(h-8)/2,CoastalStyle.ink());
-            double position=MenuMotion.full()?MenuMotion.toggle(label+":"+x+":"+y,on).to(on?1:0):(on?1:0);
+            double position=on?1:0;
             int sx=x+w-42,sy=y+(h-14)/2;
             TrackerHud.rounded(g,sx,sy,sx+33,sy+14,on?CoastalStyle.controlAccent(accent.getAsInt()):CoastalStyle.line());
             TrackerHud.rounded(g,sx+2+(int)(18*position),sy+2,sx+13+(int)(18*position),sy+12,on?CoastalStyle.panel():CoastalStyle.ink());

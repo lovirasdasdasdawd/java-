@@ -4,6 +4,8 @@ import dev.donuttracker.core.Money;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 
 /** One small ledger, a module rail, and native pixel typography. */
 final class TrackerScreen extends Screen {
@@ -53,6 +55,7 @@ final class TrackerScreen extends Screen {
         line(g,y+h-23);TrackerHud.scaled(g,CoastalStyle.sceneName(),cx,y+h-14,.65f,CoastalStyle.muted());
         super.render(g,transition.pointerX(mx),transition.pointerY(my),delta);
         transition.end(g);
+        if(transition.closed())minecraft.setScreen(parent);
     }
     private void sidebarDivider(GuiGraphics g){
         int yy=y+136,mid=x+rail/2;
@@ -63,5 +66,6 @@ final class TrackerScreen extends Screen {
     private void stat(GuiGraphics g,String name,String value,int xx,int yy,int width){TrackerHud.scaled(g,name,xx,yy,.75f,CoastalStyle.muted());TrackerHud.scaled(g,value,xx,yy+14,Math.min(.9f,(width-8f)/Math.max(1,font.width(value))),CoastalStyle.ink());}
     private void line(GuiGraphics g,int yy){g.fill(cx,yy,cx+cw,yy+1,CoastalStyle.line());}
     private void right(GuiGraphics g,String s,int xx,int yy,float scale,int c){TrackerHud.scaled(g,s,xx-Math.round(font.width(s)*scale),yy,scale,c);}
-    @Override public void onClose(){mod.save();minecraft.setScreen(parent);}
+    @Override public boolean keyPressed(KeyEvent event){if(event.key()==GLFW.GLFW_KEY_RIGHT_SHIFT){onClose();return true;}return super.keyPressed(event);}
+    @Override public void onClose(){mod.save();transition.close();if(!MenuMotion.enabled())minecraft.setScreen(parent);}
 }

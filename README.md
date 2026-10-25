@@ -1,3 +1,12 @@
+## Quiet controls & new atmospheres — 1.16.0
+Only entering and leaving the main menu animate: the GUI grows into the centre on opening and shrinks away on closing. Module switches, tabs, hover states, clicks and toggles are instant. Full / Reduced / Off applies to opening and closing; landscape animation is controlled separately.
+
+Five new scenes — Lighthouse, River valley, Cloudscape, Moonlit lake and Bamboo grove — each have their own saved tint, intensity, density and speed, plus a matching original 40-second stereo sound loop. There are now 18 scenes and 20 ambient tracks, with volume, mute and optional in-game playback.
+
+Atmosphere → Panels shows ten interface palettes as real colour swatches, including six new options: Slate, Coffee, Lavender, Moss, Glacier and Rose. Glass and opacity remain adjustable. Choosing a palette preserves custom HUD colours until Match HUD colours is clicked.
+
+Replace the old combined JAR with `donut-tracker-fabric-1.21.11-1.16.0.jar`. Still one mod, with Tracker, Payments and Auctions in the same GUI. Java 21, Minecraft 1.21.11, Fabric Loader and Fabric API required.
+
 ## Centre pop opening — 1.15.0
 Right Shift now opens the main GUI at 12% size just below its centre, growing smoothly to its normal centred position over 290ms with cubic easing. The actual panel, text and buttons scale together. Reduced motion keeps its short full-size fade, and Off remains instant. Other module transitions and all existing features are retained.
 

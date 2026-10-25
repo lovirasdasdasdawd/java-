@@ -9,7 +9,7 @@ final class WorldBackdrop {
         if(w<1||h<1)return;
         double t=motion?System.nanoTime()/1e9*(.15+d.speed*1.3):0;
         int tint=0xFF000000|d.tint;
-        switch(scene){case SPACE->space(g,x,y,w,h,t,d,tint);case CITY->city(g,x,y,w,h,t,d,tint);case FOREST->forest(g,x,y,w,h,t,d,tint);default->SeasonBackdrop.draw(g,x,y,w,h,scene,t,d,tint);}
+        switch(scene){case SPACE->space(g,x,y,w,h,t,d,tint);case CITY->city(g,x,y,w,h,t,d,tint);case FOREST->forest(g,x,y,w,h,t,d,tint);case LIGHTHOUSE,RIVER,CLOUDS,MOON,BAMBOO->QuietBackdrop.draw(g,x,y,w,h,scene,t,d,tint);default->SeasonBackdrop.draw(g,x,y,w,h,scene,t,d,tint);}
     }
     private static int blend(int a,int b,double n){return CoastalStyle.mix(a,b,(float)n);}
     private static int seed(int i,int n){return Math.floorMod(i*1103515245+12345,n);}

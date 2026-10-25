@@ -66,7 +66,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         auctions.setScreenFactory(parent->new dev.auctionmod.AuctionScreen(auctions,parent,new AuctionModuleHost(this)));
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (menu.consumeClick()) if (client.player != null) client.setScreen(new TrackerScreen(this, client.screen));
+            while (menu.consumeClick()) if (client.player != null) {if(client.screen instanceof TrackerScreen screen)screen.onClose();else client.setScreen(new TrackerScreen(this, client.screen));}
             CoastalStyle.configure(settings);ocean.tick(client,settings);
             if(!client.options.keyUse.isDown())leverUseHeld=false;
             observeLever(client);
