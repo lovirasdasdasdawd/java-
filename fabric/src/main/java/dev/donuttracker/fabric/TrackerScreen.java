@@ -32,7 +32,7 @@ final class TrackerScreen extends Screen {
         CoastalStyle.background(g,width,height);g.fill(0,0,width,height,0x30000000);
         transition.begin(g,x,y,w,h);
         CoastalStyle.panel(g,x,y,w,h);
-        g.fill(x+1,y+1,x+rail,y+h-1,CoastalStyle.menuSurface());g.fill(x+rail,y+1,x+rail+1,y+h-1,CoastalStyle.line());
+        TrackerHud.rounded(g,x+1,y+1,x+rail,y+h-1,CoastalStyle.menuSurface(),11);g.fill(x+rail-11,y+1,x+rail,y+h-1,CoastalStyle.menuSurface());g.fill(x+rail,y+1,x+rail+1,y+h-1,CoastalStyle.line());
         TrackerHud.text(g,"DONUT",x+12,y+15,CoastalStyle.ink());TrackerHud.text(g,"TRACKER",x+12,y+27,CoastalStyle.accent());
         TrackerHud.scaled(g,"MODULES",x+12,y+52,.7f,CoastalStyle.muted());
         sidebarDivider(g);

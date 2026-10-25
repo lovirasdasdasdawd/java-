@@ -1,3 +1,8 @@
+## Rounded panels & HUDs — 1.17.0
+GUI panels, buttons, cards and outlines now use rounded corners. Tracker and Payment Queue HUD backgrounds, shadows, borders and accent rails follow the rounded silhouette; Auction panels and HUDs match. Glass surfaces use non-overlapping rows so their transparency stays even. Existing sizes, positions, settings, opening/closing motion and tracking behaviour are retained.
+
+Replace the previous combined JAR with `donut-tracker-fabric-1.21.11-1.17.0.jar`.
+
 ## Quiet controls & new atmospheres — 1.16.0
 Only entering and leaving the main menu animate: the GUI grows into the centre on opening and shrinks away on closing. Module switches, tabs, hover states, clicks and toggles are instant. Full / Reduced / Off applies to opening and closing; landscape animation is controlled separately.
 

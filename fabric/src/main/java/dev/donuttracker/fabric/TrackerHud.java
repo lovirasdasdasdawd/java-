@@ -18,10 +18,10 @@ final class TrackerHud {
         g.pose().pushMatrix();g.pose().translate((float)x(h,g.guiWidth()),(float)y(h,g.guiHeight()));g.pose().scale((float)h.scale,(float)h.scale);
         int w=width(),ht=height(h),ink=opaque(h.text),muted=blend(h.text,h.background,.56f),accent=opaque(h.accent);
         if(h.theme==Settings.Theme.NEON)for(int n=3;n>0;n--)border(g,-n,-n,w+n,ht+n,0x14000000|h.accent);
-        g.fill(2,ht,w+2,ht+2,((int)(65*h.opacity)<<24));
-        g.fill(0,0,w,ht,((int)((h.theme==Settings.Theme.GLASS?145:255)*h.opacity)<<24)|h.background);
+        rounded(g,2,2,w+2,ht+2,((int)(65*h.opacity)<<24));
+        rounded(g,0,0,w,ht,((int)((h.theme==Settings.Theme.GLASS?145:255)*h.opacity)<<24)|h.background);
         border(g,0,0,w,ht,((int)(160*h.opacity)<<24)|(blend(h.text,h.background,.22f)&0xFFFFFF));
-        g.fill(0,0,2,ht,accent);g.fill(2,0,w,1,((int)(100*h.opacity)<<24)|h.accent);
+        rounded(g,2,9,4,ht-9,accent);g.fill(12,1,w-12,2,((int)(100*h.opacity)<<24)|h.accent);
         if(h.layout==Settings.Layout.MINIMAL){
             if(h.showIcon){if(payment)people(g,8,8,accent);else donut(g,8,8,accent);}
             int start=h.showIcon?26:9;
@@ -69,16 +69,18 @@ final class TrackerHud {
         double distance = row < radius ? radius - row - .5 : row >= height - radius ? row - (height - radius) + .5 : 0;
         return distance == 0 ? 0 : Math.max(0, (int)Math.ceil(radius - Math.sqrt(radius * radius - distance * distance)));
     }
-    static void rounded(GuiGraphics g, int x1, int y1, int x2, int y2, int color) {
-        int ht = y2 - y1, radius = Math.max(0, Math.min(1, Math.min((x2-x1)/2, ht/2)));
-        for (int y = 0; y < ht; y++) { int dx = inset(y, ht, radius); g.fill(x1 + dx, y1+y, x2-dx, y1+y+1, color); }
+    static void rounded(GuiGraphics g,int x1,int y1,int x2,int y2,int color){rounded(g,x1,y1,x2,y2,color,8);}
+    static void rounded(GuiGraphics g,int x1,int y1,int x2,int y2,int color,int radius){
+        int ht=y2-y1;radius=Math.max(0,Math.min(radius,Math.min((x2-x1)/2,ht/2)));
+        for(int y=0;y<ht;y++){int dx=inset(y,ht,radius);if(x1+dx<x2-dx)g.fill(x1+dx,y1+y,x2-dx,y1+y+1,color);}
     }
-    static void border(GuiGraphics g, int x1, int y1, int x2, int y2, int color) {
-        int ht = y2-y1, radius = Math.max(0, Math.min(1, Math.min((x2-x1)/2, ht/2)));
-        for (int y = 0; y < ht; y++) {
-            int dx = inset(y, ht, radius);
-            if (y == 0 || y == ht-1) g.fill(x1+dx,y1+y,x2-dx,y1+y+1,color);
-            else { int inner = 1 + inset(y-1,ht-2,Math.max(0,radius-1)); g.fill(x1+dx,y1+y,x1+inner,y1+y+1,color); g.fill(x2-inner,y1+y,x2-dx,y1+y+1,color); }
+    static void border(GuiGraphics g,int x1,int y1,int x2,int y2,int color){border(g,x1,y1,x2,y2,color,8);}
+    static void border(GuiGraphics g,int x1,int y1,int x2,int y2,int color,int radius){
+        int ht=y2-y1;radius=Math.max(0,Math.min(radius,Math.min((x2-x1)/2,ht/2)));
+        for(int y=0;y<ht;y++){
+            int dx=inset(y,ht,radius),left=x1+dx,right=x2-dx;
+            if(y==0||y==ht-1){if(left<right)g.fill(left,y1+y,right,y1+y+1,color);}
+            else{int inner=Math.max(dx,1+inset(y-1,ht-2,Math.max(0,radius-1)));if(left<x1+inner)g.fill(left,y1+y,x1+inner,y1+y+1,color);if(x2-inner<right)g.fill(x2-inner,y1+y,right,y1+y+1,color);}
         }
     }
     private static void donut(GuiGraphics g,int x,int y,int c){border(g,x,y,x+11,y+11,c);g.fill(x+5,y+4,x+7,y+7,c);}

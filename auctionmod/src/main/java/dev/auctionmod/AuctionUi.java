@@ -11,7 +11,14 @@ import net.minecraft.network.chat.Component;
 final class AuctionUi {
     static final int CYAN=0xFF6EDDED,INK=0xFFEDF1F5,MUTED=0xFFA0A8B5,YELLOW=0xFFF0D66D;
     static void text(GuiGraphics g,String s,int x,int y,int c){g.drawString(Minecraft.getInstance().font,s,x,y,c,false);}
-    static void round(GuiGraphics g,int x,int y,int w,int h,int c){g.fill(x+3,y,x+w-3,y+h,c);g.fill(x+1,y+1,x+w-1,y+h-1,c);g.fill(x,y+3,x+w,y+h-3,c);}
+    static void round(GuiGraphics g,int x,int y,int w,int h,int c){
+        int radius=Math.max(0,Math.min(10,Math.min(w/2,h/2)));
+        for(int row=0;row<h;row++){
+            double dy=row<radius?radius-row-.5:row>=h-radius?row-(h-radius)+.5:0;
+            int inset=dy==0?0:Math.max(0,(int)Math.ceil(radius-Math.sqrt(radius*radius-dy*dy)));
+            if(w>2*inset)g.fill(x+inset,y+row,x+w-inset,y+row+1,c);
+        }
+    }
     static void panel(GuiGraphics g,int x,int y,int w,int h,boolean glass){round(g,x,y,w,h,glass?0x3040536A:0xFF40536A);round(g,x+1,y+1,w-2,h-2,glass?0x9A151E2B:0xFF111925);g.fill(x+6,y+1,x+w-6,y+2,glass?0x807FC2CF:0xFF293C50);}
     static final class Action extends Button.Plain {
         private final boolean primary;

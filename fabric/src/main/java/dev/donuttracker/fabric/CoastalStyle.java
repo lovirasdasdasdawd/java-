@@ -37,16 +37,16 @@ final class CoastalStyle {
         for(int row=0;row<1+(int)(settings.sceneDesign().density*5);row++)wave(g,0,height-23-row*14,width,4+row,((int)(15+settings.sceneDesign().intensity*60)<<24)|settings.sceneDesign().tint,phase+row*1.8);
     }
     static void panel(GuiGraphics g,int x,int y,int w,int h){
-        TrackerHud.rounded(g,x-1,y+4,x+w+1,y+h+5,0x50000000);
-        TrackerHud.rounded(g,x,y,x+w,y+h,(glass?(int)(glassOpacity*255)<<24:0xFF000000)|(panel()&0xFFFFFF));
-        TrackerHud.border(g,x,y,x+w,y+h,line());
+        TrackerHud.rounded(g,x-1,y+4,x+w+1,y+h+5,0x50000000,12);
+        TrackerHud.rounded(g,x,y,x+w,y+h,(glass?(int)(glassOpacity*255)<<24:0xFF000000)|(panel()&0xFFFFFF),12);
+        TrackerHud.border(g,x,y,x+w,y+h,line(),12);
         g.fill(x+10,y+1,x+w-10,y+2,mix(panel(),ink(),.16f));
     }
     static void glass(GuiGraphics g,int x,int y,int w,int h){
         int alpha=palette==Settings.MenuPalette.PAPER?0xFF000000:0xD9000000;
-        TrackerHud.rounded(g,x,y+3,x+w,y+h+3,0x30000000);
-        TrackerHud.rounded(g,x,y,x+w,y+h,alpha|(panel()&0xFFFFFF));
-        TrackerHud.border(g,x,y,x+w,y+h,0xA0000000|(line()&0xFFFFFF));
+        TrackerHud.rounded(g,x,y+3,x+w,y+h+3,0x30000000,12);
+        TrackerHud.rounded(g,x,y,x+w,y+h,alpha|(panel()&0xFFFFFF),12);
+        TrackerHud.border(g,x,y,x+w,y+h,0xA0000000|(line()&0xFFFFFF),12);
         g.fill(x+9,y+1,x+w-9,y+2,0x40000000|(accent()&0xFFFFFF));
     }
     static void wave(GuiGraphics g,int x,int y,int width,int amplitude,int colour,double phase){
