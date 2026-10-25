@@ -14,14 +14,15 @@ final class TrackerScreen extends Screen {
     @Override public boolean isPauseScreen(){return false;}
     @Override protected void init(){
         w=Math.min(490,width-24);h=Math.min(238,height-20);x=(width-w)/2;y=(height-h)/2;rail=90;cx=x+rail+14;cw=w-rail-28;
-        nav("Tracker",y+66,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false)));
-        nav("Payments",y+92,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true)));
-        nav("Move HUDs",y+130,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
-        nav("Atmosphere",y+156,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
+        nav("Tracker",y+62,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false)));
+        nav("Payments",y+86,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true)));
+        nav("Auctions",y+110,()->mod.auctions.openScreen(this));
+        nav("Move HUDs",y+142,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
+        nav("Atmosphere",y+166,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
         addRenderableWidget(new MenuWidgets.Action(x+8,y+h-28,rail-16,20,"Close",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,this::onClose));
         addRenderableWidget(new MenuWidgets.Action(cx+cw-87,y+44,87,21,mod.tracker.running()?"End session":"Start session",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();}));
     }
-    private void nav(String name,int yy,Runnable run){addRenderableWidget(new MenuWidgets.Action(x+7,yy,rail-14,22,name,CoastalStyle::accent,MenuWidgets.Kind.NAV,run));}
+    private void nav(String name,int yy,Runnable run){addRenderableWidget(new MenuWidgets.Action(x+7,yy,rail-14,20,name,CoastalStyle::accent,MenuWidgets.Kind.NAV,run));}
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
         CoastalStyle.background(g,width,height);g.fill(0,0,width,height,0x30000000);
         CoastalStyle.panel(g,x,y,w,h);
@@ -49,7 +50,7 @@ final class TrackerScreen extends Screen {
         super.render(g,mx,my,delta);
     }
     private void sidebarDivider(GuiGraphics g){
-        int yy=y+121,mid=x+rail/2;
+        int yy=y+136,mid=x+rail/2;
         g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+rail-9,yy+1,CoastalStyle.line());
         g.fill(x+10,yy,x+19,yy+1,CoastalStyle.accent());
         g.fill(mid-3,yy-2,mid+4,yy+3,CoastalStyle.line());g.fill(mid-1,yy-1,mid+2,yy+2,CoastalStyle.accent());

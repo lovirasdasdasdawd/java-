@@ -12,6 +12,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public final class AuctionScreen extends Screen {
+    public record Area(int left,int top,int width,int height){}
+    public interface Host {
+        Area area(int width,int height);
+        void render(GuiGraphics g,int width,int height);
+        void navigation(java.util.function.Consumer<net.minecraft.client.gui.components.AbstractWidget> add,Screen current);
+    }
+    private final Host host;
     private final AuctionModClient mod;
     private final Screen parent;
     private final List<ItemStack> items=new ArrayList<>(),filtered=new ArrayList<>();
@@ -21,8 +28,9 @@ public final class AuctionScreen extends Screen {
     private int left,top,w,h,gridX,gridY,gridBottom,columns,rows,scrollRow;
     private String query="",minimumText,timeText,error="";
     private static final int CELL=25;
-    public AuctionScreen(AuctionModClient mod,Screen parent){
-        super(Component.literal("Choose item image"));this.mod=mod;this.parent=parent;
+    public AuctionScreen(AuctionModClient mod,Screen parent){this(mod,parent,null);}
+    public AuctionScreen(AuctionModClient mod,Screen parent,Host host){
+        super(Component.literal("Choose item image"));this.mod=mod;this.parent=parent;this.host=host;
         minimumText=mod.config.minimum;timeText=Amounts.time(mod.config.durationSeconds);
         for(var item:BuiltInRegistries.ITEM)if(item!=Items.AIR)items.add(item.getDefaultInstance());
         items.sort(Comparator.comparing(s->s.getHoverName().getString().toLowerCase(Locale.ROOT)));
@@ -31,16 +39,18 @@ public final class AuctionScreen extends Screen {
     @Override public boolean isPauseScreen(){return false;}
     @Override protected void init(){
         w=Math.min(560,width-16);h=Math.min(340,height-16);left=(width-w)/2;top=(height-h)/2;
+        if(host!=null){var area=host.area(width,height);left=area.left();top=area.top();w=area.width();h=area.height();host.navigation(widget->addRenderableWidget(widget),this);}
         gridX=left+12;gridY=top+70;gridBottom=top+h-100;columns=Math.max(1,(w-32)/CELL);rows=Math.max(1,(gridBottom-gridY)/CELL);
         search=new EditBox(font,left+12,top+42,w-24,20,Component.literal("Search all items"));search.setMaxLength(80);search.setHint(Component.literal("Search items or blocks..."));search.setValue(query);search.setResponder(s->{query=s;scrollRow=0;filter();});addRenderableWidget(search);
         int half=(w-30)/2;
         minimum=new EditBox(font,left+12,top+h-80,half,20,Component.literal("Minimum bid"));minimum.setMaxLength(64);minimum.setValue(minimumText);minimum.setResponder(s->minimumText=s);addRenderableWidget(minimum);
         time=new EditBox(font,left+18+half,top+h-80,w-half-30,20,Component.literal("Auction time"));time.setMaxLength(12);time.setValue(timeText);time.setResponder(s->timeText=s);addRenderableWidget(time);
-        glass=new AuctionUi.Action(left+w-96,top+9,84,20,mod.config.glassPanels?"Glass: On":"Glass: Off",false,()->{mod.config.glassPanels=!mod.config.glassPanels;glass.setMessage(Component.literal(mod.config.glassPanels?"Glass: On":"Glass: Off"));try{mod.saveConfig();error="";}catch(Exception ex){error=ex.getMessage();}});addRenderableWidget(glass);
+        glass=new AuctionUi.Action(left+w-96,top+9,84,18,glassLabel(),false,()->{mod.config.glassPanels=!mod.config.glassPanels;glass.setMessage(Component.literal(glassLabel()));try{mod.saveConfig();error="";}catch(Exception ex){error=ex.getMessage();}});addRenderableWidget(glass);
         done=new AuctionUi.Action(left+w-180,top+h-26,94,20,"Done",true,this::apply);addRenderableWidget(done);
         addRenderableWidget(new AuctionUi.Action(left+w-80,top+h-26,68,20,"Back",false,this::onClose));
         filter();refreshControls();setInitialFocus(search);
     }
+    private String glassLabel(){return host==null?(mod.config.glassPanels?"Glass: On":"Glass: Off"):(mod.config.glassPanels?"HUD: Glass":"HUD: Solid");}
     private void filter(){String needle=query.strip().toLowerCase(Locale.ROOT);filtered.clear();for(var stack:items)if(stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(needle)||BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().contains(needle))filtered.add(stack);scrollRow=Math.clamp(scrollRow,0,maxScroll());}
     private int maxScroll(){return Math.max(0,(filtered.size()+columns-1)/columns-rows);}
     private void refreshControls(){boolean chosen=!selected.isEmpty();minimum.visible=time.visible=chosen;minimum.active=time.active=chosen;boolean running=mod.auction.phase()==AuctionState.Phase.RUNNING;done.active=running||chosen;done.setMessage(Component.literal(running?"Stop auction":"Done"));}
@@ -58,7 +68,7 @@ public final class AuctionScreen extends Screen {
         return super.mouseScrolled(mx,my,horizontal,vertical);
     }
     @Override public void render(GuiGraphics g,int mx,int my,float delta){
-        refreshControls();g.fill(0,0,width,height,mod.config.glassPanels?0x70060B14:0xB5060B14);AuctionUi.panel(g,left,top,w,h,mod.config.glassPanels);
+        refreshControls();if(host!=null)host.render(g,width,height);else{g.fill(0,0,width,height,mod.config.glassPanels?0x70060B14:0xB5060B14);AuctionUi.panel(g,left,top,w,h,mod.config.glassPanels);}
         AuctionUi.text(g,"CHOOSE ITEM IMAGE",left+12,top+11,AuctionUi.CYAN);AuctionUi.text(g,"All items and blocks - scroll to browse",left+12,top+27,AuctionUi.MUTED);
         g.fill(gridX-1,gridY-2,left+w-12,gridBottom,0x70101824);
         ItemStack hovered=ItemStack.EMPTY;

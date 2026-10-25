@@ -1,3 +1,10 @@
+## Unified mod — 1.13.0
+**One JAR, one Fabric mod ID, one initializer:** Donut Tracker + Auctions. Auctions now appear beside Tracker and Payments in the Right Shift module sidebar, inside the same branded GUI shell. O opens that same Auctions module view. Includes the tracker, payment queue, auction HUD, glass menus/HUDs, 13 atmospheres and 15 sounds. Existing tracker and auction configuration paths are retained.
+
+Remove both the old Donut Tracker JAR and the separate auctionmod JAR, then install only `donut-tracker-fabric-1.21.11-1.13.0.jar` alongside Fabric API. Do not install the old separate Auction Mod; the loader reports that incompatible combination instead of registering duplicate handlers.
+
+Build the combined mod from this repository root with `./gradlew -PwithFabric build :fabric:build`. The installable output is `fabric/build/libs/donut-tracker-fabric-1.21.11-1.13.0.jar`. Both tracker and auction checks run in this build. Auction implementation sources are shared from the auctionmod directory; the delivered combined artifact contains those classes and language assets directly, with no nested Auction Mod JAR or second mod descriptor.
+
 ## Glass & Night Routes — 1.12.0
 Three new configurable atmospheres: **Volcanic Night / Ember wind**, **Firefly Marsh / Marsh night**, **Midnight Railway / Night rail**. Thirteen scenes and fifteen original sound loops total. The browsers now have three pages.
 

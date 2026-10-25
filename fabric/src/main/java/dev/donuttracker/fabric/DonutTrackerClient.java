@@ -55,10 +55,14 @@ public final class DonutTrackerClient implements ClientModInitializer {
     private boolean settingsWritable = true, stateWritable = true;
     private final Map<String, PaymentQueue.Payment> chatReceipts = new HashMap<>();
 
+    final dev.auctionmod.AuctionModClient auctions = new dev.auctionmod.AuctionModClient();
+
     @Override public void onInitializeClient() {
         try { settings = Settings.load(config); } catch (IOException ex) { settings = new Settings(); settingsWritable = false; LOG.error("Settings could not be read; original file preserved", ex); status = "Invalid settings file: " + config; }
         try { StateStore.load(state, tracker, queue); } catch (IOException ex) { stateWritable = false; LOG.error("History could not be read; original file preserved", ex); status = "Invalid history file: " + state; }
         CoastalStyle.configure(settings);
+        auctions.onInitializeClient();
+        auctions.setScreenFactory(parent->new dev.auctionmod.AuctionScreen(auctions,parent,new AuctionModuleHost(this)));
         KeyMapping menu = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.donuttracker.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (menu.consumeClick()) if (client.player != null) client.setScreen(new TrackerScreen(this, client.screen));

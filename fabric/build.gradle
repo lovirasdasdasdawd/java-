@@ -10,6 +10,25 @@ dependencies {
 }
 java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
 sourceSets.main.java.srcDir rootProject.file('src/main/java/dev/donuttracker/core')
+sourceSets.main.java.srcDir rootProject.file('auctionmod/src/main/java')
+sourceSets {
+    auctionVerification {
+        java.srcDir rootProject.file('auctionmod/src/verification/java')
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+tasks.register('auctionTest', JavaExec) {
+    dependsOn auctionVerificationClasses
+    classpath = sourceSets.auctionVerification.runtimeClasspath
+    mainClass = 'dev.auctionmod.AuctionTest'
+    jvmArgs '-ea', '-Djava.awt.headless=true'
+}
+check.dependsOn auctionTest
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
 processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand version: project.version } }
 jar { manifest { attributes 'Main-Class': 'dev.donuttracker.core.InstallHelp' } }
+
+processResources {
+    from(rootProject.file('auctionmod/src/main/resources')) { exclude 'fabric.mod.json' }
+}

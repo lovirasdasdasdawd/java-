@@ -25,6 +25,7 @@ public final class AuctionModClient implements ClientModInitializer {
     final Path configPath=FabricLoader.getInstance().getConfigDir().resolve("auctionmod.json");
     AuctionConfig config;
     private PaymentParser parser;
+    private java.util.function.Function<net.minecraft.client.gui.screens.Screen,net.minecraft.client.gui.screens.Screen> screenFactory;
     ItemStack auctionItem=ItemStack.EMPTY;
     boolean configWritable=true;
     String configError="";
@@ -34,7 +35,7 @@ public final class AuctionModClient implements ClientModInitializer {
         var category=KeyMapping.Category.register(Identifier.fromNamespaceAndPath("auctionmod","auction"));
         var key=KeyBindingHelper.registerKeyBinding(new KeyMapping("key.auctionmod.setup",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_O,category));
         ClientTickEvents.END_CLIENT_TICK.register(client->{
-            while(key.consumeClick())if(client.player!=null){if(client.screen instanceof AuctionScreen screen)screen.onClose();else client.setScreen(new AuctionScreen(this,client.screen));}
+            while(key.consumeClick())if(client.player!=null){if(client.screen instanceof AuctionScreen screen)screen.onClose();else openScreen(client.screen);}
             finishLocally();
         });
         // Observe the original notice before another mod appends clickable return-payment buttons.
@@ -47,6 +48,8 @@ public final class AuctionModClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler,client)->{auction.reset();auctionItem=ItemStack.EMPTY;});
         LOG.info("Auction Mod ready; O opens setup. Mojang mappings / Minecraft 1.21.11.");
     }
+    public void setScreenFactory(java.util.function.Function<net.minecraft.client.gui.screens.Screen,net.minecraft.client.gui.screens.Screen> factory){this.screenFactory=java.util.Objects.requireNonNull(factory);}
+    public void openScreen(net.minecraft.client.gui.screens.Screen parent){Minecraft.getInstance().setScreen(screenFactory==null?new AuctionScreen(this,parent):screenFactory.apply(parent));}
     private void receive(Component message){
         var client=Minecraft.getInstance();
         if(!client.isSameThread()){client.execute(()->receive(message));return;}

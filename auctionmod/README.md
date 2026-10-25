@@ -1,3 +1,6 @@
+## Current distribution: integrated into Donut Tracker 1.13+
+Auction features are now compiled directly into the single Donut Tracker + Auctions JAR, under the donuttracker mod ID and its one client entrypoint. Open Right Shift → Auctions or press O. Remove the former separate auctionmod JAR. Build the combined artifact from the repository root with `./gradlew -PwithFabric build :fabric:build`. This directory is the shared auction implementation; the standalone 1.0 project documentation below describes the earlier release.
+
 # Auction Mod
 
 Complete standalone client-only Fabric project for Minecraft Java **1.21.11**, authored in metadata as **claude**, mod ID **auctionmod**. Java **21**. Uses **official Mojang mappings** (GuiGraphics, Component, KeyMapping), **Fabric Loom 1.14.10**, **Fabric Loader 0.18.4**, **Fabric API 0.141.6+1.21.11**, and Gradle **9.2.1**. Exact versions are in gradle.properties.
