@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 
 /** One small ledger, a module rail, and native pixel typography. */
 final class TrackerScreen extends Screen {
-    private final MenuMotion transition=new MenuMotion();
+    private final MenuMotion transition=new MenuMotion(true);
     private final DonutTrackerClient mod;
     private final Screen parent;
     private int x,y,w,h,rail,cx,cw;
@@ -51,7 +51,7 @@ final class TrackerScreen extends Screen {
         if(a==null){TrackerHud.text(g,"Queue empty",cx,y+168,CoastalStyle.ink());TrackerHud.scaled(g,"The next payment will appear here.",cx,y+185,.7f,CoastalStyle.muted());}
         else {TrackerHud.text(g,a.player(),cx,y+168,CoastalStyle.ink());right(g,"+"+Money.format(a.amount()),cx+cw,y+168,1f,CoastalStyle.value(false,mod.settings.queue.positive));String next=mod.queue.waiting()>0?"Next: "+mod.queue.all().get(1).player():"No players waiting";TrackerHud.scaled(g,next,cx,y+185,.75f,CoastalStyle.muted());}
         line(g,y+h-23);TrackerHud.scaled(g,CoastalStyle.sceneName(),cx,y+h-14,.65f,CoastalStyle.muted());
-        super.render(g,mx,my,delta);
+        super.render(g,transition.pointerX(mx),transition.pointerY(my),delta);
         transition.end(g);
     }
     private void sidebarDivider(GuiGraphics g){

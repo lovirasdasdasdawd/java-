@@ -1,3 +1,8 @@
+## Centre pop opening — 1.15.0
+Right Shift now opens the main GUI at 12% size just below its centre, growing smoothly to its normal centred position over 290ms with cubic easing. The actual panel, text and buttons scale together. Reduced motion keeps its short full-size fade, and Off remains instant. Other module transitions and all existing features are retained.
+
+Replace the previous combined JAR with `donut-tracker-fabric-1.21.11-1.15.0.jar`. Still one mod with Auctions inside the same GUI.
+
 ## Motion & glass — 1.14.0
 One unified mod/JAR. The GUI opens with a short eased pixel reveal; module views wipe in from the sidebar, with border sweeps, hover fades, click stamps and sliding toggle switches. Full / Reduced / Off UI motion modes are saved separately from background animation. Hit boxes stay fixed during animation, and auction deadlines/tracking continue independently.
 
