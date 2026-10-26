@@ -1,3 +1,10 @@
+## Donut capes — 1.18.0
+Right Shift → Capes adds optional local cape cosmetics to the same mod. Choose Donut, Orbit or Crown, customize cloth/frosting/trim with the colour picker, and adjust glow strength. Trim and sparkle pixels render in a separate emissive pass; the cloth keeps normal lighting. A real-texel rear preview and View in F5 button help inspect the cape. Existing body skin, player model and elytra texture are retained; vanilla cape visibility and elytra rules still apply.
+
+Capes are off by default. Enable Cape in the module. They are visible only on your own client; no texture upload or server message is sent, and other players will not receive your cosmetic. Settings save separately in `config/donut-tracker-capes.properties`. The existing opening/closing menu animation remains the only interface animation.
+
+Replace the old combined JAR with `donut-tracker-fabric-1.21.11-1.18.0.jar`. Still one mod with Tracker, Payments, Auctions, Capes, atmospheres and sounds.
+
 ## Rounded panels & HUDs — 1.17.0
 GUI panels, buttons, cards and outlines now use rounded corners. Tracker and Payment Queue HUD backgrounds, shadows, borders and accent rails follow the rounded silhouette; Auction panels and HUDs match. Glass surfaces use non-overlapping rows so their transparency stays even. Existing sizes, positions, settings, opening/closing motion and tracking behaviour are retained.
 

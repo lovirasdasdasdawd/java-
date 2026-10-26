@@ -61,6 +61,7 @@ public final class DonutTrackerClient implements ClientModInitializer {
         try { settings = Settings.load(config); } catch (IOException ex) { settings = new Settings(); settingsWritable = false; LOG.error("Settings could not be read; original file preserved", ex); status = "Invalid settings file: " + config; }
         try { StateStore.load(state, tracker, queue); } catch (IOException ex) { stateWritable = false; LOG.error("History could not be read; original file preserved", ex); status = "Invalid history file: " + state; }
         CoastalStyle.configure(settings);
+        CapeCosmetics.initialize();
         auctions.onInitializeClient();
         auctions.setHudPlacement(this::auctionHudY);
         auctions.setScreenFactory(parent->new dev.auctionmod.AuctionScreen(auctions,parent,new AuctionModuleHost(this)));

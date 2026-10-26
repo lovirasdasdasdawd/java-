@@ -12,16 +12,17 @@ final class TrackerScreen extends Screen {
     private final MenuMotion transition=new MenuMotion(true);
     private final DonutTrackerClient mod;
     private final Screen parent;
-    private int x,y,w,h,rail,cx,cw;
+    private int x,y,w,h,rail,cx,cw,navStep;
     TrackerScreen(DonutTrackerClient mod,Screen parent){super(Component.literal("Donut Tracker"));this.mod=mod;this.parent=parent;}
     @Override public boolean isPauseScreen(){return false;}
     @Override protected void init(){
-        w=Math.min(490,width-24);h=Math.min(238,height-20);x=(width-w)/2;y=(height-h)/2;rail=90;cx=x+rail+14;cw=w-rail-28;
+        w=Math.min(490,width-24);h=Math.min(238,height-20);x=(width-w)/2;y=(height-h)/2;rail=90;navStep=h<230?20:22;cx=x+rail+14;cw=w-rail-28;
         nav("Tracker",y+62,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,false)));
-        nav("Payments",y+86,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true)));
-        nav("Auctions",y+110,()->mod.auctions.openScreen(this));
-        nav("Move HUDs",y+142,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
-        nav("Atmosphere",y+166,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
+        nav("Payments",y+62+navStep,()->minecraft.setScreen(new ModuleSettingsScreen(mod,this,true)));
+        nav("Auctions",y+62+navStep*2,()->mod.auctions.openScreen(this));
+        nav("Capes",y+62+navStep*3,()->minecraft.setScreen(new CapesScreen(mod,this)));
+        nav("Move HUDs",y+88+navStep*3,()->minecraft.setScreen(new HudEditorScreen(mod,this)));
+        nav("Atmosphere",y+88+navStep*4,()->minecraft.setScreen(new AtmosphereScreen(mod,this)));
         addRenderableWidget(new MenuWidgets.Action(x+8,y+h-28,rail-16,20,"Close",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,this::onClose));
         addRenderableWidget(new MenuWidgets.Action(cx+cw-87,y+44,87,21,mod.tracker.running()?"End session":"Start session",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,()->{mod.sessionCommand(!mod.tracker.running());rebuildWidgets();}));
         addRenderableWidget(new MenuWidgets.Action(cx+cw-168,y+h-19,96,16,"Background",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->minecraft.setScreen(new AtmosphereScreen(mod,this))));
@@ -58,7 +59,7 @@ final class TrackerScreen extends Screen {
         if(transition.closed())minecraft.setScreen(parent);
     }
     private void sidebarDivider(GuiGraphics g){
-        int yy=y+136,mid=x+rail/2;
+        int yy=y+84+navStep*3,mid=x+rail/2;
         g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+rail-9,yy+1,CoastalStyle.line());
         g.fill(x+10,yy,x+19,yy+1,CoastalStyle.accent());
         g.fill(mid-3,yy-2,mid+4,yy+3,CoastalStyle.line());g.fill(mid-1,yy-1,mid+2,yy+2,CoastalStyle.accent());

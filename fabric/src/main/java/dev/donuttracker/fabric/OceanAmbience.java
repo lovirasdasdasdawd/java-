@@ -16,7 +16,7 @@ final class OceanAmbience {
     private Loop current;
     private final ArrayList<Loop> retiring=new ArrayList<>();
     private long retryAt;
-    static boolean moduleMenu(Object screen){return screen instanceof TrackerScreen||screen instanceof ModuleSettingsScreen||screen instanceof ColourPickerScreen||screen instanceof HudEditorScreen||screen instanceof AtmosphereScreen;}
+    static boolean moduleMenu(Object screen){return screen instanceof CapesScreen||screen instanceof TrackerScreen||screen instanceof ModuleSettingsScreen||screen instanceof ColourPickerScreen||screen instanceof HudEditorScreen||screen instanceof AtmosphereScreen;}
     void tick(Minecraft client,Settings settings){
         long now=System.currentTimeMillis();
         retiring.removeIf(Loop::isStopped);

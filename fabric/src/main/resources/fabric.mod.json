@@ -3,7 +3,7 @@
   "id": "donuttracker",
   "version": "${version}",
   "name": "Donut Tracker + Auctions",
-  "description": "One client mod: profit tracker, payment queue, auctions, glass HUDs and atmospheres. Right Shift opens modules; O opens auctions.",
+  "description": "One client mod: profit tracker, payment queue, auctions, local custom donut capes, glass HUDs and atmospheres.",
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -21,5 +21,8 @@
   ],
   "breaks": {
     "auctionmod": "*"
-  }
+  },
+  "mixins": [
+    "donuttracker.mixins.json"
+  ]
 }

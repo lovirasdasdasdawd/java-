@@ -20,10 +20,11 @@ final class AuctionModuleHost implements AuctionScreen.Host {
     }
     @Override public void navigation(Consumer<AbstractWidget> add,Screen current){
         nav(add,"Tracker",62,false,()->Minecraft.getInstance().setScreen(new ModuleSettingsScreen(mod,new TrackerScreen(mod,null),false)));
-        nav(add,"Payments",86,false,()->Minecraft.getInstance().setScreen(new ModuleSettingsScreen(mod,new TrackerScreen(mod,null),true)));
-        nav(add,"Auctions",110,true,()->{});
-        nav(add,"Move HUDs",142,false,()->Minecraft.getInstance().setScreen(new HudEditorScreen(mod,current)));
-        nav(add,"Atmosphere",166,false,()->Minecraft.getInstance().setScreen(new AtmosphereScreen(mod,current)));
+        nav(add,"Payments",84,false,()->Minecraft.getInstance().setScreen(new ModuleSettingsScreen(mod,new TrackerScreen(mod,null),true)));
+        nav(add,"Auctions",106,true,()->{});
+        nav(add,"Capes",128,false,()->Minecraft.getInstance().setScreen(new CapesScreen(mod,current)));
+        nav(add,"Move HUDs",154,false,()->Minecraft.getInstance().setScreen(new HudEditorScreen(mod,current)));
+        nav(add,"Atmosphere",176,false,()->Minecraft.getInstance().setScreen(new AtmosphereScreen(mod,current)));
         add.accept(new MenuWidgets.Action(x+8,y+h-28,RAIL-16,20,"Close",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->Minecraft.getInstance().setScreen(null)));
     }
     private void nav(Consumer<AbstractWidget> add,String label,int yy,boolean selected,Runnable action){
@@ -37,6 +38,6 @@ final class AuctionModuleHost implements AuctionScreen.Host {
         transition.begin(g,x,y,w,h);
         CoastalStyle.panel(g,x,y,w,h);TrackerHud.rounded(g,x+1,y+1,x+RAIL,y+h-1,CoastalStyle.menuSurface(),11);g.fill(x+RAIL-11,y+1,x+RAIL,y+h-1,CoastalStyle.menuSurface());g.fill(x+RAIL,y+1,x+RAIL+1,y+h-1,CoastalStyle.line());
         TrackerHud.text(g,"DONUT",x+12,y+15,CoastalStyle.ink());TrackerHud.text(g,"TRACKER",x+12,y+27,CoastalStyle.accent());TrackerHud.scaled(g,"MODULES",x+12,y+52,.7f,CoastalStyle.muted());
-        int yy=y+136,mid=x+RAIL/2;g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+RAIL-9,yy+1,CoastalStyle.line());g.fill(mid-2,yy-1,mid+3,yy+2,CoastalStyle.accent());
+        int yy=y+150,mid=x+RAIL/2;g.fill(x+10,yy,mid-6,yy+1,CoastalStyle.line());g.fill(mid+7,yy,x+RAIL-9,yy+1,CoastalStyle.line());g.fill(mid-2,yy-1,mid+3,yy+2,CoastalStyle.accent());
     }
 }

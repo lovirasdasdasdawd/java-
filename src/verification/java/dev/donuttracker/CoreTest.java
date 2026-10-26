@@ -241,6 +241,22 @@ public final class CoreTest {
         var updatedProperties = new java.util.Properties();try(var reader=Files.newBufferedReader(oldPolling)){updatedProperties.load(reader);}
         check(!updatedProperties.containsKey("balance.poll"),"legacy automatic-polling setting is retired");
         check(noAuto.minimumPayment.equals(Money.parse("1")),"retiring auto polling preserves unrelated settings");
+        var cape=CapePattern.pixels(CapePattern.Design.CLASSIC,0x101625,0xC995F4,0x72E7DC,.7,false);
+        var glowCape=CapePattern.pixels(CapePattern.Design.CLASSIC,0x101625,0xC995F4,0x72E7DC,.7,true);
+        check(cape.length==256*128&&glowCape.length==cape.length,"cape atlas has vanilla 2:1 layout at 4x detail");
+        check(cape[127*256+255]==0&&glowCape[127*256+255]==0,"unused cape atlas remains transparent");
+        boolean matchingFaces=true;int luminous=0;
+        for(int yy=0;yy<64;yy++)for(int xx=0;xx<40;xx++){
+            matchingFaces&=cape[(yy+4)*256+xx+4]==cape[(yy+4)*256+xx+48];
+            if(glowCape[(yy+4)*256+xx+4]!=0)luminous++;
+        }
+        check(matchingFaces,"both cape faces have the complete donut design");
+        check(luminous>50&&luminous<900,"emissive pass lights accents instead of whole cloth");
+        var darkCape=CapePattern.pixels(CapePattern.Design.CLASSIC,0x101625,0xC995F4,0x72E7DC,0,true);
+        check(java.util.Arrays.stream(darkCape).allMatch(v->v==0),"zero glow strength disables every emissive pixel");
+        check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.ORBIT,0x101625,0xC995F4,0x72E7DC,.7,false)),"orbit design differs from classic");
+        check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CROWN,0x101625,0xC995F4,0x72E7DC,.7,false)),"crown design differs from classic");
+        check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CLASSIC,0x223344,0xFFAAAA,0xAAFFFF,.7,false)),"custom colours change real cape texels");
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }

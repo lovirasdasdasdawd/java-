@@ -1,0 +1,1 @@
+{"required":true,"package":"dev.donuttracker.fabric.mixin","compatibilityLevel":"JAVA_21","client":["LocalCapeMixin","CapeGlowMixin"],"injectors":{"defaultRequire":1}}
