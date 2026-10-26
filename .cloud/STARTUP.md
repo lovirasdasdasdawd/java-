@@ -2,14 +2,14 @@ Use the existing isolated checkout /workspace/java-. Do not create a worktree un
 
 Initialize each shell with `source .cloud/env.sh`. Build and verify with `./gradlew -PwithFabric build :fabric:build`. Refresh prerequisites with `bash .cloud/install.sh`.
 
-Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.19.0.jar.
-Desktop companion: build/libs/donut-tracker-1.19.0.jar.
+Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.20.0.jar.
+Desktop companion: build/libs/donut-tracker-1.20.0.jar.
 
 For a graphical development client, use `./gradlew -PwithFabric :fabric:runClient`. In this snapshot the framebuffer is available at /workspace/toolchains/xvfb/usr/bin/Xvfb. Start it on an unused display with `Xvfb :99 -screen 0 1280x720x24 -nolisten tcp`, export DISPLAY=:99 and start the client. Restart required processes after snapshot restoration, and stop only processes you started. Confirm rendering and the Donut Tracker initialized log, not just a PID.
 
 Right Shift opens independent Tracker and Payment Queue modules. Check their settings separately. Colours opens visible swatches and an HSV picker. Design → Move HUD... lets you drag the selected box; verify saved X/Y changes without changing scale. Escape saves.
 
-Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.19.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
+Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.20.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
 
 The prior environment draft is stale after publication. These updated setup instructions are preserved here and in install.sh for transfer/reconciliation in a new setup chat if the environment configuration needs refreshing.
 
@@ -44,3 +44,5 @@ Motion 1.14 validation: one mod/GUI; 173 tracker + 33 auction assertions. Test G
 Version 1.16.0: Only main-menu opening/closing animate; module and control changes are instant. Check 18 scenes / 20 sound loops / 10 interface palettes in Atmosphere. New scenes are Lighthouse, River valley, Cloudscape, Moonlit lake and Bamboo grove; matching new Vorbis loops are 40s stereo. Panels displays palette colour swatches. Verify scene tint/intensity/speed/density and palette persist. Close the root menu with Escape, Right Shift and Close; each should shrink smoothly. Run 193 tracker assertions and 33 auction assertions. Never rebuild while a dev client is running.
 
 Version 1.18.0 adds a local Capes module with three donut patterns, independent colour pickers and emissive trim. Check both mixins in a native client, enable Cape, use View in F5, verify glow versus normal cloth at night, and confirm disabling restores the original skin/cape. Capes are local only; no networking or remote texture service. Verify config persistence and narrow sidebar layout. Core checks: 201 tracker/cape assertions plus 33 auction assertions. Do not rebuild outputs while a client is running.
+
+Version 1.20.0: 11 capes with per-design Shape/Colours/Glow tabs. Verify Dragon/Tidal/Rift and changed Wolf/Phoenix/Skull/Nova/Lotus compositions without the shared frame. Each Shape page has three named controls persisted per design. Move Tidal wave height and Dragon coils, browse back, and confirm independent values. Check narrow GUI pages. 240 core/cape + 33 auction assertions pass; all non-cosmetic financial/auction classes remain unchanged.

@@ -1,3 +1,10 @@
+## Distinct cape compositions & shape controls — 1.20.0
+Three new designs — Dragon, Tidal and Rift — bring the collection to 11. Newer designs now have distinct artwork layouts instead of sharing one frame: Wolf uses an offset portrait, diagonal silk and claw marks; Phoenix has broad wings and a fire hem; Skull hangs from chains; Nova fills the cloth with stars and an off-centre planet; Lotus sits over pond ripples. Dragon coils down the cloth, Tidal is an all-over ocean, and Rift fractures across it.
+
+Right Shift → Capes now separates Shape, Colours and Glow. Shape exposes three controls specific to the selected design, including portrait scale/height/sparkles, wing span/tail/embers, jaw/eyes/chains, orbit tilt/stars/planet size, petals/opening/ripples, dragon coils/wings/runes, wave height/layers/foam, and crack width/branches/shards. Shape settings save independently for every cape. Existing files receive defaults without losing old settings; original Donut/Orbit/Crown remain available.
+
+Replace the old JAR with `donut-tracker-fabric-1.21.11-1.20.0.jar`. Still one client-side mod; no cosmetic uploads or server messages.
+
 ## Night Wolf & soft aura — 1.19.0
 Five new cape designs join Donut, Orbit and Crown: Night Wolf, Phoenix, Void Skull, Nova and Lotus. Night Wolf uses a detailed purple illustrated emblem inspired by the reference. Cape atlases now render at 1024×512, with a separate emissive artwork pass and a spatially blurred aura around bright pixels. Glow strength adjusts brightness; Aura selects Narrow, Soft or Wide. It works without a shader pack. This is an emissive cosmetic, not a block-light source.
 

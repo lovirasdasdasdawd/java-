@@ -24,7 +24,7 @@ public final class CapeCosmetics {
                 original.resizeSubRectTo(0,0,original.getWidth(),original.getHeight(),small);wolf=small.getPixels();
             }catch(java.io.IOException ex){throw new IllegalStateException("Bundled wolf cape artwork could not be loaded",ex);}
         }
-        var images=CapeStudio.create(config.design,config.cloth,config.frosting,config.accent,config.glow,config.aura,config.glowing,wolf,144,144);
+        var images=CapeStudio.create(config.design,config.cloth,config.frosting,config.accent,config.glow,config.aura,config.glowing,wolf,144,144,config.shape());
         upload(cloth,images.cloth());upload(glow,images.glow());upload(preview,images.preview());
     }
     private static DynamicTexture texture(Identifier id,String name){var texture=new DynamicTexture(()->name,new NativeImage(CapeStudio.WIDTH,CapeStudio.HEIGHT,true));Minecraft.getInstance().getTextureManager().register(id,texture);return texture;}

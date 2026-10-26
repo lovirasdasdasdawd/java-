@@ -257,7 +257,7 @@ public final class CoreTest {
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.ORBIT,0x101625,0xC995F4,0x72E7DC,.7,false)),"orbit design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CROWN,0x101625,0xC995F4,0x72E7DC,.7,false)),"crown design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CLASSIC,0x223344,0xFFAAAA,0xAAFFFF,.7,false)),"custom colours change real cape texels");
-        check(CapePattern.Design.values().length==8,"eight cape designs available without removing previous selections");
+        check(CapePattern.Design.values().length==11,"eleven cape designs available without removing previous selections");
         int[] point=new int[33*33];point[16*33+16]=0xFFFFFF;
         var halo=CapeStudio.halo(point,33,33,3,1);
         check(halo[16*33+19]>0,"emissive aura spreads beyond bright source pixels");
@@ -271,6 +271,23 @@ public final class CoreTest {
         var glowOff=CapeStudio.create(CapePattern.Design.NOVA,0x101625,0xAA88FF,0x77DDFF,.7,.65,false,null,0,0);
         check(java.util.Arrays.stream(glowOff.glow()).allMatch(v->v==0),"glow toggle disables the complete emissive texture");
         check(!java.util.Arrays.equals(hd.cloth(),CapeStudio.create(CapePattern.Design.LOTUS,0x101625,0xAA88FF,0x77DDFF,.7,.65,true,null,0,0).cloth()),"new emblem designs have distinct artwork");
+        var shapeProperties=new java.util.Properties();
+        var wolfShape=new CapeTuning(.17,.83,.31);var fireShape=new CapeTuning(.91,.22,.74);
+        wolfShape.write(shapeProperties,CapePattern.Design.WOLF);fireShape.write(shapeProperties,CapePattern.Design.PHOENIX);
+        check(CapeTuning.read(shapeProperties,CapePattern.Design.WOLF).equals(wolfShape),"wolf shape controls round-trip independently");
+        check(CapeTuning.read(shapeProperties,CapePattern.Design.PHOENIX).equals(fireShape),"phoenix variables do not overwrite wolf controls");
+        check(CapeTuning.read(new java.util.Properties(),CapePattern.Design.RIFT).equals(CapeTuning.DEFAULT),"old cape files get default new design controls");
+        check(new CapeTuning(-3,4,.6).primary()==0&&new CapeTuning(-3,4,.6).secondary()==1,"shape controls clamp to safe ranges");
+        boolean badShape=false;try{new CapeTuning(Double.NaN,.5,.5);}catch(IllegalArgumentException expected){badShape=true;}check(badShape,"non-finite shape controls rejected");
+        int[] whiteWolf=new int[32*32];java.util.Arrays.fill(whiteWolf,0xFFC995F4);
+        for(var d:CapePattern.Design.values()){
+            if(d.ordinal()<3)continue;
+            var standard=CapeStudio.create(d,0x101625,0xC995F4,0x72E7DC,.7,.65,true,whiteWolf,32,32,CapeTuning.DEFAULT).cloth();
+            for(int control=0;control<3;control++){
+                var modified=CapeStudio.create(d,0x101625,0xC995F4,0x72E7DC,.7,.65,true,whiteWolf,32,32,CapeTuning.DEFAULT.with(control,0)).cloth();
+                check(!java.util.Arrays.equals(standard,modified),d+" has a working geometric control: "+CapeTuning.names(d)[control]);
+            }
+        }
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }
