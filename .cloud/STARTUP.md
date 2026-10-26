@@ -2,14 +2,14 @@ Use the existing isolated checkout /workspace/java-. Do not create a worktree un
 
 Initialize each shell with `source .cloud/env.sh`. Build and verify with `./gradlew -PwithFabric build :fabric:build`. Refresh prerequisites with `bash .cloud/install.sh`.
 
-Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.21.0.jar.
-Desktop companion: build/libs/donut-tracker-1.21.0.jar.
+Minecraft artifact: fabric/build/libs/donut-tracker-fabric-1.21.11-1.22.0.jar.
+Desktop companion: build/libs/donut-tracker-1.22.0.jar.
 
 For a graphical development client, use `./gradlew -PwithFabric :fabric:runClient`. In this snapshot the framebuffer is available at /workspace/toolchains/xvfb/usr/bin/Xvfb. Start it on an unused display with `Xvfb :99 -screen 0 1280x720x24 -nolisten tcp`, export DISPLAY=:99 and start the client. Restart required processes after snapshot restoration, and stop only processes you started. Confirm rendering and the Donut Tracker initialized log, not just a PID.
 
 Right Shift opens independent Tracker and Payment Queue modules. Check their settings separately. Colours opens visible swatches and an HSV picker. Design → Move HUD... lets you drag the selected box; verify saved X/Y changes without changing scale. Escape saves.
 
-Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.21.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
+Core verification prints 76 passing assertions. The desktop companion can render headlessly with `java -jar build/libs/donut-tracker-1.22.0.jar --render /workspace/setup/donut-ui.png`. No backend service or API key is needed. Live DonutSMP testing needs an authenticated game session. Preserve user files and TLS verification; never print credentials.
 
 The prior environment draft is stale after publication. These updated setup instructions are preserved here and in install.sh for transfer/reconciliation in a new setup chat if the environment configuration needs refreshing.
 
@@ -46,3 +46,5 @@ Version 1.16.0: Only main-menu opening/closing animate; module and control chang
 Version 1.18.0 adds a local Capes module with three donut patterns, independent colour pickers and emissive trim. Check both mixins in a native client, enable Cape, use View in F5, verify glow versus normal cloth at night, and confirm disabling restores the original skin/cape. Capes are local only; no networking or remote texture service. Verify config persistence and narrow sidebar layout. Core checks: 201 tracker/cape assertions plus 33 auction assertions. Do not rebuild outputs while a client is running.
 
 Version 1.20.0: 11 capes with per-design Shape/Colours/Glow tabs. Verify Dragon/Tidal/Rift and changed Wolf/Phoenix/Skull/Nova/Lotus compositions without the shared frame. Each Shape page has three named controls persisted per design. Move Tidal wave height and Dragon coils, browse back, and confirm independent values. Check narrow GUI pages. 240 core/cape + 33 auction assertions pass; all non-cosmetic financial/auction classes remain unchanged.
+
+Version 1.22.0: Atmosphere → Panels → Christmas GUI is an independent saved theme toggle. Confirm festive green/gold/cream colours, static garlands and snowy decorated-tree background; disable it and confirm the previous normal palette/background return. Verify choosing a normal palette or scene leaves Christmas mode. Custom HUD/cape settings remain separate. Existing Scene animation controls snowfall; existing UI motion controls menu entrance/exit only. 252 core + 33 auction assertions pass.

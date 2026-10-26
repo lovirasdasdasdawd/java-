@@ -37,7 +37,7 @@ public final class Settings {
     public BackgroundScene backgroundScene = BackgroundScene.AURORA;
     public OceanTrack oceanTrack = OceanTrack.AURORA_DRIFT;
     public boolean oceanEnabled = true, oceanInGame = false, menuMotion = true;
-    public boolean menuGlass=false;
+    public boolean menuGlass=false,christmasGui=false;
     public double menuOpacity=.76;
     public double auroraGlow = .85;
     public double oceanVolume = .18;
@@ -72,7 +72,7 @@ public final class Settings {
                 d.intensity=bounded(p.getProperty(k+"intensity",scene==BackgroundScene.AURORA?p.getProperty("menu.auroraGlow",".85"):".75"),0,1);d.density=bounded(p.getProperty(k+"density",".6"),0,1);d.speed=bounded(p.getProperty(k+"speed",".4"),0,1);d.tint=color(p.getProperty(k+"tint",String.format("%06X",d.tint)));}
             s.menuOpacity=bounded(p.getProperty("menu.panelOpacity",".76"),.3,1);
             s.uiMotion=UiMotion.valueOf(p.getProperty("menu.uiMotion","FULL"));
-            s.menuGlass=Boolean.parseBoolean(p.getProperty("menu.glass","false"));
+            s.menuGlass=Boolean.parseBoolean(p.getProperty("menu.glass","false"));s.christmasGui=Boolean.parseBoolean(p.getProperty("menu.christmas","false"));
             s.menuPalette=MenuPalette.valueOf(p.getProperty("menu.palette",MenuPalette.SEA_GLASS.name()));
             s.auroraGlow=bounded(p.getProperty("menu.auroraGlow","0.85"),0,1);
             s.backgroundScene=BackgroundScene.valueOf(p.getProperty("menu.background",BackgroundScene.OCEAN.name()));
@@ -120,7 +120,7 @@ public final class Settings {
         for(var scene:BackgroundScene.values()){var d=sceneDesigns.get(scene);String k="scene."+scene.name()+".";p.setProperty(k+"intensity",Double.toString(Math.clamp(d.intensity,0,1)));p.setProperty(k+"density",Double.toString(Math.clamp(d.density,0,1)));p.setProperty(k+"speed",Double.toString(Math.clamp(d.speed,0,1)));p.setProperty(k+"tint",String.format("%06X",d.tint));}
         p.setProperty("menu.panelOpacity",Double.toString(Math.clamp(menuOpacity,.3,1)));
         p.setProperty("menu.uiMotion",uiMotion.name());
-        p.setProperty("menu.glass",Boolean.toString(menuGlass));
+        p.setProperty("menu.glass",Boolean.toString(menuGlass));p.setProperty("menu.christmas",Boolean.toString(christmasGui));
         p.setProperty("menu.palette",menuPalette.name());p.setProperty("menu.background",backgroundScene.name());p.setProperty("menu.auroraGlow",Double.toString(Math.clamp(auroraGlow,0,1)));p.setProperty("menu.motion",Boolean.toString(menuMotion));
         p.setProperty("ocean.enabled",Boolean.toString(oceanEnabled));p.setProperty("ocean.inGame",Boolean.toString(oceanInGame));
         p.setProperty("ocean.track",oceanTrack.name());p.setProperty("ocean.volume",Double.toString(Math.clamp(oceanVolume,0,1)));

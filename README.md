@@ -1,3 +1,10 @@
+## Optional Christmas GUI — 1.22.0
+Right Shift → Atmosphere → Panels → Christmas GUI enables a festive interface: dark evergreen panels, warm gold controls, cream text, red/gold garlands, frosted trim, a decorated tree and snowy winter scenery. It applies to the shared GUI without replacing custom HUD colours or cape settings.
+
+The toggle saves independently of the normal palette/background. Turn it off to restore those choices; choosing a normal palette or scene also exits Christmas mode. Glass, opacity and existing opening/closing motion remain available. Scene animation can freeze the snowfall. No flashing lights or additional UI transitions are added.
+
+Replace the old combined JAR with `donut-tracker-fabric-1.21.11-1.22.0.jar`. All previous modules and Christmas capes remain.
+
 ## Christmas capes — 1.21.0
 Three Christmas designs join the collection (14 total): Christmas Tree with fairy lights and presents, Winter Night with moonlit snowfall and snowdrifts, and Gingerbread with icing and candy buttons. Each has three independent Shape controls plus the existing colour, glow and aura settings. Existing cape selections and per-design settings are retained.
 

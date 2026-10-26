@@ -7,27 +7,28 @@ import net.minecraft.client.gui.GuiGraphics;
 final class CoastalStyle {
     private static Settings.MenuPalette palette=Settings.MenuPalette.AURORA;
     private static Settings.BackgroundScene scene=Settings.BackgroundScene.AURORA;
-    private static boolean motion=true,glass=false;
+    private static boolean motion=true,glass=false,christmas=false;
     private static float glow=.85f,glassOpacity=.76f;
     private static Settings settings;
-    static void configure(Settings settings){CoastalStyle.settings=settings;MenuMotion.configure(settings.uiMotion);glass=settings.menuGlass;glassOpacity=(float)settings.menuOpacity;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
-    static int panel(){return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;case SLATE->0xFF111820;case COFFEE->0xFF28221E;case LAVENDER->0xFF242136;case MOSS->0xFF1D2923;case GLACIER->0xFF142832;case ROSE->0xFF32232A;};}
-    static int surface(){return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;case SLATE->0xFF1B2530;case COFFEE->0xFF372E27;case LAVENDER->0xFF312B46;case MOSS->0xFF29372D;case GLACIER->0xFF203844;case ROSE->0xFF443039;};}
-    static int paletteAccent(Settings.MenuPalette choice){var before=palette;try{palette=choice;return accent();}finally{palette=before;}}
-    static int palettePanel(Settings.MenuPalette choice){var before=palette;try{palette=choice;return panel();}finally{palette=before;}}
+    static void configure(Settings settings){CoastalStyle.settings=settings;MenuMotion.configure(settings.uiMotion);christmas=settings.christmasGui;glass=settings.menuGlass;glassOpacity=(float)settings.menuOpacity;palette=settings.menuPalette;scene=settings.backgroundScene;motion=settings.menuMotion;glow=(float)settings.sceneDesign().intensity;}
+    static int panel(){if(christmas)return 0xFF10271F;return switch(palette){case SEA_GLASS->0xFF102F3B;case DUSK->0xFF292D46;case PAPER->0xFFE5D9B8;case AURORA->0xFF101A30;case SLATE->0xFF111820;case COFFEE->0xFF28221E;case LAVENDER->0xFF242136;case MOSS->0xFF1D2923;case GLACIER->0xFF142832;case ROSE->0xFF32232A;};}
+    static int surface(){if(christmas)return 0xFF1B352B;return switch(palette){case SEA_GLASS->0xFF193D46;case DUSK->0xFF35364F;case PAPER->0xFFF1E7CB;case AURORA->0xFF162540;case SLATE->0xFF1B2530;case COFFEE->0xFF372E27;case LAVENDER->0xFF312B46;case MOSS->0xFF29372D;case GLACIER->0xFF203844;case ROSE->0xFF443039;};}
+    static int paletteAccent(Settings.MenuPalette choice){var before=palette;boolean festive=christmas;try{christmas=false;palette=choice;return accent();}finally{palette=before;christmas=festive;}}
+    static int palettePanel(Settings.MenuPalette choice){var before=palette;boolean festive=christmas;try{christmas=false;palette=choice;return panel();}finally{palette=before;christmas=festive;}}
     static String paletteName(Settings.MenuPalette choice){return switch(choice){case SEA_GLASS->"Sea glass";case DUSK->"Dusk";case PAPER->"Paper";case AURORA->"Aurora";case SLATE->"Slate";case COFFEE->"Coffee";case LAVENDER->"Lavender";case MOSS->"Moss";case GLACIER->"Glacier";case ROSE->"Rose";};}
     static int menuSurface(){return (glass?(int)(glassOpacity*90)<<24:0xFF000000)|(surface()&0xFFFFFF);}
-    static int line(){return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;case SLATE->0xFF435563;case COFFEE->0xFF746052;case LAVENDER->0xFF71638E;case MOSS->0xFF5E7560;case GLACIER->0xFF507D8E;case ROSE->0xFF896370;};}
-    static int ink(){return palette==Settings.MenuPalette.PAPER?0xFF243F48:palette==Settings.MenuPalette.AURORA?0xFFE6EDF8:0xFFF3E8CB;}
-    static int muted(){return switch(palette){case SEA_GLASS->0xFFA5BAB0;case DUSK->0xFFC1B4BD;case PAPER->0xFF617776;case AURORA->0xFFA6B5CE;case SLATE->0xFF9AAEBD;case COFFEE->0xFFC5AE99;case LAVENDER->0xFFBDB0D1;case MOSS->0xFFADBDA6;case GLACIER->0xFFA5C8D6;case ROSE->0xFFCEB0BC;};}
-    static int accent(){return switch(palette){case SEA_GLASS->0xFF90D7C2;case DUSK->0xFFE9AEAA;case PAPER->0xFF327E77;case AURORA->0xFF9CEBD2;case SLATE->0xFFB2CDDD;case COFFEE->0xFFE4BE8B;case LAVENDER->0xFFC8B2EB;case MOSS->0xFFC2D39B;case GLACIER->0xFFA0DEEA;case ROSE->0xFFF0B5C5;};}
-    static int controlAccent(int custom){return palette==Settings.MenuPalette.PAPER?accent():0xFF000000|custom;}
-    static int value(boolean loss,int custom){return palette==Settings.MenuPalette.PAPER?(loss?0xFF9B4951:0xFF286B55):0xFF000000|custom;}
-    static int primaryInk(){return palette==Settings.MenuPalette.PAPER?0xFFFFF4D8:0xFF183A3E;}
+    static int line(){if(christmas)return 0xFF677657;return switch(palette){case SEA_GLASS->0xFF426D70;case DUSK->0xFF6D657F;case PAPER->0xFFA7B4A1;case AURORA->0xFF405675;case SLATE->0xFF435563;case COFFEE->0xFF746052;case LAVENDER->0xFF71638E;case MOSS->0xFF5E7560;case GLACIER->0xFF507D8E;case ROSE->0xFF896370;};}
+    static int ink(){if(christmas)return 0xFFFFF5DF;return palette==Settings.MenuPalette.PAPER?0xFF243F48:palette==Settings.MenuPalette.AURORA?0xFFE6EDF8:0xFFF3E8CB;}
+    static int muted(){if(christmas)return 0xFFB5C9B8;return switch(palette){case SEA_GLASS->0xFFA5BAB0;case DUSK->0xFFC1B4BD;case PAPER->0xFF617776;case AURORA->0xFFA6B5CE;case SLATE->0xFF9AAEBD;case COFFEE->0xFFC5AE99;case LAVENDER->0xFFBDB0D1;case MOSS->0xFFADBDA6;case GLACIER->0xFFA5C8D6;case ROSE->0xFFCEB0BC;};}
+    static int accent(){if(christmas)return 0xFFEACB8A;return switch(palette){case SEA_GLASS->0xFF90D7C2;case DUSK->0xFFE9AEAA;case PAPER->0xFF327E77;case AURORA->0xFF9CEBD2;case SLATE->0xFFB2CDDD;case COFFEE->0xFFE4BE8B;case LAVENDER->0xFFC8B2EB;case MOSS->0xFFC2D39B;case GLACIER->0xFFA0DEEA;case ROSE->0xFFF0B5C5;};}
+    static int controlAccent(int custom){return christmas||palette==Settings.MenuPalette.PAPER?accent():0xFF000000|custom;}
+    static int value(boolean loss,int custom){if(christmas)return loss?0xFFFF8A94:0xFFA4E2B3;return palette==Settings.MenuPalette.PAPER?(loss?0xFF9B4951:0xFF286B55):0xFF000000|custom;}
+    static int primaryInk(){if(christmas)return 0xFF1A3022;return palette==Settings.MenuPalette.PAPER?0xFFFFF4D8:0xFF183A3E;}
     static int hover(){return mix(surface(),accent(),.12f);}
     static int mix(int a,int b,float amount){int r=Math.round((a>>16&255)*(1-amount)+(b>>16&255)*amount),g=Math.round((a>>8&255)*(1-amount)+(b>>8&255)*amount),v=Math.round((a&255)*(1-amount)+(b&255)*amount);return 0xFF000000|r<<16|g<<8|v;}
-    static String sceneName(){return scene.name();}
+    static String sceneName(){return christmas?"CHRISTMAS":scene.name();}
     static void background(GuiGraphics g,int width,int height){
+        if(christmas){ChristmasBackdrop.draw(g,width,height,motion,settings.sceneDesign());return;}
         if(scene!=Settings.BackgroundScene.AURORA&&scene!=Settings.BackgroundScene.OCEAN){WorldBackdrop.draw(g,0,0,width,height,scene,motion,settings.sceneDesign());return;}
         if(scene==Settings.BackgroundScene.AURORA){AuroraBackdrop.draw(g,0,0,width,height,motion,glow,settings.sceneDesign());return;}
         int top=palette==Settings.MenuPalette.PAPER?0xEA344F54:palette==Settings.MenuPalette.DUSK?0xEF171E36:0xEF071E2D;
@@ -41,9 +42,10 @@ final class CoastalStyle {
         TrackerHud.rounded(g,x,y,x+w,y+h,(glass?(int)(glassOpacity*255)<<24:0xFF000000)|(panel()&0xFFFFFF),12);
         TrackerHud.border(g,x,y,x+w,y+h,line(),12);
         g.fill(x+10,y+1,x+w-10,y+2,mix(panel(),ink(),.16f));
+        if(christmas)ChristmasBackdrop.garland(g,x,y,w);
     }
     static void glass(GuiGraphics g,int x,int y,int w,int h){
-        int alpha=palette==Settings.MenuPalette.PAPER?0xFF000000:0xD9000000;
+        int alpha=!christmas&&palette==Settings.MenuPalette.PAPER?0xFF000000:0xD9000000;
         TrackerHud.rounded(g,x,y+3,x+w,y+h+3,0x30000000,12);
         TrackerHud.rounded(g,x,y,x+w,y+h,alpha|(panel()&0xFFFFFF),12);
         TrackerHud.border(g,x,y,x+w,y+h,0xA0000000|(line()&0xFFFFFF),12);
@@ -59,8 +61,8 @@ final class CoastalStyle {
     static void matchHud(Settings settings){
         for(var h:new Settings.Hud[]{settings.profit,settings.queue}){
             h.accent=accent()&0xFFFFFF;h.text=ink()&0xFFFFFF;h.background=panel()&0xFFFFFF;
-            h.positive=palette==Settings.MenuPalette.PAPER?0x286B55:0xA5E3B7;
-            h.negative=palette==Settings.MenuPalette.PAPER?0xA4434B:0xF4A296;
+            h.positive=christmas?0xA4E2B3:palette==Settings.MenuPalette.PAPER?0x286B55:0xA5E3B7;
+            h.negative=christmas?0xFF8A94:palette==Settings.MenuPalette.PAPER?0xA4434B:0xF4A296;
         }
         settings.queue.accent=palette==Settings.MenuPalette.SEA_GLASS?0xB6C6E9:accent()&0xFFFFFF;
     }

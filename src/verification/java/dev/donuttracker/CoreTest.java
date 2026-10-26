@@ -288,6 +288,12 @@ public final class CoreTest {
                 check(!java.util.Arrays.equals(standard,modified),d+" has a working geometric control: "+CapeTuning.names(d)[control]);
             }
         }
+        var seasonal=new Settings();check(!seasonal.christmasGui,"Christmas GUI is optional by default");
+        seasonal.menuPalette=Settings.MenuPalette.COFFEE;seasonal.backgroundScene=Settings.BackgroundScene.OCEAN;seasonal.profit.accent=0x123456;seasonal.christmasGui=true;
+        seasonal.save(auroraFile);var seasonalLoaded=Settings.load(auroraFile);
+        check(seasonalLoaded.christmasGui&&seasonalLoaded.menuPalette==Settings.MenuPalette.COFFEE&&seasonalLoaded.backgroundScene==Settings.BackgroundScene.OCEAN&&seasonalLoaded.profit.accent==0x123456,"Christmas GUI persists without replacing normal palette, background or HUD colours");
+        seasonalLoaded.christmasGui=false;seasonalLoaded.save(auroraFile);var normalAgain=Settings.load(auroraFile);
+        check(!normalAgain.christmasGui&&normalAgain.menuPalette==Settings.MenuPalette.COFFEE&&normalAgain.backgroundScene==Settings.BackgroundScene.OCEAN,"disabling Christmas GUI preserves the original appearance settings");
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }
