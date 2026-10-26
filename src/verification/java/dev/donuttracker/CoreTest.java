@@ -257,6 +257,20 @@ public final class CoreTest {
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.ORBIT,0x101625,0xC995F4,0x72E7DC,.7,false)),"orbit design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CROWN,0x101625,0xC995F4,0x72E7DC,.7,false)),"crown design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CLASSIC,0x223344,0xFFAAAA,0xAAFFFF,.7,false)),"custom colours change real cape texels");
+        check(CapePattern.Design.values().length==8,"eight cape designs available without removing previous selections");
+        int[] point=new int[33*33];point[16*33+16]=0xFFFFFF;
+        var halo=CapeStudio.halo(point,33,33,3,1);
+        check(halo[16*33+19]>0,"emissive aura spreads beyond bright source pixels");
+        check((halo[16*33+16]&255)>(halo[16*33+19]&255),"halo falls off away from source");
+        check(java.util.Arrays.stream(CapeStudio.halo(point,33,33,3,0)).allMatch(v->v==0),"zero intensity removes core and halo");
+        check(java.util.Arrays.stream(CapeStudio.halo(new int[33*33],33,33,3,1)).allMatch(v->v==0),"dark artwork never creates stray glow");
+        check((CapeStudio.halo(point,33,33,3,.25)[16*33+16]&255)<(halo[16*33+16]&255),"glow strength changes emissive intensity");
+        var hd=CapeStudio.create(CapePattern.Design.NOVA,0x101625,0xAA88FF,0x77DDFF,.7,.65,true,null,0,0);
+        check(hd.cloth().length==1024*512&&hd.glow().length==hd.cloth().length,"HD atlas matches vanilla cape UV layout");
+        check(hd.cloth()[511*1024+1023]==0&&hd.glow()[511*1024+1023]==0,"halo cannot spill into unused atlas regions");
+        var glowOff=CapeStudio.create(CapePattern.Design.NOVA,0x101625,0xAA88FF,0x77DDFF,.7,.65,false,null,0,0);
+        check(java.util.Arrays.stream(glowOff.glow()).allMatch(v->v==0),"glow toggle disables the complete emissive texture");
+        check(!java.util.Arrays.equals(hd.cloth(),CapeStudio.create(CapePattern.Design.LOTUS,0x101625,0xAA88FF,0x77DDFF,.7,.65,true,null,0,0).cloth()),"new emblem designs have distinct artwork");
         System.out.println("PASS: " + checks + " assertions — formatting, real chat examples, tracking, losses, queue, themes and persistence.");
     }
 }

@@ -1,3 +1,10 @@
+## Night Wolf & soft aura — 1.19.0
+Five new cape designs join Donut, Orbit and Crown: Night Wolf, Phoenix, Void Skull, Nova and Lotus. Night Wolf uses a detailed purple illustrated emblem inspired by the reference. Cape atlases now render at 1024×512, with a separate emissive artwork pass and a spatially blurred aura around bright pixels. Glow strength adjusts brightness; Aura selects Narrow, Soft or Wide. It works without a shader pack. This is an emissive cosmetic, not a block-light source.
+
+Right Shift → Capes uses previous/next design controls, colour pickers, the glow toggle, glow-strength slider, aura-width selector, real-texture preview and View in F5. Previous cape choices and colours load as before. New designs choose matching accent colours when selected. All cosmetics remain client-side and visible only to you.
+
+Replace the old JAR with `donut-tracker-fabric-1.21.11-1.19.0.jar`; still one mod with all existing modules and atmospheres.
+
 ## Donut capes — 1.18.0
 Right Shift → Capes adds optional local cape cosmetics to the same mod. Choose Donut, Orbit or Crown, customize cloth/frosting/trim with the colour picker, and adjust glow strength. Trim and sparkle pixels render in a separate emissive pass; the cloth keeps normal lighting. A real-texel rear preview and View in F5 button help inspect the cape. Existing body skin, player model and elytra texture are retained; vanilla cape visibility and elytra rules still apply.
 
