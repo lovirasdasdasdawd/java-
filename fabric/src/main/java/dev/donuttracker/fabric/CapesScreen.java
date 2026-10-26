@@ -39,8 +39,10 @@ final class CapesScreen extends Screen {
         addRenderableWidget(new MenuWidgets.Action(left+14,top+h-24,75,19,"< Modules",CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,this::onClose));
         addRenderableWidget(new MenuWidgets.Action(left+w-149,top+h-24,135,19,"View in F5",CoastalStyle::accent,MenuWidgets.Kind.PRIMARY,()->{save();minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);minecraft.setScreen(null);}));
     }
-    private static String designName(CapePattern.Design d){return switch(d){case CLASSIC->"Donut";case ORBIT->"Orbit";case CROWN->"Crown";case WOLF->"Night Wolf";case PHOENIX->"Phoenix";case VOID_SKULL->"Void Skull";case NOVA->"Nova";case LOTUS->"Lotus";case DRAGON->"Dragon";case TIDAL->"Tidal";case RIFT->"Rift";};}
+    private static String designName(CapePattern.Design d){return switch(d){case CLASSIC->"Donut";case ORBIT->"Orbit";case CROWN->"Crown";case WOLF->"Night Wolf";case PHOENIX->"Phoenix";case VOID_SKULL->"Void Skull";case NOVA->"Nova";case LOTUS->"Lotus";case DRAGON->"Dragon";case TIDAL->"Tidal";case RIFT->"Rift";case CHRISTMAS_TREE->"Christmas Tree";case WINTER_NIGHT->"Winter Night";case GINGERBREAD->"Gingerbread";};}
     private static String shapeValue(CapePattern.Design d,int i,double v){
+        if(d==CapePattern.Design.CHRISTMAS_TREE&&i==2)return ""+(1+(int)(v*5));
+        if(d==CapePattern.Design.GINGERBREAD&&i==2)return ""+(2+(int)(v*4));
         if(d==CapePattern.Design.NOVA&&i==0)return Math.round((v-.5)*86)+" deg";
         if(d==CapePattern.Design.LOTUS&&i==0)return ""+(4+(int)(v*7));
         if(d==CapePattern.Design.LOTUS&&i==2)return ""+(1+(int)(v*6));
@@ -52,7 +54,7 @@ final class CapesScreen extends Screen {
     }
     private void design(int step){change(()->{
         var c=CapeCosmetics.config;c.design=CapePattern.Design.values()[Math.floorMod(c.design.ordinal()+step,CapePattern.Design.values().length)];
-        switch(c.design){case WOLF->{c.frosting=0xBC65FF;c.accent=0xA242FF;}case PHOENIX->{c.frosting=0xFFCE6D;c.accent=0xFF7047;}case VOID_SKULL->{c.frosting=0xD5D0FF;c.accent=0x9964FF;}case NOVA->{c.frosting=0xB998FF;c.accent=0x76DCFF;}case LOTUS->{c.frosting=0xF5A4DA;c.accent=0xCB75F2;}case DRAGON->{c.frosting=0x92EECE;c.accent=0x35BAA0;}case TIDAL->{c.frosting=0xB5F5EE;c.accent=0x3296CE;}case RIFT->{c.frosting=0xEBC7FF;c.accent=0x9C4BFB;}default->{}}
+        switch(c.design){case WOLF->{c.frosting=0xBC65FF;c.accent=0xA242FF;}case PHOENIX->{c.frosting=0xFFCE6D;c.accent=0xFF7047;}case VOID_SKULL->{c.frosting=0xD5D0FF;c.accent=0x9964FF;}case NOVA->{c.frosting=0xB998FF;c.accent=0x76DCFF;}case LOTUS->{c.frosting=0xF5A4DA;c.accent=0xCB75F2;}case DRAGON->{c.frosting=0x92EECE;c.accent=0x35BAA0;}case TIDAL->{c.frosting=0xB5F5EE;c.accent=0x3296CE;}case RIFT->{c.frosting=0xEBC7FF;c.accent=0x9C4BFB;}case CHRISTMAS_TREE->{c.frosting=0x54D683;c.accent=0xEC5866;}case WINTER_NIGHT->{c.frosting=0xD7F5FF;c.accent=0x81BEDD;}case GINGERBREAD->{c.frosting=0xD49A59;c.accent=0xF26565;}default->{}}
     });}
     private void colour(String name,int value,int yy,java.util.function.IntConsumer setter){
         addRenderableWidget(new MenuWidgets.Action(left+14,yy,cw,20,name+"  #"+String.format("%06X",value),CoastalStyle::accent,MenuWidgets.Kind.SECONDARY,()->minecraft.setScreen(new ColourPickerScreen(mod,this,"Cape "+name,value,v->{setter.accept(v);save();CapeCosmetics.refresh();}))));

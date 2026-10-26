@@ -32,7 +32,7 @@ public final class CapeStudio {
                 face[i]=0xFF000000|mix(face[i],tinted,alpha/255d);
                 // The complete bright artwork emits, not just the stitched border.
                 double luminance=((tinted>>16&255)*.22+(tinted>>8&255)*.65+(tinted&255)*.13)/255d;
-                mask[i]=scale(tinted,alpha/255d*Math.min(1,luminance*1.8));
+                mask[i]=scale(tinted,alpha/255d*Math.min(1,luminance*1.8)*CapeComposition.emissionWeight(design,tinted,fx,fy,tuning));
             }
         }
         int[] halo=halo(mask,FACE_W,FACE_H,2+(int)(Math.clamp(aura,0,1)*12),enabled?strength:0),glow=new int[base.length],preview=base.clone();

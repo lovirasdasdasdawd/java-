@@ -1,3 +1,8 @@
+## Christmas capes — 1.21.0
+Three Christmas designs join the collection (14 total): Christmas Tree with fairy lights and presents, Winter Night with moonlit snowfall and snowdrifts, and Gingerbread with icing and candy buttons. Each has three independent Shape controls plus the existing colour, glow and aura settings. Existing cape selections and per-design settings are retained.
+
+Open Right Shift → Capes and browse to the Christmas designs. Replace the old JAR with `donut-tracker-fabric-1.21.11-1.21.0.jar`. The game target remains Minecraft 1.21.11 / Fabric / Java 21. Capes are client-side cosmetics.
+
 ## Distinct cape compositions & shape controls — 1.20.0
 Three new designs — Dragon, Tidal and Rift — bring the collection to 11. Newer designs now have distinct artwork layouts instead of sharing one frame: Wolf uses an offset portrait, diagonal silk and claw marks; Phoenix has broad wings and a fire hem; Skull hangs from chains; Nova fills the cloth with stars and an off-centre planet; Lotus sits over pond ripples. Dragon coils down the cloth, Tidal is an all-over ocean, and Rift fractures across it.
 

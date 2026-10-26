@@ -3,7 +3,7 @@ package dev.donuttracker.core;
 /** Deterministic 4x-resolution vanilla cape atlas and separate emissive mask. */
 public final class CapePattern {
     public static final int WIDTH=256,HEIGHT=128;
-    public enum Design { CLASSIC, ORBIT, CROWN, WOLF, PHOENIX, VOID_SKULL, NOVA, LOTUS, DRAGON, TIDAL, RIFT }
+    public enum Design { CLASSIC, ORBIT, CROWN, WOLF, PHOENIX, VOID_SKULL, NOVA, LOTUS, DRAGON, TIDAL, RIFT, CHRISTMAS_TREE, WINTER_NIGHT, GINGERBREAD }
     private CapePattern(){}
     public static int[] pixels(Design design,int background,int frosting,int glow,double strength,boolean emissive){
         int[] out=new int[WIDTH*HEIGHT];

@@ -257,7 +257,7 @@ public final class CoreTest {
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.ORBIT,0x101625,0xC995F4,0x72E7DC,.7,false)),"orbit design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CROWN,0x101625,0xC995F4,0x72E7DC,.7,false)),"crown design differs from classic");
         check(!java.util.Arrays.equals(cape,CapePattern.pixels(CapePattern.Design.CLASSIC,0x223344,0xFFAAAA,0xAAFFFF,.7,false)),"custom colours change real cape texels");
-        check(CapePattern.Design.values().length==11,"eleven cape designs available without removing previous selections");
+        check(CapePattern.Design.values().length==14,"fourteen cape designs available without removing previous selections");
         int[] point=new int[33*33];point[16*33+16]=0xFFFFFF;
         var halo=CapeStudio.halo(point,33,33,3,1);
         check(halo[16*33+19]>0,"emissive aura spreads beyond bright source pixels");

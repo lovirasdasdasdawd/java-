@@ -18,9 +18,12 @@ public record CapeTuning(double primary,double secondary,double density) {
         case DRAGON->new String[]{"Dragon coils","Wing span","Runes"};
         case TIDAL->new String[]{"Wave height","Wave layers","Sea foam"};
         case RIFT->new String[]{"Crack width","Branches","Floating shards"};
+        case CHRISTMAS_TREE->new String[]{"Tree height","Fairy lights","Presents"};
+        case WINTER_NIGHT->new String[]{"Snowfall","Snowdrifts","Moon size"};
+        case GINGERBREAD->new String[]{"Cookie size","Icing width","Candy buttons"};
         default->new String[]{"Emblem size","Vertical stretch","Stitch intensity"};
     };}
-    public static String description(CapePattern.Design d){return switch(d){case WOLF->"Portrait / diagonal silk / claw marks";case PHOENIX->"Wide wings / ember fall / fire hem";case VOID_SKULL->"Bone sigil / hanging chains";case NOVA->"Off-centre planet / full star field";case LOTUS->"Low bloom / pond / concentric ripples";case DRAGON->"Coiling silhouette / wing / rune column";case TIDAL->"Full-cloth layered ocean / foam";case RIFT->"Edge-to-edge fissures / broken shards";default->"Donut emblem / stitched cloth";};}
+    public static String description(CapePattern.Design d){return switch(d){case WOLF->"Portrait / diagonal silk / claw marks";case PHOENIX->"Wide wings / ember fall / fire hem";case VOID_SKULL->"Bone sigil / hanging chains";case NOVA->"Off-centre planet / full star field";case LOTUS->"Low bloom / pond / concentric ripples";case DRAGON->"Coiling silhouette / wing / rune column";case TIDAL->"Full-cloth layered ocean / foam";case RIFT->"Edge-to-edge fissures / broken shards";case CHRISTMAS_TREE->"Evergreen / fairy lights / wrapped gifts";case WINTER_NIGHT->"Moonlight / snowfall / deep snowdrifts";case GINGERBREAD->"Baked cookie / sugar icing / candy";default->"Donut emblem / stitched cloth";};}
     private static String key(CapePattern.Design d,int i){return "design."+d.name()+"."+names(d)[i].toLowerCase(java.util.Locale.ROOT).replace(' ','.');}
     public static CapeTuning read(Properties p,CapePattern.Design d){return new CapeTuning(Double.parseDouble(p.getProperty(key(d,0),"0.5")),Double.parseDouble(p.getProperty(key(d,1),"0.5")),Double.parseDouble(p.getProperty(key(d,2),"0.5")));}
     public void write(Properties p,CapePattern.Design d){for(int i=0;i<3;i++)p.setProperty(key(d,i),Double.toString(value(i)));}
